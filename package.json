@@ -8,10 +8,8 @@
     "server": "node index.js",
     "live-server": "node js/live-server.js",
     "sleep": "node -e \"setTimeout(() => process.exit(0), 500)\"",
-    "open": "open http://localhost:8080",
-    "delayed-open": "npm run sleep && npm run open",
     "build": "vite --watch build",
-    "dev": "npm-run-all --parallel --continue-on-error live-server build delayed-open server"
+    "dev": "npm-run-all --parallel --continue-on-error live-server build server"
   },
   "repository": {
     "type": "git",
@@ -24,6 +22,11 @@
   },
   "homepage": "https://github.com/zlamb1/CSC440-Group-Project#readme",
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@fontsource/roboto": "^5.1.0",
+    "@mui/icons-material": "^6.1.0",
+    "@mui/material": "^6.1.0",
     "express": "^4.21.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -31,6 +34,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "npm-run-all": "^4.1.5",
+    "open": "^10.1.0",
     "vite": "^5.4.5"
   }
 }

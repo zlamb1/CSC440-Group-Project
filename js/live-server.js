@@ -1,4 +1,5 @@
 import express from 'express';
+import open from 'open'; 
 
 import env from './env.js';
 import reload from './reload.js';
@@ -10,7 +11,14 @@ app.use((req, res, next) => {
     next(); 
 });
 
+let first = true;
 app.get('*', reload.connect);
-app.post('*', reload.notify); 
+app.post('*', () => {
+    if (first) {
+        first = false; 
+        open(`http://localhost:${env.getWebServerPort()}`); 
+    }
+    reload.notify(); 
+}); 
 
 app.listen(env.getLiveServerPort()); 
