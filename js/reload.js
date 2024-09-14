@@ -1,14 +1,5 @@
-const fs = require('fs'); 
-
 const clients = []; 
-const notify = async () => {
-    for (const client of clients) {
-        client.write('event: message\n');
-        client.write('data: update\n\n'); 
-    }
-}
-
-module.exports = {
+export default {
     connect: async (req, res) => {
         // send headers to keep connection alive
         res.writeHead(200, {
@@ -25,8 +16,11 @@ module.exports = {
             }
         });
     },
-    watch: async () => {
-        fs.watch('./public', notify); 
-        fs.watch('./pages', notify); 
+    notify: async () => {
+        console.log('called');
+        for (const client of clients) {
+            client.write('event: message\n');
+            client.write('data: update\n\n'); 
+        }
     }
 };

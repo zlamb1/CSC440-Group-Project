@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "server": "node index.js",
     "sleep": "node -e \"setTimeout(() => process.exit(0), 500)\"",
     "open": "open http://localhost:8080",
     "delayed-open": "npm run sleep && npm run open",
-    "dev": "npm run delayed-open & npm run server"
+    "build": "vite --watch build",
+    "dev": "npm-run-all --parallel --continue-on-error build delayed-open server"
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,13 @@
   },
   "homepage": "https://github.com/zlamb1/CSC440-Group-Project#readme",
   "dependencies": {
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "npm-run-all": "^4.1.5",
+    "vite": "^5.4.5"
   }
 }

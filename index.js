@@ -1,23 +1,32 @@
-const express = require('express');
-const path = require('path');
-const reload = require('./js/reload.js'); 
+import express from 'express';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+import reload from './js/reload.js'; 
 
 const app = express();
 const port = process.env.PORT || 8080; 
 
-app.use(express.static('public'));
+app.use(express.static('dist'));
+
+const usePage = (name) => {
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    return path.join(__dirname + `/dist/src/pages/${name}.html`);
+}
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/pages/index.html'));
+    res.sendFile(usePage('index'));
 });
 
-app.get('/live-server', reload.connect);
-// watch files for changes and notify clients
-reload.watch(); 
+const env = process.env.NODE_ENV || 'development'; 
+if (env == 'development') {
+    app.get('/live-server', reload.connect);
+    app.post('/live-server', reload.notify);
+}
 
 // no route found
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '/pages/404.html'));
+    res.sendFile(usePage('404'));
 });
 
 app.listen(port, () => {
