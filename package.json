@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "echo \"Error: no test specified\" && exit 1"
+    "server": "node index.js",
+    "sleep": "node -e \"setTimeout(() => process.exit(0), 500)\"",
+    "open": "open http://localhost:8080",
+    "delayed-open": "npm run sleep && npm run open",
+    "dev": "npm run delayed-open & npm run server"
   },
   "repository": {
     "type": "git",
