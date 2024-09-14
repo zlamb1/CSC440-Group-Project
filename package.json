@@ -6,11 +6,12 @@
   "type": "module",
   "scripts": {
     "server": "node index.js",
+    "live-server": "node js/live-server.js",
     "sleep": "node -e \"setTimeout(() => process.exit(0), 500)\"",
     "open": "open http://localhost:8080",
     "delayed-open": "npm run sleep && npm run open",
     "build": "vite --watch build",
-    "dev": "npm-run-all --parallel --continue-on-error build delayed-open server"
+    "dev": "npm-run-all --parallel --continue-on-error live-server build delayed-open server"
   },
   "repository": {
     "type": "git",

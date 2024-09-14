@@ -1,8 +1,8 @@
 import { resolve } from 'path';
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-const port = process.env.PORT || 8080;
+import env from './js/env.js';
 
 export default defineConfig({
     plugins: [ 
@@ -11,9 +11,9 @@ export default defineConfig({
             name: 'live-server',
             enforce: 'post',
             writeBundle() {
-                fetch(`http://localhost:${port}/live-server`, {
+                fetch(`http://localhost:${env.getLiveServerPort()}/live-server`, {
                     method: 'POST'
-                });
+                }).catch(() => {});
             }
         }
     ],
@@ -23,6 +23,9 @@ export default defineConfig({
                 main: resolve(__dirname, '/src/pages/index.html'),
                 '404': resolve(__dirname, '/src/pages/404.html')
             },
+            external: [
+                '/poll.js'
+            ]
         },
     },
 });
