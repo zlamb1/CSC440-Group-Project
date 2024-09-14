@@ -1,0 +1,22 @@
+{
+  "name": "csc440-group-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zlamb1/CSC440-Group-Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zlamb1/CSC440-Group-Project/issues"
+  },
+  "homepage": "https://github.com/zlamb1/CSC440-Group-Project#readme",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
