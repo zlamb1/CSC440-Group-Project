@@ -17,7 +17,6 @@ export default {
         });
     },
     notify: async () => {
-        console.log('called');
         for (const client of clients) {
             client.write('event: message\n');
             client.write('data: update\n\n'); 

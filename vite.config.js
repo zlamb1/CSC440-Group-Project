@@ -6,7 +6,11 @@ import env from './js/env.js';
 
 export default defineConfig({
     plugins: [ 
-        react(),
+        react({
+            babel: {
+                babelrc: true
+            }
+        }),
         {
             name: 'live-server',
             enforce: 'post',

@@ -17,19 +17,22 @@ app.get('/', (req, res) => {
     res.sendFile(usePage('index'));
 });
 
-// return script with current live-server port
-app.get('/poll.js', (req, res) => {
-    res.setHeader("Content-Type", "text/javascript");
-    res.send(`
-        const eventSource = new EventSource('http://localhost:${env.getLiveServerPort()}');
-        eventSource.onmessage = async (event) => {
-            eventSource.close();
-            // refresh page on update
-            location.reload();
-        }
-    `);
-    res.end(); 
-});
+const nodeEnv = process.env.NODE_ENV || 'development';
+if (nodeEnv === 'development') {
+    // return script with current live-server port
+    app.get('/poll.js', (req, res) => {
+        res.setHeader("Content-Type", "text/javascript");
+        res.send(`
+            const eventSource = new EventSource('http://localhost:${env.getLiveServerPort()}');
+            eventSource.onmessage = async (event) => {
+                eventSource.close();
+                // refresh page on update
+                location.reload();
+            }
+        `);
+        res.end(); 
+    });
+}
 
 // no route found
 app.get('*', (req, res) => {
