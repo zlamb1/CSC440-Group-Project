@@ -10,6 +10,7 @@ export default {
         clients.push(res); 
         // listen for client 'close' requests
         req.on('close', () => { 
+            // find and remove client from clients array
             const index = clients.indexOf(res); 
             if (index > -1) {
                 clients.splice(index, 1); 

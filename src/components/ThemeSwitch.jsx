@@ -3,8 +3,8 @@ import Switch from "@mui/material/Switch";
 
 // https://mui.com/material-ui/react-switch/#customization
 export default styled(Switch)(({ theme }) => ({
-    width: 62,
-    height: 34,
+    width: 54,
+    height: 30,
     padding: 7,
     '& .MuiSwitch-switchBase': {
         margin: 1,
@@ -29,8 +29,8 @@ export default styled(Switch)(({ theme }) => ({
     },
     '& .MuiSwitch-thumb': {
         backgroundColor: '#001e3c',
-        width: 32,
-        height: 32,
+        width: 26,
+        height: 26,
         '&::before': {
             content: "''",
             position: 'absolute',
