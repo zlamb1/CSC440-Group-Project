@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "server": "node index.js",
-    "live-server": "node js/live-server.js",
+    "live-server": "node js/live_server.js",
     "sleep": "node -e \"setTimeout(() => process.exit(0), 500)\"",
     "build": "vite --watch build",
     "dev": "npm-run-all --parallel --continue-on-error live-server build server"
@@ -29,7 +29,11 @@
     "@mui/material": "^6.1.0",
     "@mui/system": "^6.1.0",
     "autoprefixer": "^10.4.20",
+    "concat-stream": "^2.0.0",
+    "dompurify": "^3.1.6",
     "express": "^4.21.0",
+    "mkdirp": "^3.0.1",
+    "multer": "^1.4.5-lts.1",
     "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

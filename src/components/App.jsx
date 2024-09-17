@@ -29,9 +29,12 @@ function MyApp() {
                     <Divider className="absolute right-0" orientation="vertical" />
                 </Stack>
                 <Stack className="p-2">
-                    <Typography>
-                        PAGE CONTENT
-                    </Typography>
+                    <form action="/test" encType="multipart/form-data" method="post">
+                        <div className="form-group">
+                            <input type="file" name="profileImage"/>
+                            <input type="submit" value="Upload the profile image" />
+                        </div>
+                    </form>
                 </Stack>
             </Stack>
         </PageContainer>
@@ -41,9 +44,9 @@ function MyApp() {
 export default function App() {
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline />
+            <CssBaseline/>
             <StyledEngineProvider injectFirst>
-                <MyApp />
+                <MyApp/>
             </StyledEngineProvider>
         </ThemeProvider>
     );

@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-import env from './js/env.js';
+import env from './js/server_env.js';
 
 export default defineConfig({
     plugins: [ 
