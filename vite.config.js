@@ -24,8 +24,8 @@ export default defineConfig({
     build: {
         rollupOptions: {
             input: {
-                main: resolve(__dirname, '/src/pages/index.html'),
-                '404': resolve(__dirname, '/src/pages/404.html')
+                main: './src/pages/index.html',
+                '404': './src/pages/404.html',
             },
             external: [
                 '/poll'
