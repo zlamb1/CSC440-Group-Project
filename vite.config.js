@@ -28,7 +28,7 @@ export default defineConfig({
                 '404': resolve(__dirname, '/src/pages/404.html')
             },
             external: [
-                '/poll.js'
+                '/poll'
             ]
         },
     },

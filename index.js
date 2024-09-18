@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from "multer";
-import path, { dirname } from 'path';
+import path, { dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 
 import './js/db/user.js';
@@ -11,13 +11,11 @@ import './js/db/message_queue.js';
 import './js/db/session.js'
 
 import env from './js/server_env.js';
-import {UnsupportedFileFormat} from "./js/image_storage.js";
 import ImageStorage from "./js/image_storage.js";
-import {generateUserSession} from "./js/db/session.js";
+import fs from "fs";
 
 const app = express();
-
-const upload = multer({
+const imageUpload = multer({
     storage: new ImageStorage({
         destination: './uploads'
     }),
@@ -27,58 +25,56 @@ const upload = multer({
     },
 });
 
-app.post('/test', (req, res) => {
-    upload.single('profileImage')(req, res, err => {
-        if (err instanceof multer.MulterError) {
-            // A Multer error occurred when uploading.
-            res.writeHead(500);
-            return res.end();
-        } else if (err instanceof UnsupportedFileFormat) {
-            res.writeHead(415);
-            return res.end(err.msg);
-        }
-        // Everything went fine.
-        res.writeHead(201);
-        res.end();
-    });
-});
-
 app.use(express.static('dist'));
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const usePage = (name) => {
-    const __dirname = dirname(fileURLToPath(import.meta.url));
     return path.join(__dirname + `/dist/src/pages/${name}.html`);
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(usePage('index'));
-});
-
-const nodeEnv = process.env.NODE_ENV || 'development';
-if (nodeEnv === 'development') {
-    // return script with current live-server port
-    app.get('/poll.js', (req, res) => {
-        res.setHeader("Content-Type", "text/javascript");
-        res.end(`
-            const eventSource = new EventSource('http://localhost:${env.getLiveServerPort()}');
-            eventSource.onmessage = async (event) => {
-                eventSource.close();
-                // refresh page on update
-                location.reload();
-            }
-        `);
+const routes = [];
+function resolveRoutes(path, initialPath) {
+    initialPath = initialPath ?? path;
+    fs.readdirSync(path, {withFileTypes: true}).forEach(function(file) {
+        const ext = extname(file.name);
+        if (file.isDirectory()) {
+            return resolveRoutes(file.path + '/' + file.name, initialPath);
+        } else if (ext === '.js') {
+            routes.push({
+                path: file.path + '/' + file.name,
+                route: file.path.replace(initialPath, '') + '/' + file.name.substring(0, file.name.lastIndexOf('.'))
+            });
+        }
     });
 }
 
-// no route found
+// dynamically resolve routes
+resolveRoutes('./routes');
+const nodeEnv = process.env.NODE_ENV || 'development';
+
+for (const route of routes) {
+    const routeImport = await import(route.path);
+    if (nodeEnv === 'development' || !routeImport?.DEV_ROUTE) {
+        if (route.route === '/index') route.route = '/';
+        ['get', 'post', 'put', 'delete'].forEach(method => {
+            if (method === 'get' && !routeImport['get'] && routeImport.default) {
+                app.get(route.route, (req, res, next) => {
+                    routeImport.default(req, res, next, usePage);
+                })
+            }
+            if (routeImport[method]) {
+                app[method](route.route, (req, res, next) => {
+                    routeImport[method](req, res, next, usePage);
+                });
+            }
+        });
+    }
+}
+
 app.get('*', (req, res) => {
     res.sendFile(usePage('404'));
 });
 
 app.listen(env.getWebServerPort(), () => {
     console.log(`Server listening on port ${env.getWebServerPort()}`);
-});
-
-generateUserSession(123123).catch((err) => {
-    console.log(err);
 });

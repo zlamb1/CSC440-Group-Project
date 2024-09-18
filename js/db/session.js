@@ -32,19 +32,33 @@ async function insertSession(userID, sessionID) {
 
 export async function generateUserSession(userID) {
     return new Promise(async (resolve, reject) => {
-        let attempt = 0;
-        while (attempt < 3) {
+        let attempt = 3;
+        while (attempt >= 0) {
             const sessionID = generateSessionID();
             try {
                 await insertSession(userID, sessionID);
                 return resolve(sessionID);
             } catch (err) {
+                if (attempt === 0) {
+                    return reject(err);
+                }
                 if (err.errno !== 19 || !err?.message?.includes('UNIQUE constraint failed')) {
                     return reject(err);
                 }
             }
-            attempt++;
+            attempt--;
         }
-        reject('failed to generate session ID');
+    });
+}
+
+export async function getUserSessions(userID) {
+    return new Promise(async (resolve, reject) => {
+        db.all('SELECT * FROM Session WHERE UserID = ?', [userID], (err, rows) => {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(rows?.map(row => row.SessionID));
+            }
+        });
     });
 }
