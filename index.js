@@ -2,11 +2,18 @@ import express from 'express';
 import multer from "multer";
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+
 import './js/db/user.js';
+import './js/db/story.js';
+import './js/db/comment.js';
+import './js/db/friend.js';
+import './js/db/message_queue.js';
+import './js/db/session.js'
 
 import env from './js/server_env.js';
 import {UnsupportedFileFormat} from "./js/image_storage.js";
 import ImageStorage from "./js/image_storage.js";
+import {generateUserSession} from "./js/db/session.js";
 
 const app = express();
 
@@ -15,8 +22,8 @@ const upload = multer({
         destination: './uploads'
     }),
     limits: {
-        // 500KB upload limit
-        fileSize: 1024 * 500
+        // 512KB upload limit
+        fileSize: 1024 * 512
     },
 });
 
@@ -25,7 +32,7 @@ app.post('/test', (req, res) => {
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
             res.writeHead(500);
-            return res.end('unknown error');
+            return res.end();
         } else if (err instanceof UnsupportedFileFormat) {
             res.writeHead(415);
             return res.end(err.msg);
@@ -70,4 +77,8 @@ app.get('*', (req, res) => {
 
 app.listen(env.getWebServerPort(), () => {
     console.log(`Server listening on port ${env.getWebServerPort()}`);
+});
+
+generateUserSession(123123).catch((err) => {
+    console.log(err);
 });

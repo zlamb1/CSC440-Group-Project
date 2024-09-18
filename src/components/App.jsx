@@ -23,18 +23,10 @@ function MyApp() {
             <Divider />
             <Stack className="flex-grow" direction="row">
                 <Stack className="p-2 justify-center relative" direction="row">
-                    <Stack>
-                        <Typography>TEST</Typography>
-                    </Stack>
                     <Divider className="absolute right-0" orientation="vertical" />
                 </Stack>
                 <Stack className="p-2">
-                    <form action="/test" encType="multipart/form-data" method="post">
-                        <div className="form-group">
-                            <input type="file" name="profileImage"/>
-                            <input type="submit" value="Upload the profile image" />
-                        </div>
-                    </form>
+
                 </Stack>
             </Stack>
         </PageContainer>
