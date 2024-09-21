@@ -2,19 +2,15 @@ import express from 'express';
 import multer from 'multer';
 import http from 'http';
 import https from 'https';
-import path, { dirname, extname } from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-import './js/db/user.js';
-import './js/db/story.js';
-import './js/db/comment.js';
-import './js/db/friend.js';
-import './js/db/message_queue.js';
-import './js/db/session.js'
+import './js/db/imports.js';
 
 import env from './js/server_env.js';
 import ImageStorage from "./js/image_storage.js";
 import fs from "fs";
+import {mapRoutes, resolveRoutes} from "./js/routes.js";
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -36,44 +32,9 @@ const usePage = (name) => {
     return path.join(__dirname + `/dist/src/pages/${name}.html`);
 }
 
-const routes = [];
-function resolveRoutes(path, initialPath) {
-    initialPath = initialPath ?? path;
-    fs.readdirSync(path, {withFileTypes: true}).forEach(function(file) {
-        const ext = extname(file.name);
-        if (file.isDirectory()) {
-            return resolveRoutes(file.path + '/' + file.name, initialPath);
-        } else if (ext === '.js') {
-            routes.push({
-                path: file.path + '/' + file.name,
-                route: file.path.replace(initialPath, '') + '/' + file.name.substring(0, file.name.lastIndexOf('.'))
-            });
-        }
-    });
-}
-
 // dynamically resolve routes
-resolveRoutes('./routes');
-const nodeEnv = process.env.NODE_ENV || 'development';
-
-for (const route of routes) {
-    const routeImport = await import(route.path);
-    if (nodeEnv === 'development' || !routeImport?.DEV_ROUTE) {
-        if (route.route === '/index') route.route = '/';
-        ['get', 'post', 'put', 'delete'].forEach(method => {
-            if (method === 'get' && !routeImport['get'] && routeImport.default) {
-                app.get(route.route, (req, res, next) => {
-                    routeImport.default(req, res, next, usePage);
-                })
-            }
-            if (routeImport[method]) {
-                app[method](route.route, (req, res, next) => {
-                    routeImport[method](req, res, next, usePage);
-                });
-            }
-        });
-    }
-}
+const routes = resolveRoutes(path.join(__dirname, '/routes'));
+await mapRoutes(app, routes, usePage);
 
 app.get('*', (req, res) => {
     res.sendFile(usePage('404'));
