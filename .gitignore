@@ -1,8 +1,9 @@
 node_modules
-dist
+build
 .idea
 *.db
 uploads/**
 .env
 .key
 .pem
+.cache

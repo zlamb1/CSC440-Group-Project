@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "server": "node index.js",
-    "live-server": "node js/live_server.js",
-    "build": "vite build",
-    "dev": "npm-run-all --parallel --continue-on-error live-server \"build -- --watch\" server",
-    "start": "npm-run-all --sequential --continue-on-error build server"
+    "live-server": "node js/live_server/live_server.js",
+    "build": "remix vite:build",
+    "dev": "cross-env NODE_ENV=development npm run server",
+    "start": "cross-env NODE_ENV=production npm run server"
   },
   "repository": {
     "type": "git",
@@ -28,11 +28,17 @@
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
     "@mui/system": "^6.1.0",
+    "@remix-run/express": "^2.12.1",
+    "@remix-run/node": "^2.12.1",
+    "@remix-run/react": "^2.12.1",
+    "@remix-run/serve": "^2.12.1",
     "autoprefixer": "^10.4.20",
     "concat-stream": "^2.0.0",
+    "cross-env": "^7.0.3",
     "dompurify": "^3.1.6",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "isbot": "^4.4.0",
     "mkdirp": "^3.0.1",
     "multer": "^1.4.5-lts.1",
     "postcss": "^8.4.47",
@@ -43,6 +49,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
+    "@remix-run/dev": "^2.12.1",
+    "@types/css-modules": "^1.0.5",
     "@vitejs/plugin-react": "^4.3.1",
     "babel-plugin-direct-import": "^1.0.0",
     "eslint": "^9.10.0",

@@ -1,4 +1,4 @@
-import useHTMLPage from "../js/page.js";
+import useHTMLPage from "../js/routing/page.js";
 
 export default useHTMLPage('index', (page, isProduction) => {
     if (!isProduction) {

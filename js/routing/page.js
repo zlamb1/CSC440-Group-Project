@@ -1,4 +1,4 @@
-import isProduction from './prod.js';
+import isProduction from '../prod.js';
 import path from "path";
 import fs from "fs";
 

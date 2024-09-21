@@ -1,66 +1,25 @@
 import 'dotenv/config'
 import express from 'express';
-import http from 'http';
-import https from 'https';
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
 import './js/db/imports.js';
-
-import env from './js/server_env.js';
-import fs from "fs";
-import {mapRoutes, resolveRoutes} from "./js/routes.js";
-import useHTMLPage, {setDirname} from "./js/page.js";
-
-const isProduction = process.env.NODE_ENV === 'production';
+import {createServer} from "./js/server.js";
+import { createRequestHandler } from "@remix-run/express";
+import isProduction from './js/prod.js';
+import * as vite from "vite";
 
 const app = express();
 
-/* const imageUpload = multer({
-    storage: new ImageStorage({
-        destination: './uploads'
-    }),
-    limits: {
-        // 512KB upload limit
-        fileSize: 1024 * 512
-    },
-}); */
-
-app.use(express.static('dist'));
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-setDirname(__dirname);
-
-// dynamically resolve routes
-const routes = resolveRoutes(path.join(__dirname, '/routes'));
-await mapRoutes(app, routes, __dirname);
-
-app.get('*', useHTMLPage('404'));
-
-const servers = [];
-
-if (isProduction) {
-    const key = fs.readFileSync(process.env.KEY_PATH || '.key', 'utf-8');
-    const cert = fs.readFileSync(process.env.CERT_PATH || '.pem', 'utf-8');
-    const credentials = { key, cert };
-    const ports = env.getWebServerPorts();
-    const httpServer = http.createServer(app);
-    servers.push(httpServer.listen(ports.http));
-    const httpsServer = https.createServer(credentials, app);
-    servers.push(httpsServer.listen(ports.https));
-} else {
-    servers.push(app.listen(env.getWebServerPorts().http, () => {
-        console.log(`Server listening on port ${env.getWebServerPorts().http}`);
-    }));
+let viteServer;
+if (!isProduction) {
+    viteServer = await vite.createServer({
+        server: {middlewareMode: true}
+    });
 }
 
-function handleClose() {
-    for (const server of servers) {
-        console.log(`Closing server on port ${server.address().port}`);
-        server.close();
-    }
-    process.exit();
-}
+app.use(viteServer ? viteServer.middlewares : express.static('build/client'));
 
-process.on('SIGINT', handleClose);
-process.on('SIGTERM', handleClose);
+const build = viteServer ? () => viteServer.ssrLoadModule(
+    "virtual:remix/server-build") : await import("./build/server/index.js");
+
+app.all("*", createRequestHandler({ build }));
+
+createServer(app);

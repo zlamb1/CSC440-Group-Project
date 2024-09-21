@@ -1,7 +1,7 @@
 import express from 'express';
 import open from 'open'; 
 
-import env from './server_env.js';
+import env from '../server_env.js';
 import reload from './reload.js';
 
 const app = express();
