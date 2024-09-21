@@ -7,7 +7,7 @@ import reload from './reload.js';
 const app = express();
 
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', `http://localhost:${env.getWebServerPort()}`);
+    res.setHeader('Access-Control-Allow-Origin', `http://localhost:${env.getWebServerPorts().http}`);
     next(); 
 });
 
@@ -16,7 +16,7 @@ app.get('*', reload.connect);
 app.post('*', () => {
     if (first) {
         first = false; 
-        open(`http://localhost:${env.getWebServerPort()}`); 
+        open(`http://localhost:${env.getWebServerPorts().http}`);
     }
     reload.notify(); 
 }); 

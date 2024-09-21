@@ -1,5 +1,7 @@
 import express from 'express';
-import multer from "multer";
+import multer from 'multer';
+import http from 'http';
+import https from 'https';
 import path, { dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -13,6 +15,8 @@ import './js/db/session.js'
 import env from './js/server_env.js';
 import ImageStorage from "./js/image_storage.js";
 import fs from "fs";
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 const imageUpload = multer({
@@ -75,6 +79,17 @@ app.get('*', (req, res) => {
     res.sendFile(usePage('404'));
 });
 
-app.listen(env.getWebServerPort(), () => {
-    console.log(`Server listening on port ${env.getWebServerPort()}`);
-});
+if (isProduction) {
+    const key = fs.readFileSync(process.env.KEY_PATH || '.key', 'utf-8');
+    const cert = fs.readFileSync(process.env.CERT_PATH || '.pem', 'utf-8');
+    const credentials = { key, cert };
+    const ports = env.getWebServerPorts();
+    const httpServer = http.createServer(app);
+    httpServer.listen(ports.http);
+    const httpsServer = https.createServer(credentials, app);
+    httpsServer.listen(ports.https);
+} else {
+    app.listen(env.getWebServerPorts().http, () => {
+        console.log(`Server listening on port ${env.getWebServerPorts().http}`);
+    });
+}
