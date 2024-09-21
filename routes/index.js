@@ -1,3 +1,8 @@
-export default function(req, res, next, usePage) {
-    res.sendFile(usePage('index'));
-}
+import useHTMLPage from "../js/page.js";
+
+export default useHTMLPage('index', (page, isProduction) => {
+    if (!isProduction) {
+        return page.replace('<!-- poll-script -->', '<script src="/poll"></script>')
+    }
+    return page;
+});

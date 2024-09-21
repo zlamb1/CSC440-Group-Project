@@ -1,5 +1,5 @@
 import fs from "fs";
-import {extname} from "path";
+import path, {extname} from "path";
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -20,7 +20,10 @@ export function resolveRoutes(path, initialPath, resolved) {
     return resolved;
 }
 
-export async function mapRoutes(app, routes, usePage) {
+export async function mapRoutes(app, routes, __dirname) {
+    function usePage(name) {
+        return path.join(__dirname + `/dist/src/pages/${name}.html`);
+    }
     for (const route of routes) {
         const routeImport = await import(route.path);
         if (!isProduction || !routeImport?.DEV_ROUTE) {

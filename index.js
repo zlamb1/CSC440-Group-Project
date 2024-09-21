@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 import http from 'http';
 import https from 'https';
 import path, { dirname } from 'path';
@@ -8,14 +7,15 @@ import { fileURLToPath } from 'url';
 import './js/db/imports.js';
 
 import env from './js/server_env.js';
-import ImageStorage from "./js/image_storage.js";
 import fs from "fs";
 import {mapRoutes, resolveRoutes} from "./js/routes.js";
+import useHTMLPage, {setDirname} from "./js/page.js";
 
 const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
-const imageUpload = multer({
+
+/* const imageUpload = multer({
     storage: new ImageStorage({
         destination: './uploads'
     }),
@@ -23,22 +23,18 @@ const imageUpload = multer({
         // 512KB upload limit
         fileSize: 1024 * 512
     },
-});
+}); */
 
 app.use(express.static('dist'));
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const usePage = (name) => {
-    return path.join(__dirname + `/dist/src/pages/${name}.html`);
-}
+setDirname(__dirname);
 
 // dynamically resolve routes
 const routes = resolveRoutes(path.join(__dirname, '/routes'));
-await mapRoutes(app, routes, usePage);
+await mapRoutes(app, routes, __dirname);
 
-app.get('*', (req, res) => {
-    res.sendFile(usePage('404'));
-});
+app.get('*', useHTMLPage('404'));
 
 if (isProduction) {
     const key = fs.readFileSync(process.env.KEY_PATH || '.key', 'utf-8');
