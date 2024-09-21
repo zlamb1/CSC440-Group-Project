@@ -7,6 +7,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
     steps:
       - uses: actions/checkout@v2
       - name: Create SSH key
@@ -15,7 +19,3 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/deploy.key
           chmod 600 ~/.ssh/deploy.key
           ssh -i ~/.ssh/deploy.key $SSH_KEY@$SSH_HOST
-    env:
-      SSH_USER: ${{ secrets.SSH_USER }}
-      SSH_KEY: ${{ secrets.SSH_KEY }}
-      SSH_HOST: ${{ secrets.SSH_HOST }}
