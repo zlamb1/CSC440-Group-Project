@@ -37,17 +37,30 @@ await mapRoutes(app, routes, __dirname);
 
 app.get('*', useHTMLPage('404'));
 
+const servers = [];
+
 if (isProduction) {
     const key = fs.readFileSync(process.env.KEY_PATH || '.key', 'utf-8');
     const cert = fs.readFileSync(process.env.CERT_PATH || '.pem', 'utf-8');
     const credentials = { key, cert };
     const ports = env.getWebServerPorts();
     const httpServer = http.createServer(app);
-    httpServer.listen(ports.http);
+    servers.push(httpServer.listen(ports.http));
     const httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(ports.https);
+    servers.push(httpsServer.listen(ports.https));
 } else {
-    app.listen(env.getWebServerPorts().http, () => {
+    servers.push(app.listen(env.getWebServerPorts().http, () => {
         console.log(`Server listening on port ${env.getWebServerPorts().http}`);
-    });
+    }));
 }
+
+function handleClose() {
+    for (const server of servers) {
+        console.log(`Closing server on port ${server.address().port}`);
+        server.close();
+    }
+    process.exit();
+}
+
+process.on('SIGINT', handleClose);
+process.on('SIGTERM', handleClose);
