@@ -12,9 +12,7 @@ jobs:
       SSH_KEY: ${{ secrets.SSH_KEY }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
     steps:
-      - name: SSH remote VPS
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/deploy.key
-          chmod 600 ~/.ssh/deploy.key
-          ssh -i ~/.ssh/deploy.key $SSH_KEY@$SSH_HOST
+      - run: mkdir -p ~/.ssh/
+      - run: echo "$SSH_KEY" > ~/.ssh/deploy.key
+      - run: chmod 600 ~/.ssh/deploy.key
+      - run: ssh -i ~/.ssh/deploy.key $SSH_KEY@$SSH_HOST
