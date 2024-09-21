@@ -7,9 +7,9 @@
   "scripts": {
     "server": "node index.js",
     "live-server": "node js/live_server.js",
-    "sleep": "node -e \"setTimeout(() => process.exit(0), 500)\"",
-    "build": "vite --watch build",
-    "dev": "npm-run-all --parallel --continue-on-error live-server build server"
+    "build": "vite build",
+    "dev": "npm-run-all --parallel --continue-on-error live-server \"build -- --watch\" server",
+    "start": "npm-run-all --sequential --continue-on-error build server"
   },
   "repository": {
     "type": "git",
