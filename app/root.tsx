@@ -5,10 +5,10 @@ import {
     Scripts,
 } from "@remix-run/react";
 
-import MyApp from "./MyApp.jsx";
+import MyApp from "@components/MyApp.jsx";
 
 import type { LinksFunction } from "@remix-run/node";
-import stylesheet from "./tailwind.css?url";
+import stylesheet from "@css/tailwind.css?url";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
@@ -27,9 +27,9 @@ export default function App() {
                 <title>Stories</title>
             </head>
             <body>
-                <MyApp />
-                <Outlet />
-                <Scripts />
+                <MyApp/>
+                <Outlet/>
+                <Scripts/>
             </body>
         </html>
     );
