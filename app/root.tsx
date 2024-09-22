@@ -5,7 +5,7 @@ import {
     Scripts,
 } from "@remix-run/react";
 
-import MyApp from "@components/MyApp.jsx";
+import MyApp from "@components/MyApp";
 
 import type { LinksFunction } from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";

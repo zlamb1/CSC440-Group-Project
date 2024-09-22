@@ -22,6 +22,8 @@
   },
   "homepage": "https://github.com/zlamb1/CSC440-Group-Project#readme",
   "dependencies": {
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@remix-run/express": "^2.12.1",
     "@remix-run/node": "^2.12.1",
     "@remix-run/react": "^2.12.1",
