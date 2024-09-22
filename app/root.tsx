@@ -9,6 +9,7 @@ import MyApp from "@components/MyApp";
 
 import type { LinksFunction } from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";
+import {StrictMode} from "react";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
@@ -27,7 +28,11 @@ export default function App() {
                 <title>Stories</title>
             </head>
             <body>
-                <MyApp/>
+                <StrictMode>
+                    <div id="root" className="flex p-6">
+                        <MyApp />
+                    </div>
+                </StrictMode>
                 <Outlet/>
                 <Scripts/>
             </body>
