@@ -3,10 +3,12 @@ const fileName = (process.env.DB_FILE_NAME || 'storage') + '.db';
 const db = new sqlite3.Database(fileName);
 
 let called;
-function cleanup() {
+function cleanup(evt) {
     if (!called) {
         called = true;
-        console.log('Closing database...');
+        // flush stdout buffer
+        if (evt === 'SIGINT') console.log();
+        console.log('Stopping database.');
         db.close();
     }
 }

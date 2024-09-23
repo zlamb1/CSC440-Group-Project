@@ -49,7 +49,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
             RippleProps.onClick(evt);
             animate(scope.current, {
-                scale: [ 0.95, 1 ]
+                scale: [ 0.97, 1 ]
             });
         }
         return (
