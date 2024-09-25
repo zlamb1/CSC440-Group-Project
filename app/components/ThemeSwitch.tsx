@@ -1,21 +1,28 @@
+import {Computer, FileQuestion, Laptop, Moon, Sun} from "lucide-react";
+import {themes, useTheme} from "@/utils/prefers-color-scheme";
+import {useEffect, useState} from "react";
+import React from "react";
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuTrigger
 } from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
-import {FileQuestion, Moon, Sun} from "lucide-react";
-import {themes, useTheme} from "@/utils/prefers-color-scheme";
-import {AnimatePresence, motion} from 'framer-motion';
-import {useEffect, useState} from "react";
+import {AnimatePresence} from "framer-motion";
 import {Separator} from "@ui/separator";
-import React from "react";
+import {motion} from 'framer-motion';
 
-const themeMeta = {
-    'light': { icon: Sun },
-    'dark': { icon: Moon },
+const themeIcons = {
+    'light': Sun,
+    'dark': Moon,
+    'system': Laptop,
+}
+
+const colorSchemeIcons = {
+    'light': Sun,
+    'dark': Moon,
 }
 
 export default function ThemeSwitch() {
@@ -25,18 +32,18 @@ export default function ThemeSwitch() {
     });
     const { themeStore, setTheme } = useTheme();
     // @ts-ignore
-    const meta = isMounted ? (themeMeta[themeStore.colorScheme] ?? { icon: FileQuestion, key: 'unknown' }) : { icon: FileQuestion, key: 'ssr' };
+    const SchemeIcon = isMounted ? (colorSchemeIcons[themeStore.colorScheme] ?? FileQuestion) : FileQuestion;
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="focus-visible:ring-0" asChild>
                 <Button className="w-fit h-fit p-2" variant="ghost" size="icon">
-                    <AnimatePresence mode="wait">
-                        <motion.div key={meta.icon.displayName}
+                    <AnimatePresence initial={false} mode="wait">
+                        <motion.div key={SchemeIcon.displayName}
                                     initial={{y: '100%', opacity: 0.5, scale: 0.25}}
                                     animate={{y: 0, opacity: 1, scale: 1}}
                                     exit={{y: '100%', opacity: 0.5, scale: 0.25}}
                                     transition={{duration: 0.1}}>
-                            <meta.icon className={"w-[40px] h-[40px] lg:w-[48px] lg:h-[48px] xl:w-[56px] xl:h-[56px]  " + (isMounted ? '' : 'invisible')} />
+                            <SchemeIcon className={"w-[20px] h-[20px] " + (isMounted ? '' : 'invisible')} />
                         </motion.div>
                     </AnimatePresence>
                     <span className="sr-only">Toggle theme</span>
@@ -47,8 +54,9 @@ export default function ThemeSwitch() {
                     {
                         themes.map((theme, index) => (
                             <React.Fragment key={theme}>
-                                <DropdownMenuRadioItem value={theme} className={'text-xl md:text-2xl'}>
+                                <DropdownMenuRadioItem value={theme} className="text-xl md:text-xl flex flex-row flex-nowrap justify-between gap-2">
                                     {theme.charAt(0).toUpperCase() + theme.substring(1)}
+                                    {React.createElement(themeIcons[theme], {})}
                                 </DropdownMenuRadioItem>
                                 { index !== themes.length - 1 && <Separator /> }
                             </React.Fragment>

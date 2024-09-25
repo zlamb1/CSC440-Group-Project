@@ -29,9 +29,7 @@ export default function App() {
                 <title>Stories</title>
             </head>
             <body>
-                <div className="p-10">
-                    <MyApp />
-                </div>
+                <MyApp />
                 <Scripts />
             </body>
         </html>
