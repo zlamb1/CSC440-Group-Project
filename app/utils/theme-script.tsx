@@ -1,26 +1,51 @@
 import React from "react";
 import {
     colorSchemes,
-    defaultFallbackColorScheme,
-    prefersColorSchemeCookieName
+    defaultColorScheme, themes,
+    themeStorageName,
 } from "@/utils/prefers-color-scheme";
 
-export function ThemeClientScript() {
+export default function ThemeHandler() {
     return (
-        <script dangerouslySetInnerHTML={{__html: `
+        <script dangerouslySetInnerHTML={{__html: `            
             class Adapter {
                 constructor() {
-                    this.pollRate = 1000; 
-                    this.poll = (name, fn) => {
-                        let cachedValue = this.getItem(name); 
-                        setInterval(() => {
-                            const value = this.getItem(name);
-                            if (value !== cachedValue) {
-                                cachedValue = value;
-                                fn(value); 
-                            }
-                        }, this.pollRate);
+                    this.pollRate = 100; 
+                    this.subscribers = {}
+                }
+                
+                subscribe(name, cb, notifyImmediately) {
+                    if (notifyImmediately) {
+                        cb(this.getItem(name)); 
                     }
+                    if (!this.subscribers[name]) {
+                        this.subscribers[name] = []; 
+                    }
+                    this.subscribers[name].push(cb);
+                }
+                
+                notify(name) {
+                    if (this.subscribers[name]) {
+                        for (const subscriber of this.subscribers[name]) {
+                            subscriber(this.getItem(name));
+                        }
+                    }
+                }
+                
+                poll(name, cb) {
+                    let cachedValue = this.getItem(name); 
+                    setInterval(() => {
+                        const value = this.getItem(name);
+                        if (value !== cachedValue) {
+                            cachedValue = value;
+                            cb(value);
+                            if (this.subscribers[name]) {
+                                for (const subscriber of this.subscribers[name]) {
+                                    subscriber(value); 
+                                }
+                            }
+                        }
+                    }, this.pollRate);
                 }
             }
             
@@ -39,6 +64,7 @@ export function ThemeClientScript() {
                     }
                     return cookieEnabled;
                 }
+                
                 constructor() {
                     super(); 
                     this.getItem = (name) => {
@@ -53,9 +79,10 @@ export function ThemeClientScript() {
                         }
                         return null;
                     }
+                    
                     this.setItem = (name, value) => {
                         const expiration = 60 * 60 * 24 * 365 * 10;
-                        document.cookie = name + '=' + value + ';Same-Site=Lax;Max-Age=' + expiration + ';Path=/'; 
+                        document.cookie = name + '=' + value + ';SameSite=Lax;Max-Age=' + expiration + ';Path=/'; 
                     }
                 }
             }
@@ -97,7 +124,6 @@ export function ThemeClientScript() {
                 return new MockAdapter(); 
             }
             
-            const chPrefersColorScheme = '${prefersColorSchemeCookieName}'; 
             const adapter = createAdapter(); 
             const mediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : undefined; 
             
@@ -110,65 +136,72 @@ export function ThemeClientScript() {
                         return 'light'; 
                     }
                 }
-                return '${defaultFallbackColorScheme}';
+                return '${defaultColorScheme}';
             }
     
-            function getActiveScheme() {
+            function getActiveTheme() {
                 return document.documentElement.dataset.theme;
             }
             
-            function updateDOM(scheme) {
+            function updateDOM(colorScheme) {
                 const htmlElement = document.documentElement; 
-                const dataTheme = htmlElement.dataset.theme;
-                if (dataTheme !== scheme) {
-                    htmlElement.classList.remove(htmlElement.dataset.theme); 
-                    htmlElement.classList.add(scheme);
-                    htmlElement.dataset.theme = scheme;
+                const dataColorScheme = htmlElement.dataset.colorScheme;
+                if (dataColorScheme !== colorScheme) {
+                    htmlElement.classList.remove(dataColorScheme); 
+                    htmlElement.classList.add(colorScheme);
+                    htmlElement.dataset.colorScheme = colorScheme;
                 }
             }
             
-            function validateColorScheme(scheme) {
-                if (scheme === 'system' && !mediaQuery) return { scheme: '${defaultFallbackColorScheme}', transformed: true }; 
-                if (![${colorSchemes.map(scheme => `'${scheme}'`).join(',')}].includes(scheme)) {
-                    return { scheme: '${defaultFallbackColorScheme}', transformed: true };
+            function getColorScheme(theme) {
+                if (theme === 'system' && mediaQuery) return getPreferredColorScheme(); 
+                if (![${colorSchemes.map(colorScheme => `'${colorScheme}'`).join(',')}].includes(theme)) {
+                    return '${defaultColorScheme}';
                 }
-                return { scheme, transformed: false }; 
+                return theme; 
             }
             
-            function updateColorScheme(value) {
+            function updateTheme(value) {
                 if (typeof window !== "undefined") {
-                    value = value ?? adapter.getItem(chPrefersColorScheme);
-                    const activeScheme = getActiveScheme(); 
+                    value = value ?? adapter.getItem('${themeStorageName}');
+                    const activeTheme = getActiveTheme(); 
                     const preferredScheme = getPreferredColorScheme(); 
                     if (value) {
-                        const { scheme, transformed } = validateColorScheme(value); 
-                        if (scheme === 'system') {
-                            if (activeScheme !== preferredScheme) {
-                                updateDOM(preferredScheme); 
-                            }
-                        } else if (activeScheme !== scheme) {
-                            updateDOM(scheme); 
+                        if (activeTheme === value && value === 'system') {
+                            updateDOM(preferredScheme);
                         }
-                        if (transformed) {
-                            adapter.setItem(chPrefersColorScheme, scheme); 
+                        if (activeTheme !== value) {
+                            document.documentElement.dataset.theme = value; 
+                            adapter.setItem('${themeStorageName}', value); 
+                            updateDOM(getColorScheme(value)); 
                         }
                     } else if (mediaQuery) {
+                        document.documentElement.dataset.theme = 'system'; 
+                        adapter.setItem('${themeStorageName}', 'system');
                         updateDOM(preferredScheme);
-                        adapter.setItem(chPrefersColorScheme, preferredScheme);
                     } else {
-                        updateDOM('${defaultFallbackColorScheme}');
-                        adapter.setItem(chPrefersColorScheme, ${defaultFallbackColorScheme});
+                        document.documentElement.dataset.theme = '${defaultColorScheme}'; 
+                        adapter.setItem('${themeStorageName}', '${defaultColorScheme}'); 
+                        updateDOM('${defaultColorScheme}');
                     }
                 }
             }
+           
+            function initializeTheme() {
+                updateTheme(); 
+                adapter.poll('${themeStorageName}', updateTheme); 
+                if (mediaQuery) {
+                    mediaQuery.addEventListener('change', e => updateTheme());
+                }
+            }
             
-            updateColorScheme(); 
-            adapter.poll(chPrefersColorScheme, updateColorScheme); 
-            
-            if (mediaQuery) {
-                mediaQuery.addEventListener('change', e => updateColorScheme());
-                // backward-compatability
-                mediaQuery.addListener(e => updateColorScheme());
+            if (typeof document !== 'undefined') {
+                window.pollColorScheme = function(cb) {
+                    adapter.subscribe('${themeStorageName}', (newScheme) => {
+                        return cb(newScheme); 
+                    }, true); 
+                }
+                initializeTheme(); 
             }
         `}} />
     )

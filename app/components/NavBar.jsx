@@ -1,6 +1,6 @@
 import React, {useContext} from "react";
 import {AppBar, Button, IconButton, Stack, Toolbar, useColorScheme} from "@mui/material";
-import ThemeSwitch from "./ThemeSwitch.jsx";
+import ThemeSwitch from "./ThemeSwitch.tsx";
 
 export default function NavBar() {
     const { mode, setMode } = useColorScheme();
