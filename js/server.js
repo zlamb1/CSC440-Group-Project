@@ -12,10 +12,9 @@ function handleClose(servers) {
     process.exit();
 }
 
-const isUnprivileged = process.env.SERVER_UNPRIV;
 export function createServer(app) {
     const servers = [];
-    if (isProduction && !isUnprivileged) {
+    if (isProduction) {
         const ports = env.getWebServerPorts();
         try {
             const httpServer = http.createServer(app);
