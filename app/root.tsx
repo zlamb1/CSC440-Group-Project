@@ -1,25 +1,25 @@
 import {
     Links,
-    Meta,
+    Meta, Outlet,
     Scripts,
 } from "@remix-run/react";
 
-import MyApp from "@components/MyApp";
+import NavBar from "@components/NavBar";
 
 import type {LinksFunction} from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";
 import React from "react";
-import ThemeHandler from "@/utils/theme-script";
+import ThemeScript from "@/utils/theme-script";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
 ];
 
-export default function App() {
+export function Layout({children}: {children: React.ReactNode}) {
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-                <ThemeHandler />
+                <ThemeScript />
                 <link
                     rel="icon"
                     href="data:image/x-icon;base64,AA"
@@ -29,9 +29,16 @@ export default function App() {
                 <title>Stories</title>
             </head>
             <body>
-                <MyApp />
+                <div className="flex flex-col" style={{minHeight: '100vh'}}>
+                    <NavBar />
+                    {children}
+                </div>
                 <Scripts />
             </body>
         </html>
     )
+}
+
+export default function App() {
+    return <Outlet />
 }

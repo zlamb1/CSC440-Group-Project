@@ -5,7 +5,7 @@ import {
     themeStorageName,
 } from "@/utils/prefers-color-scheme";
 
-export default function ThemeHandler() {
+export default function ThemeScript() {
     return (
         <script dangerouslySetInnerHTML={{__html: `            
             class Adapter {

@@ -14,10 +14,14 @@ import {AnimatePresence} from "framer-motion";
 import {Separator} from "@ui/separator";
 import {motion} from 'framer-motion';
 
-const themeIcons = {
-    'light': Sun,
-    'dark': Moon,
-    'system': Laptop,
+interface ThemeIcons {
+    [index: string]: React.FunctionComponent
+}
+
+const themeIcons: ThemeIcons = {
+    light: Sun,
+    dark: Moon,
+    system: Laptop,
 }
 
 const colorSchemeIcons = {

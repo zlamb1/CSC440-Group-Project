@@ -8,9 +8,9 @@ import {LogIn, MessageCircleCode} from "lucide-react";
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
 
-export default function MyApp() {
+export default function NavBar() {
     return (
-        <div className="w-100 flex flex-row" style={{minHeight: '100vh'}}>
+        <div>
             <NavigationMenu className="py-2 w-100 text-lg h-fit mx-4 sm:mx-16 md:mx-32 lg:mx-64 xl:mx-96">
                 <div className="flex flex-row items-center gap-5">
                     <Link className="flex flex-row items-center font-bold gap-1" to="/">
