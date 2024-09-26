@@ -6,7 +6,7 @@ import {Ripple, useRipple} from "@components/ui/ripple";
 import {motion, useAnimate} from 'framer-motion';
 
 const buttonVariants = cva(
-    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+    "flex items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
     {
         variants: {
             variant: {
@@ -49,18 +49,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
             RippleProps.onClick(evt);
             animate(scope.current, {
-                scale: [ 0.97, 1 ]
+                scale: [ 0.9, 1 ]
             });
         }
         return (
-            <div className="relative overflow-hidden">
-                <motion.div ref={scope}>
-                    <Comp onClick={onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props}>
-                        <Slottable>{children}</Slottable>
-                    </Comp>
-                </motion.div>
-                <Ripple {...RippleProps} />
-            </div>
+            <motion.div ref={scope}>
+                <Comp onClick={onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props}>
+                    <Slottable>{children}</Slottable>
+                    <Ripple {...RippleProps} />
+                </Comp>
+            </motion.div>
         );
     }
 )

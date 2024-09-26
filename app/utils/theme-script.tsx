@@ -126,7 +126,7 @@ export default function ThemeScript() {
             }
             
             const adapter = createAdapter(); 
-            const mediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : undefined; 
+            const mediaQuery = window ? (window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : undefined) : undefined; 
             
             function getPreferredColorScheme() {
                 if (window.matchMedia) {
@@ -148,8 +148,16 @@ export default function ThemeScript() {
                 const htmlElement = document.documentElement; 
                 const dataColorScheme = htmlElement.dataset.colorScheme;
                 if (dataColorScheme !== colorScheme) {
-                    htmlElement.classList.remove(dataColorScheme); 
-                    htmlElement.classList.add(colorScheme);
+                    if (document.startViewTransition) {
+                        document.startViewTransition(() => {
+                            htmlElement.classList.remove(dataColorScheme); 
+                            htmlElement.classList.add(colorScheme);
+                        });
+                    } else {
+                        // fallback if view transitions aren't available
+                        htmlElement.classList.remove(dataColorScheme); 
+                        htmlElement.classList.add(colorScheme);
+                    }
                     htmlElement.dataset.colorScheme = colorScheme;
                 }
             }

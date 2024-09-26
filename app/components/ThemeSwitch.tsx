@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import React from "react";
 import {
     DropdownMenu,
-    DropdownMenuContent,
+    DropdownMenuContent, DropdownMenuPortal,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger
@@ -39,7 +39,7 @@ export default function ThemeSwitch() {
     const SchemeIcon = isMounted ? (colorSchemeIcons[themeStore.colorScheme] ?? FileQuestion) : FileQuestion;
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="focus-visible:ring-0" asChild>
+            <DropdownMenuTrigger asChild>
                 <Button className="w-fit h-fit p-2" variant="ghost" size="icon">
                     <AnimatePresence initial={false} mode="wait">
                         <motion.div key={SchemeIcon.displayName}
