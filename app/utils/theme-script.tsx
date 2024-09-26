@@ -10,26 +10,27 @@ export default function ThemeScript() {
         <script dangerouslySetInnerHTML={{__html: `            
             class Adapter {
                 constructor() {
+                    this.items = {}
                     this.pollRate = 100; 
                     this.subscribers = {}
                 }
                 
-                subscribe(name, cb, notifyImmediately) {
-                    if (notifyImmediately) {
+                getItem(name) {
+                    return this.items[name];
+                }
+                
+                setItem(name, value) {
+                    this.items[name] = value;
+                }
+                
+                subscribe(name, cb, notify) {
+                    if (notify) {
                         cb(this.getItem(name)); 
                     }
                     if (!this.subscribers[name]) {
                         this.subscribers[name] = []; 
                     }
                     this.subscribers[name].push(cb);
-                }
-                
-                notify(name) {
-                    if (this.subscribers[name]) {
-                        for (const subscriber of this.subscribers[name]) {
-                            subscriber(this.getItem(name));
-                        }
-                    }
                 }
                 
                 poll(name, cb) {
@@ -67,52 +68,51 @@ export default function ThemeScript() {
                 
                 constructor() {
                     super(); 
-                    this.getItem = (name) => {
-                        name = name + "=";
-                        const decodedCookies = decodeURIComponent(document.cookie);
-                        const cookies = decodedCookies.split(';');
-                        for (let cookie of cookies) {
-                            while (cookie.charAt(0) === ' ')
-                                cookie = cookie.substring(1); 
-                            if (cookie.indexOf(name) == 0)
-                                return cookie.substring(name.length, cookie.length); 
-                        }
-                        return null;
+                }
+                
+                getItem(name) {
+                    name = name + "=";
+                    const decodedCookies = decodeURIComponent(document.cookie);
+                    const cookies = decodedCookies.split(';');
+                    for (let cookie of cookies) {
+                        while (cookie.charAt(0) === ' ')
+                            cookie = cookie.substring(1); 
+                        if (cookie.indexOf(name) == 0)
+                            return cookie.substring(name.length, cookie.length); 
                     }
-                    
-                    this.setItem = (name, value) => {
-                        const expiration = 60 * 60 * 24 * 365 * 10;
-                        document.cookie = name + '=' + value + ';SameSite=Lax;Max-Age=' + expiration + ';Path=/'; 
-                    }
+                    return null;
+                }
+                
+                setItem(name, value) {
+                    const expiration = 60 * 60 * 24 * 365 * 10;
+                    document.cookie = name + '=' + value + ';SameSite=Lax;Max-Age=' + expiration + ';Path=/'; 
                 }
             }
             
             class StorageAdapter extends Adapter {
                 static isEnabled() {
                     try {
-                        localStorage.setItem('local_storage_enabled', true); 
-                        if (localStorage.getItem('local_storage_enabled') !== 'true') {
+                        localStorage.setItem('storagetest', 'true'); 
+                        if (localStorage.getItem('storagetest') !== 'true') {
                             return false; 
                         }
-                        localStorage.removeItem('local_storage_enabled');
+                        localStorage.removeItem('storagetest');
                         return true; 
                     } catch (err) {
                         return false; 
                     }
                 }
+                
                 constructor() {
                     super(); 
-                    this.getItem = (name) => localStorage.getItem(name);
-                    this.setItem = (name, value) => localStorage.setItem(name, value); 
                 }
-            }
-            
-            class MockAdapter {
-                static isEnabled() { return true; } 
-                constructor() {
-                    this.getItem = (name) => {}
-                    this.setItem = (name, value) => {}
-                    this.poll = (name, fn) => {}
+                
+                getItem(name) {
+                    return localStorage.getItem(name);
+                }
+                
+                setItem(name, value) {
+                    localStorage.setItem(name, value); 
                 }
             }
             
@@ -121,7 +121,8 @@ export default function ThemeScript() {
                     return new CookieAdapter(); 
                 if (StorageAdapter.isEnabled())
                     return new StorageAdapter();
-                return new MockAdapter(); 
+                // return default adapter (won't persist data)
+                return new Adapter(); 
             }
             
             const adapter = createAdapter(); 
