@@ -148,13 +148,13 @@ export default function ThemeScript() {
                 const htmlElement = document.documentElement; 
                 const dataColorScheme = htmlElement.dataset.colorScheme;
                 if (dataColorScheme !== colorScheme) {
-                    if (document.startViewTransition) {
+                    // use view-transition if the API is supported and its not the first load
+                    if (dataColorScheme && document.startViewTransition) {
                         document.startViewTransition(() => {
                             htmlElement.classList.remove(dataColorScheme); 
                             htmlElement.classList.add(colorScheme);
                         });
                     } else {
-                        // fallback if view transitions aren't available
                         htmlElement.classList.remove(dataColorScheme); 
                         htmlElement.classList.add(colorScheme);
                     }
