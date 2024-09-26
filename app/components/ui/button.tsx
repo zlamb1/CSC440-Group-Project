@@ -38,19 +38,22 @@ const buttonVariants = cva(
 export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>,
         VariantProps<typeof buttonVariants> {
-    asChild?: boolean
+    asChild?: boolean,
+    noClickAnimation?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({className, variant, size, asChild = false, children, ...props}, ref) => {
+    ({className, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
         const Comp = asChild ? Slot : "button"
         const RippleProps = useRipple(props);
         const [scope, animate] = useAnimate();
         const onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
             RippleProps.onClick(evt);
-            animate(scope.current, {
-                scale: [ 0.9, 1 ]
-            });
+            if (!noClickAnimation) {
+                animate(scope.current, {
+                    scale: [ 0.9, 1 ]
+                });
+            }
         }
         return (
             <motion.div ref={scope}>

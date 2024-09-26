@@ -9,6 +9,7 @@ import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
 import {HamburgerMenuIcon} from "@radix-ui/react-icons";
 import React from "react";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@ui/tooltip";
 
 export default function NavBar() {
     const links = [
@@ -19,7 +20,7 @@ export default function NavBar() {
     return (
         <div>
             <NavigationMenu className="py-2 w-100 text-lg h-fit mx-4 sm:mx-16 md:mx-32 lg:mx-64 xl:mx-96">
-                <NavigationMenuList className="flex flex-row items-center gap-5">
+                <NavigationMenuList className="flex flex-row items-baseline gap-5">
                     <NavigationMenuItem className="md:hidden">
                         <NavigationMenuTrigger>
                             <HamburgerMenuIcon />
@@ -35,8 +36,8 @@ export default function NavBar() {
                         </NavigationMenuContent>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Link className="flex flex-row items-center font-bold gap-1" to="/">
-                            <MessageCircleCode className="w-5 h-5" />
+                        <Link className="flex flex-row items-baseline font-bold gap-1" to="/">
+                            <MessageCircleCode className="w-5 h-5 self-center" />
                             Stories
                         </Link>
                     </NavigationMenuItem>
@@ -51,9 +52,11 @@ export default function NavBar() {
                         <ThemeSwitch />
                     </NavigationMenuItem>
                     <NavigationMenuItem className="flex items-center">
-                        <Button variant="ghost" size="icon">
-                            <LogIn />
-                        </Button>
+                        <Link to="/login">
+                            <Button variant="ghost" size="icon">
+                                <LogIn />
+                            </Button>
+                        </Link>
                     </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>

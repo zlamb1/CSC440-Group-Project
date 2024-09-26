@@ -34,18 +34,44 @@ export default function ThemeSwitch() {
     useEffect(() => {
         setMounted(true);
     });
+    const [counter, setCounter] = useState(0);
+    const [isOpen, setIsOpen] = useState(false);
     const { themeStore, setTheme } = useTheme();
+    useEffect(() => {
+        setCounter(counter + 1);
+    }, [themeStore]);
     // @ts-ignore
     const SchemeIcon = isMounted ? (colorSchemeIcons[themeStore.colorScheme] ?? FileQuestion) : FileQuestion;
+    const variants = {
+        hidden: {
+            y: '100%',
+            opacity: 0.5,
+            scale: 0.25
+        },
+        appear: {
+            opacity: 0.5,
+            scale: 0.25,
+        },
+        visible: {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+        }
+    }
+    function onClick(theme: string) {
+        setIsOpen(false);
+        setTheme(theme);
+    }
     return (
-        <DropdownMenu>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
             <DropdownMenuTrigger asChild>
                 <Button className="w-fit h-fit p-2" variant="ghost" size="icon">
-                    <AnimatePresence initial={false} mode="wait">
+                    <AnimatePresence mode="wait">
                         <motion.div key={SchemeIcon.displayName}
-                                    initial={{y: '100%', opacity: 0.5, scale: 0.25}}
-                                    animate={{y: 0, opacity: 1, scale: 1}}
-                                    exit={{y: '100%', opacity: 0.5, scale: 0.25}}
+                                    initial={counter > 1 ? 'hidden' : 'appear'}
+                                    animate="visible"
+                                    exit="hidden"
+                                    variants={variants}
                                     transition={{duration: 0.1}}>
                             <SchemeIcon className={"w-[20px] h-[20px] " + (isMounted ? '' : 'invisible')} />
                         </motion.div>
@@ -53,20 +79,18 @@ export default function ThemeSwitch() {
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuRadioGroup className="p-0" value={themeStore.theme} onValueChange={setTheme}>
-                    {
-                        themes.map((theme, index) => (
-                            <React.Fragment key={theme}>
-                                <DropdownMenuRadioItem value={theme} className="text-xl md:text-xl flex flex-row flex-nowrap justify-between gap-2">
-                                    {theme.charAt(0).toUpperCase() + theme.substring(1)}
-                                    {React.createElement(themeIcons[theme], {})}
-                                </DropdownMenuRadioItem>
-                                { index !== themes.length - 1 && <Separator /> }
-                            </React.Fragment>
-                        ))
-                    }
-                </DropdownMenuRadioGroup>
+            <DropdownMenuContent className="flex flex-col">
+                {
+                    themes.map((theme, index) => (
+                        <React.Fragment key={theme}>
+                            <Button className="flex flex-row w-full justify-between" variant="ghost" onClick={() => onClick(theme)} noClickAnimation>
+                                {theme.charAt(0).toUpperCase() + theme.substring(1)}
+                                {React.createElement(themeIcons[theme], {})}
+                            </Button>
+                            { index !== themes.length - 1 && <Separator /> }
+                        </React.Fragment>
+                    ))
+                }
             </DropdownMenuContent>
         </DropdownMenu>
     )

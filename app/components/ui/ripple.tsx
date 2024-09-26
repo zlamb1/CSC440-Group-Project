@@ -1,5 +1,5 @@
 import {AnimatePresence, clamp, motion} from "framer-motion";
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useRef, useState} from "react";
 
 // @ https://github.com/nextui-org/nextui/blob/canary/packages/components/ripple/src/use-ripple.ts#L25
 
@@ -35,12 +35,15 @@ export function useRipple(props: any) {
         setRipples((prevState) => prevState.filter((ripple) => ripple.key !== key));
     }, []);
 
-    const color = props?.rippleColor ?? 'white';
+    const color = props?.rippleColor ?? 'currentColor';
     return { ripples, onClick, onClear, color };
 }
 
 export function Ripple(props: any) {
     const { ripples = [], style, color = "currentColor", onClear } = props;
+    function transformColor(color: any) {
+        return color;
+    }
     return (
         <>
             {ripples.map((ripple: RippleType) => {
@@ -53,7 +56,7 @@ export function Ripple(props: any) {
                                      initial={{transform: "scale(0)", opacity: 0.35}}
                                      style={{
                                          position: "absolute",
-                                         backgroundColor: color,
+                                         backgroundColor: transformColor(color),
                                          borderRadius: "100%",
                                          pointerEvents: "none",
                                          overflow: "hidden",
