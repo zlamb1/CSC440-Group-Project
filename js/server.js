@@ -17,12 +17,6 @@ export function createServer(app) {
     if (isProduction) {
         const ports = env.getWebServerPorts();
         try {
-            const httpServer = http.createServer(app);
-            servers.push(httpServer.listen(ports.http));
-        } catch (err) {
-            console.log('failed to start http server: ' + err);
-        }
-        try {
             const key = fs.readFileSync(process.env.KEY_PATH || '.key', 'utf-8');
             const cert = fs.readFileSync(process.env.CERT_PATH || '.pem', 'utf-8');
             const credentials = {key, cert};

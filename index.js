@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import express from 'express';
-import './js/db/imports.js';
 import {createServer} from "./js/server.js";
 import { createRequestHandler } from "@remix-run/express";
 import isProduction from './js/prod.js';

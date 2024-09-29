@@ -1,8 +1,10 @@
 import {
     Links,
     Meta, Outlet,
-    Scripts,
+    Scripts, useLoaderData,
 } from "@remix-run/react";
+
+import {json} from '@remix-run/node';
 
 import NavBar from "@components/NavBar";
 
@@ -35,7 +37,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             </head>
             <body>
                 <div className="flex flex-col" style={{minHeight: '100vh'}}>
-                    <NavBar/>
+                    <NavBar />
                     {children}
                 </div>
                 <Scripts />
