@@ -4,6 +4,4 @@ build
 *.db
 uploads/**
 .env
-.key
-.pem
 .cache

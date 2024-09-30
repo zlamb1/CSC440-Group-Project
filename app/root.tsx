@@ -4,7 +4,7 @@ import {
     Scripts, useLoaderData, useLocation, useOutlet,
 } from "@remix-run/react";
 
-import {json} from '@remix-run/node';
+import client from '@/db/db.server.js';
 
 import NavBar from "@components/NavBar";
 
@@ -18,7 +18,13 @@ export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
 ];
 
+export async function loader() {
+    client;
+    return null;
+}
+
 export function Layout({children}: {children: React.ReactNode}) {
+    useLoaderData();
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
