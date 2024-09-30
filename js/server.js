@@ -1,9 +1,5 @@
-import fs from "fs";
 import env from "./server_env.js";
-import isProduction from "./prod.js";
 import http from "http";
-import https from "https";
-import {port} from "pg/lib/defaults.js";
 
 function handleClose(servers) {
     for (const server of servers) {
