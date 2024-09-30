@@ -4,6 +4,7 @@ import {createServer} from "./js/server.js";
 import { createRequestHandler } from "@remix-run/express";
 import isProduction from './js/prod.js';
 import * as vite from "vite";
+import client from "./js/db/db.js";
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use(viteServer ? viteServer.middlewares : express.static('build/client'));
 const build = viteServer ? () => viteServer.ssrLoadModule(
     "virtual:remix/server-build") : await import("./build/server/index.js");
 
-app.all("*", createRequestHandler({ build }));
+app.all("*", createRequestHandler({ build, getLoadContext(req, res) {
+        return { client };
+    }
+}));
 
 createServer(app);
