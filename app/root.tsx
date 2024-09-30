@@ -1,7 +1,7 @@
 import {
     Links,
     Meta, Outlet,
-    Scripts, useLoaderData,
+    Scripts, useLoaderData, useLocation, useOutlet,
 } from "@remix-run/react";
 
 import {json} from '@remix-run/node';
@@ -12,6 +12,7 @@ import type {LinksFunction} from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
+import {AnimatePresence, motion} from "framer-motion";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
@@ -37,10 +38,10 @@ export function Layout({children}: {children: React.ReactNode}) {
             </head>
             <body>
                 <div className="flex flex-col" style={{minHeight: '100vh'}}>
-                    <NavBar />
+                    <NavBar/>
                     {children}
                 </div>
-                <Scripts />
+                <Scripts/>
             </body>
         </html>
     )
@@ -55,5 +56,17 @@ export function ErrorBoundary() {
 }
 
 export default function App() {
-    return <Outlet />
+    const outlet = useOutlet();
+    return (
+        <AnimatePresence mode="wait" initial={false}>
+            <motion.main key={useLocation().pathname}
+                         initial={{ opacity: 0 }}
+                         animate={{ opacity: 1 }}
+                         exit={{ opacity: 0 }}
+                         transition={{ duration: 0.1 }}>
+                {outlet}
+            </motion.main>
+        </AnimatePresence>
+
+    );
 }
