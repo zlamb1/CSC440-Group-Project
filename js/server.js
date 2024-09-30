@@ -3,6 +3,7 @@ import env from "./server_env.js";
 import isProduction from "./prod.js";
 import http from "http";
 import https from "https";
+import {port} from "pg/lib/defaults.js";
 
 function handleClose(servers) {
     for (const server of servers) {
@@ -14,22 +15,12 @@ function handleClose(servers) {
 
 export function createServer(app) {
     const servers = [];
-    if (isProduction) {
-        const ports = env.getWebServerPorts();
-        try {
-            const key = fs.readFileSync(process.env.KEY_PATH || '.key', 'utf-8');
-            const cert = fs.readFileSync(process.env.CERT_PATH || '.pem', 'utf-8');
-            const credentials = {key, cert};
-            const httpsServer = https.createServer(credentials, app);
-            servers.push(httpsServer.listen(ports.https));
-        } catch (err) {
-            console.log('failed to start https server: ' + err);
-        }
-    } else {
-        servers.push(app.listen(env.getWebServerPorts().http, () => {
-            console.log(`Server listening on port ${env.getWebServerPorts().http}`);
-        }));
-    }
+    const ports = env.getWebServerPorts();
+    const httpServer = http.createServer(app);
+    servers.push(httpServer);
+    httpServer.listen(ports.http, () => {
+        console.log(`HTTP server listening on port ${ports.http}`);
+    });
     process.on('SIGINT', () => handleClose(servers));
     process.on('SIGTERM', () => handleClose(servers));
     return servers;
