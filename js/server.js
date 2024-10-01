@@ -15,7 +15,7 @@ export function createServer(app) {
     const httpServer = http.createServer(app);
     servers.push(httpServer);
     httpServer.listen(ports.http, () => {
-        console.log(`HTTP server listening on port ${ports.http}`);
+        console.log(`HTTP server listening on port ${ports.http}.`);
     });
     process.on('SIGINT', () => handleClose(servers));
     process.on('SIGTERM', () => handleClose(servers));

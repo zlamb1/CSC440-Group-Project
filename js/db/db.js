@@ -6,13 +6,14 @@ const client = new pg.Client({ connectionString });
 
 client.connect(err => {
     if (err) {
-        console.log('err', err);
+        console.log('Failed to connect to PostgreSQL database: ', err);
     } else {
-        console.log('connected');
+        console.log('Connected to PostgreSQL database.');
     }
 });
 
 client.on('end', () => {
+    console.log('Disconnected from PostgreSQL database.');
     // TODO: handle disconnects
 });
 

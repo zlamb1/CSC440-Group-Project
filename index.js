@@ -4,9 +4,13 @@ import {createServer} from "./js/server.js";
 import { createRequestHandler } from "@remix-run/express";
 import isProduction from './js/prod.js';
 import * as vite from "vite";
-import client from "./js/db/db.js";
+import {createUser, isUsernameAvailable} from "./js/db/users.js";
 
 const app = express();
+
+// derive IP from X-Forwarded header
+// allows obtaining IP even behind reverse proxy
+app.enable('trust proxy');
 
 let viteServer;
 if (!isProduction) {
@@ -21,7 +25,8 @@ const build = viteServer ? () => viteServer.ssrLoadModule(
     "virtual:remix/server-build") : await import("./build/server/index.js");
 
 app.all("*", createRequestHandler({ build, getLoadContext(req, res) {
-        return { client };
+        console.log('ip: ' + req.ip);
+        return { isUsernameAvailable, createUser };
     }
 }));
 
