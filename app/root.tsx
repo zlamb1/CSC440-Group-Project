@@ -1,7 +1,7 @@
 import {
     Links,
     Meta,
-    Scripts, useLoaderData, useLocation, useOutlet,
+    Scripts, useLoaderData, useLocation, useOutlet, useRouteError,
 } from "@remix-run/react";
 
 import NavBar from "@components/NavBar";
@@ -12,7 +12,6 @@ import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName} from "@/utils/prefers-color-scheme";
-import {useSession} from "@/sessions.server";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
@@ -56,7 +55,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             </head>
             <body>
                 <div className="flex flex-col" style={{minHeight: '100vh'}}>
-                    <NavBar ssrColorScheme={data.ssrColorScheme} {...data} />
+                    <NavBar ssrColorScheme={data?.ssrColorScheme} {...data} />
                     {children}
                 </div>
                 <Scripts/>
@@ -66,6 +65,8 @@ export function Layout({children}: {children: React.ReactNode}) {
 }
 
 export function ErrorBoundary() {
+    const error = useRouteError();
+    console.error(error);
     return (
         <div className="mx-8 sm:mx-16 md:mx- 32 lg:mx-48 xl:mx-64 select-none flex-grow flex flex-col items-center mt-32 gap-1">
             <p className="text-5xl font-bold">Oops!</p>

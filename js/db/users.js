@@ -6,6 +6,11 @@ export async function isUsernameAvailable(username) {
     return res.rows.length === 0;
 }
 
+export async function doesUserExist(id) {
+    const res = await client.query('SELECT id FROM users WHERE id = $1', [id]);
+    return res.rows.length > 0;
+}
+
 export async function createUser(username, password) {
     return new Promise((resolve, reject) => {
         const saltRounds = 10;
@@ -20,7 +25,6 @@ export async function createUser(username, password) {
         });
     });
 }
-
 
 export async function validateUser(username, password) {
     const res = await client.query('SELECT id, password_hash FROM users WHERE user_name = $1;', [username]);

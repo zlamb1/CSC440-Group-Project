@@ -2,10 +2,12 @@ import 'dotenv/config'
 import express from 'express';
 import {createServer} from "./js/server.js";
 import {createRequestHandler} from "@remix-run/express";
-import isProduction from './js/prod.js';
 import * as vite from "vite";
 import {createUser, isUsernameAvailable, validateUser} from "./js/db/users.js";
 import {commitSession, destroySession, getSession, useUserData} from "./js/auth.js";
+import {createPost, deletePost, getPost, getPosts} from "./js/db/posts.js";
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
@@ -37,6 +39,9 @@ app.all("*", createRequestHandler({ build, async getLoadContext(req, res) {
             },
             session: {
                 getSession, commitSession, destroySession
+            },
+            posts: {
+                createPost, getPost, getPosts, deletePost
             }
         }
     }
