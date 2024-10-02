@@ -26,7 +26,11 @@ const build = viteServer ? () => viteServer.ssrLoadModule(
     "virtual:remix/server-build") : await import("./build/server/index.js");
 
 app.all("*", createRequestHandler({ build, async getLoadContext(req, res) {
-        const data = await useUserData(req);
+        const { data, session } = await useUserData(req);
+        if (data.loggedIn) {
+            // update session expiration on request
+            res.setHeader('Set-Cookie', await commitSession(session));
+        }
         return {
             user: {
                 data, isUsernameAvailable, createUser, validateUser

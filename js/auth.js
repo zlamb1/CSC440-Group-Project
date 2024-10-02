@@ -21,21 +21,21 @@ export const { getSession, commitSession, destroySession } = createSessionStorag
     deleteData
 })
 
-export async function useUserData(request){
-    const session = await getSession(request.headers.cookie);
+export async function useUserData(req, res){
+    const session = await getSession(req.headers.cookie);
     const userId = session.get('userId');
     if (!userId) {
-        return { loggedIn: false }
+        return { data: { loggedIn: false }, session }
     }
     const data = await getUser(userId);
     if (!data) {
-        return { loggedIn: false }
+        return { data: { loggedIn: false }, session }
     }
-    return {
+    return { data: {
         loggedIn: true,
         id: data.id,
         userName: data.user_name,
         joinedAt: data.joined_at,
         avatarPath: data.avatar_path,
-    }
+    }, session }
 }

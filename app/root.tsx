@@ -6,12 +6,13 @@ import {
 
 import NavBar from "@components/NavBar";
 
-import {createCookie, json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
+import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
-import {colorSchemeStorageName, themeStorageName} from "@/utils/prefers-color-scheme";
+import {colorSchemeStorageName} from "@/utils/prefers-color-scheme";
+import {useSession} from "@/sessions.server";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
