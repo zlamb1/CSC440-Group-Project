@@ -1,22 +1,29 @@
 import {
     Links,
     Meta,
-    Scripts, useLocation, useOutlet,
+    Scripts, useLoaderData, useLocation, useOutlet,
 } from "@remix-run/react";
 
 import NavBar from "@components/NavBar";
 
-import type {LinksFunction} from "@remix-run/node";
+import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
+import {useUserData} from "@/sessions.server";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
 ];
 
+export async function loader({context, request}: LoaderFunctionArgs) {
+    const data = await useUserData(context, request);
+    return json(data);
+}
+
 export function Layout({children}: {children: React.ReactNode}) {
+    const data = useLoaderData<typeof loader>();
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
@@ -36,7 +43,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             </head>
             <body>
                 <div className="flex flex-col" style={{minHeight: '100vh'}}>
-                    <NavBar/>
+                    <NavBar {...data} />
                     {children}
                 </div>
                 <Scripts/>
@@ -67,6 +74,5 @@ export default function App() {
                 {outlet}
             </motion.main>
         </AnimatePresence>
-
     );
 }

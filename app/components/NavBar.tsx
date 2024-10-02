@@ -3,14 +3,18 @@ import {
     NavigationMenuItem,
     NavigationMenuList, NavigationMenuTrigger,
 } from "@ui/navigation-menu";
-import {Link} from "@remix-run/react";
-import {LogIn, MessageCircleCode} from "lucide-react";
+import {Form, Link} from "@remix-run/react";
+import {LogIn, LogOut, MessageCircleCode} from "lucide-react";
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
 import {HamburgerMenuIcon} from "@radix-ui/react-icons";
 import React from "react";
 
-export default function NavBar() {
+export interface NavBarProps {
+    loggedIn?: boolean;
+}
+
+export default function NavBar({ loggedIn = false }: NavBarProps) {
     const links = [
         { text: 'Link 1', to: '/test1' },
         { text: 'Link 2', to: '/test2' },
@@ -50,11 +54,10 @@ export default function NavBar() {
                     <ThemeSwitch />
                 </NavigationMenuItem>
                 <NavigationMenuItem className="flex items-center">
-                    <Link to="/login">
-                        <Button variant="ghost" size="icon">
-                            <LogIn />
-                        </Button>
-                    </Link>
+                    {
+                        loggedIn ? (<Form action="/logout" method="post"><Button variant="ghost" size="icon"><LogOut /></Button></Form>) :
+                            (<Link to="/login"><Button variant="ghost" size="icon" type="submit"><LogIn /></Button></Link>)
+                    }
                 </NavigationMenuItem>
             </NavigationMenuList>
         </NavigationMenu>
