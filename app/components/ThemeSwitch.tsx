@@ -30,9 +30,10 @@ const colorSchemeIcons = {
 }
 
 export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any }) {
-    const [isMounted, setMounted] = useState(false);
+    const [isSSR, setSSR] = useState(false);
     useEffect(() => {
-        setMounted(true);
+        // is server-side rendered
+        setSSR(true);
     });
     const [counter, setCounter] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +42,7 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
         setCounter(counter + 1);
     }, [themeStore]);
     // @ts-ignore
-    const SchemeIcon = colorSchemeIcons[isMounted ? themeStore.colorScheme : ssrColorScheme] ?? undefined;
+    const SchemeIcon = colorSchemeIcons[isSSR ? themeStore.colorScheme : ssrColorScheme] ?? undefined;
     if (!SchemeIcon) return null;
     const variants = {
         hidden: {

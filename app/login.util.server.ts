@@ -24,8 +24,8 @@ export async function useRegisterValidation({context, request}: ActionFunctionAr
     if (!available) {
         errors.username = 'That username is unavailable.';
     }
-    if (password.length === 0) {
-        errors.password = 'Password is required.';
+    if (password.length < 6) {
+        errors.password = 'Password must be at least 6 characters long.';
     }
     if (Object.keys(errors).length > 0) {
         return json({ errors });
