@@ -19,9 +19,11 @@ export const links: LinksFunction = () => [
 
 function parseColorSchemeCookie(cookieHeader: any) {
     const cookies = cookieHeader?.replaceAll(' ', '').split(";");
-    for (const cookie of cookies) {
-        if (cookie.indexOf(colorSchemeStorageName) === 0) {
-            return cookie.split('=')[1];
+    if (cookies) {
+        for (const cookie of cookies) {
+            if (cookie.indexOf(colorSchemeStorageName) === 0) {
+                return cookie.split('=')[1];
+            }
         }
     }
     return null;

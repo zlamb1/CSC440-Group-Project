@@ -207,11 +207,6 @@ export default function ThemeScript() {
             }
             
             if (typeof document !== 'undefined') {
-                window.pollColorScheme = function(cb) {
-                    adapter.subscribe('${themeStorageName}', (newScheme) => {
-                        return cb(newScheme); 
-                    }, true); 
-                }
                 initializeTheme(); 
             }
         `}} />
