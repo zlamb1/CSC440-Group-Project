@@ -1,11 +1,11 @@
 import {ActionFunctionArgs, redirect, json, LoaderFunctionArgs, TypedResponse, AppLoadContext} from "@remix-run/node";
 import {Key, Lock} from "lucide-react";
-import {useSession, useUserData} from "@/sessions.server";
 import LoginForm from "@components/LoginForm";
 import {useLoginValidation} from "@/login.util.server";
+import {useSession} from "@/sessions.server";
 
-export async function loader({context, request}: LoaderFunctionArgs) {
-    const data = await useUserData(context, request);
+export async function loader({context}: LoaderFunctionArgs) {
+    const data = context.user.data;
     if (data.loggedIn) {
         return redirect('/');
     } else {

@@ -11,15 +11,13 @@ import stylesheet from "@css/tailwind.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
-import {useUserData} from "@/sessions.server";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
 ];
 
-export async function loader({context, request}: LoaderFunctionArgs) {
-    const data = await useUserData(context, request);
-    return json(data);
+export async function loader({context}: LoaderFunctionArgs) {
+    return json(context.user.data);
 }
 
 export function Layout({children}: {children: React.ReactNode}) {

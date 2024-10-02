@@ -1,10 +1,8 @@
 import {AppLoadContext} from "@remix-run/server-runtime";
-import {useUserData} from "@/sessions.server";
 import {ActionFunctionArgs, json, TypedResponse} from "@remix-run/node";
 
 async function useLoginFormData(context: AppLoadContext, request: Request) {
-    const data = await useUserData(context, request);
-    if (data.loggedIn) {
+    if (context.user.data.loggedIn) {
         return json({ error: 'You are already signed in.' });
     }
     const formData = await request.formData();
