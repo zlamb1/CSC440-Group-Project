@@ -6,18 +6,30 @@ import {
 
 import NavBar from "@components/NavBar";
 
-import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
+import {createCookie, json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import stylesheet from "@css/tailwind.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
+import {colorSchemeStorageName, themeStorageName} from "@/utils/prefers-color-scheme";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: stylesheet },
 ];
 
-export async function loader({context}: LoaderFunctionArgs) {
-    return json(context.user.data);
+function parseColorSchemeCookie(cookieHeader: any) {
+    const cookies = cookieHeader.replaceAll(' ', '').split(";");
+    for (const cookie of cookies) {
+        if (cookie.indexOf(colorSchemeStorageName) === 0) {
+            return cookie.split('=')[1];
+        }
+    }
+    return null;
+}
+
+export async function loader({context, request}: LoaderFunctionArgs) {
+    const ssrColorScheme = parseColorSchemeCookie(request.headers.get("Cookie"));
+    return json({ ssrColorScheme, ...context.user.data });
 }
 
 export function Layout({children}: {children: React.ReactNode}) {
@@ -41,7 +53,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             </head>
             <body>
                 <div className="flex flex-col" style={{minHeight: '100vh'}}>
-                    <NavBar {...data} />
+                    <NavBar ssrColorScheme={data.ssrColorScheme} {...data} />
                     {children}
                 </div>
                 <Scripts/>

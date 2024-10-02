@@ -11,10 +11,11 @@ import {HamburgerMenuIcon} from "@radix-ui/react-icons";
 import React from "react";
 
 export interface NavBarProps {
+    ssrColorScheme?: string;
     loggedIn?: boolean;
 }
 
-export default function NavBar({ loggedIn = false }: NavBarProps) {
+export default function NavBar({ ssrColorScheme, loggedIn = false }: NavBarProps) {
     const links = [
         { text: 'Link 1', to: '/test1' },
         { text: 'Link 2', to: '/test2' },
@@ -51,7 +52,7 @@ export default function NavBar({ loggedIn = false }: NavBarProps) {
             </NavigationMenuList>
             <NavigationMenuList className="flex flex-row items-center gap-1">
                 <NavigationMenuItem className="flex items-center">
-                    <ThemeSwitch />
+                    <ThemeSwitch ssrColorScheme={ssrColorScheme} />
                 </NavigationMenuItem>
                 <NavigationMenuItem className="flex items-center">
                     {

@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 
-export const themeStorageName = 'client-hint-prefers-color-scheme';
+export const themeStorageName = 'client-hint-prefers-theme';
+export const colorSchemeStorageName = 'client-hint-prefers-color-scheme';
 export const defaultColorScheme = 'dark';
 
 export const colorSchemes = [ 'light', 'dark' ];

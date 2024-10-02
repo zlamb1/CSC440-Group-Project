@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    colorSchemes,
+    colorSchemes, colorSchemeStorageName,
     defaultColorScheme, themes,
     themeStorageName,
 } from "@/utils/prefers-color-scheme";
@@ -159,6 +159,8 @@ export default function ThemeScript() {
                         htmlElement.classList.add(colorScheme);
                     }
                     htmlElement.dataset.colorScheme = colorScheme;
+                    // update color scheme storage
+                    adapter.setItem('${colorSchemeStorageName}', colorScheme);
                 }
             }
             

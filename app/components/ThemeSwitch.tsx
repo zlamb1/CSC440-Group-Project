@@ -29,7 +29,7 @@ const colorSchemeIcons = {
     'dark': Moon,
 }
 
-export default function ThemeSwitch() {
+export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any }) {
     const [isMounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
@@ -41,7 +41,8 @@ export default function ThemeSwitch() {
         setCounter(counter + 1);
     }, [themeStore]);
     // @ts-ignore
-    const SchemeIcon = isMounted ? (colorSchemeIcons[themeStore.colorScheme] ?? FileQuestion) : FileQuestion;
+    const SchemeIcon = colorSchemeIcons[isMounted ? themeStore.colorScheme : ssrColorScheme] ?? undefined;
+    if (!SchemeIcon) return null;
     const variants = {
         hidden: {
             y: '100%',
@@ -66,14 +67,14 @@ export default function ThemeSwitch() {
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
             <DropdownMenuTrigger asChild>
                 <Button className="w-fit h-fit p-2" variant="ghost" size="icon">
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence initial={false} mode="wait">
                         <motion.div key={SchemeIcon.displayName}
                                     initial={counter > 1 ? 'hidden' : 'appear'}
                                     animate="visible"
                                     exit="hidden"
                                     variants={variants}
                                     transition={{duration: 0.1}}>
-                            <SchemeIcon className={"w-[20px] h-[20px] " + (isMounted ? '' : 'invisible')} />
+                            <SchemeIcon className={"w-[20px] h-[20px] "} />
                         </motion.div>
                     </AnimatePresence>
                     <span className="sr-only">Toggle theme</span>
