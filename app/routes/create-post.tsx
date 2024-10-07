@@ -1,8 +1,7 @@
 import {ActionFunctionArgs, json} from "@remix-run/node";
 
 export async function action({context, request}: ActionFunctionArgs) {
-    const user = context.user.data;
-    if (!user.loggedIn) {
+    if (!context.user.loggedIn) {
         return json({
             error: 'You must be logged in to post.'
         });
@@ -19,7 +18,7 @@ export async function action({context, request}: ActionFunctionArgs) {
     }
 
     try {
-        await context.posts.createPost(user, content);
+        await context.db.createPost(context.user.id, content);
         return json({});
     } catch (err) {
         return json({error: 'unknown error'});

@@ -1,19 +1,18 @@
-import {ActionFunctionArgs, json, redirect, TypedResponse} from "@remix-run/node";
-import {useRegisterValidation} from "@/login.util.server";
+import {ActionFunctionArgs, redirect} from "@remix-run/node";
+import {tryDatabaseAction} from "@/utils/database-error";
 
-export async function action(args: ActionFunctionArgs) {
-    return await useRegisterValidation(args, async (username, password) => {
-        try {
-            const session = await args.context.session.getSession();
-            session.set('userId', await args.context.user.createUser(username, password));
-            return redirect('/', {
-                headers: {
-                    'Set-Cookie': await args.context.session.commitSession(session)
-                }
-            });
-        } catch (err) {
-            console.error('Failed to create user: ' + err);
-            return json({ err: 'unknown error' });
-        }
+export async function action({ context, request }: ActionFunctionArgs) {
+    return await tryDatabaseAction(async () => {
+        const formData = await request.formData();
+        const username = String(formData.get("username"));
+        const password = String(formData.get("password"));
+
+        const session = await context.session.getSession();
+        session.set('userId', await context.user.createUser(username, password));
+        return redirect('/', {
+            headers: {
+                'Set-Cookie': await context.session.commitSession(session)
+            }
+        });
     });
 }

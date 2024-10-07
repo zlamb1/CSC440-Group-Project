@@ -1,31 +1,34 @@
 import {ActionFunctionArgs, redirect, json, LoaderFunctionArgs, TypedResponse, AppLoadContext} from "@remix-run/node";
 import {Key, Lock} from "lucide-react";
 import LoginForm from "@components/LoginForm";
-import {useLoginValidation} from "@/login.util.server";
 import {useSession} from "@/sessions.server";
+import {tryDatabaseAction} from "@/utils/database-error";
 
 export async function loader({context}: LoaderFunctionArgs) {
-    const data = context.user.data;
-    if (data.loggedIn) {
+    if (context.user.loggedIn) {
         return redirect('/');
     } else {
         return null;
     }
 }
 
-export async function action(args: ActionFunctionArgs) {
-    return await useLoginValidation(args, async (username, password) => {
-        const { validated, userId } = await args.context.user.validateUser(username, password);
-        if (validated) {
-            const { session } = await useSession(args.context, args.request);
-            session.set('userId', userId);
+export async function action({ context, request } : ActionFunctionArgs) {
+    return await tryDatabaseAction(async () => {
+        const formData = await request.formData();
+        const username = String(formData.get("username"));
+        const password = String(formData.get("password"));
+
+        const { loggedIn, id } = await context.db.authenticateUser(username, password);
+        if (loggedIn) {
+            const { session } = await useSession(context, request);
+            session.set('userId', id);
             return redirect('/', {
                 headers: {
-                    'Set-Cookie': await args.context.session.commitSession(session)
+                    'Set-Cookie': await context.session.commitSession(session)
                 }
             });
         } else {
-            return json({ errors: { password: 'Invalid credentials.' } });
+            return json({ password: 'Invalid credentials.' });
         }
     });
 }

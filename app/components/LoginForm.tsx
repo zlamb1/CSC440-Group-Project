@@ -30,14 +30,14 @@ export default function LoginForm({ header, submit, icon, action }: LoginFormPro
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="username">Username</Label>
                             <Input type="text" id="username" name="username" autoComplete="off"/>
-                            <ErrorContext msg={fetcher.data?.errors.username}/>
+                            <ErrorContext msg={fetcher.data?.username}/>
                         </div>
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-between items-center gap-2">
                                 <Label htmlFor="password">Password</Label>
                             </div>
                             <Input type="password" id="password" name="password" />
-                            <ErrorContext msg={fetcher.data?.errors.password}/>
+                            <ErrorContext msg={fetcher.data?.password}/>
                         </div>
                         <Button type="submit" className="w-full">
                             {fetcher.state === 'submitting' ? <LoadingSpinner /> : submit}

@@ -1,8 +1,7 @@
 import {ActionFunctionArgs, json} from "@remix-run/node";
 
 export async function action({context, request}: ActionFunctionArgs) {
-    const user = context.user.data;
-    if (!user.loggedIn) {
+    if (!context.user.loggedIn) {
         return json({
             error: 'You must be logged in to post.'
         });
@@ -15,13 +14,13 @@ export async function action({context, request}: ActionFunctionArgs) {
         return json({ id: 'Post ID is required.' });
     }
 
-    const post = await context.posts.getPost(postId);
-    if (post.poster_id !== user.id) {
+    const post = await context.db.getPost(postId);
+    if (post.poster_id !== context.user.id) {
         return json({ error: 'You cannot delete a post you did not create.' });
     }
 
     try {
-        await context.posts.deletePost(postId);
+        await context.db.deletePost(context.user.id, postId);
         return json({});
     } catch (err) {
         return json({error: 'unknown error'});

@@ -3,9 +3,8 @@ import express from 'express';
 import {createServer} from "./js/server.js";
 import {createRequestHandler} from "@remix-run/express";
 import * as vite from "vite";
-import {createUser, isUsernameAvailable, validateUser} from "./js/db/users.js";
 import {commitSession, destroySession, getSession, useUserData} from "./js/auth.js";
-import {createPost, deletePost, getPost, getPosts} from "./js/db/posts.js";
+import DBClient from './js/db/imports.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -34,15 +33,11 @@ app.all("*", createRequestHandler({ build, async getLoadContext(req, res) {
             res.setHeader('Set-Cookie', await commitSession(session));
         }
         return {
-            user: {
-                data, isUsernameAvailable, createUser, validateUser
-            },
+            db: new DBClient(data, session),
             session: {
                 getSession, commitSession, destroySession
             },
-            posts: {
-                createPost, getPost, getPosts, deletePost
-            }
+            user: data
         }
     }
 }));

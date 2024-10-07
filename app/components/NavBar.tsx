@@ -12,10 +12,10 @@ import React from "react";
 
 export interface NavBarProps {
     ssrColorScheme?: string;
-    loggedIn?: boolean;
+    user?: any;
 }
 
-export default function NavBar({ ssrColorScheme, loggedIn = false }: NavBarProps) {
+export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
     const links = [
         { text: 'Link 1', to: '/test1' },
         { text: 'Link 2', to: '/test2' },
@@ -56,7 +56,7 @@ export default function NavBar({ ssrColorScheme, loggedIn = false }: NavBarProps
                 </NavigationMenuItem>
                 <NavigationMenuItem className="flex items-center">
                     {
-                        loggedIn ? (<Form action="/logout" method="post"><Button variant="ghost" size="icon"><LogOut /></Button></Form>) :
+                        user?.loggedIn ? (<Form action="/logout" method="post"><Button variant="ghost" size="icon"><LogOut /></Button></Form>) :
                             (<Link to="/login"><Button variant="ghost" size="icon" type="submit"><LogIn /></Button></Link>)
                     }
                 </NavigationMenuItem>
