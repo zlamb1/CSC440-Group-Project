@@ -6,6 +6,7 @@ export async function action({context, request}: ActionFunctionArgs) {
             error: 'You must be logged in to post.'
         });
     }
+
     const formData = await request.formData();
     const content = String(formData.get("content"));
 

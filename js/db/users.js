@@ -6,7 +6,7 @@ DBClient.prototype.isUsernameAvailable = async function(username) {
         const res = await client.query('SELECT id FROM users WHERE user_name = $1;', [username]);
         return res.rows.length === 0;
     } catch (err) {
-        console.error('Failed to check if username is available: ', err);
+        console.error('isUsernameAvailable: ', err);
         throw new DBError();
     }
 }
@@ -48,7 +48,7 @@ DBClient.prototype.createUser = async function(username, password) {
         const res = await client.query('INSERT INTO users (user_name, password_hash) VALUES ($1, $2) RETURNING id;', [username, hash]);
         return res.rows[0].id;
     } catch (err) {
-        console.error('Failed to create user: ', err);
+        console.error('createUser: ', err);
         throw DBError();
     }
 }
@@ -70,15 +70,24 @@ DBClient.prototype.authenticateUser = async function(username, password) {
         const matched = await bcrypt.compare(password, res.rows[0].password_hash);
         return { loggedIn: matched, id: matched ? res.rows[0].id : undefined }
     } catch (err) {
-        console.error('Failed to authenticate user: ', err);
+        console.error('authenticateUser: ', err);
         throw new DBError();
     }
 }
 
 export async function getUser(id) {
-    const res = await client.query('SELECT * FROM users WHERE id = $1;', [id]);
-    if (res.rows.length === 0) return null;
-    return res.rows[0];
+    return new Promise(async (resolve, reject) => {
+        try {
+            const res = await client.query('SELECT * FROM users WHERE id = $1;', [id]);
+            if (res.rows.length === 0) {
+                return reject(new DBError('User not found.'));
+            }
+            return resolve(res.rows[0]);
+        } catch (err) {
+            console.error('getUser: ', err);
+            return reject(new DBError());
+        }
+    });
 }
 
 DBClient.prototype.getUser = getUser;

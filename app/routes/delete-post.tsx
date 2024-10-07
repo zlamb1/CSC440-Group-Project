@@ -15,7 +15,7 @@ export async function action({context, request}: ActionFunctionArgs) {
     }
 
     const post = await context.db.getPost(postId);
-    if (post.poster_id !== context.user.id) {
+    if (post.poster !== context.user.id) {
         return json({ error: 'You cannot delete a post you did not create.' });
     }
 

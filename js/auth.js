@@ -31,11 +31,15 @@ export async function useUserData(req, res){
     if (!data) {
         return { data: { loggedIn: false }, session }
     }
-    return { data: {
-        loggedIn: true,
-        id: data.id,
-        userName: data.user_name,
-        joinedAt: data.joined_at,
-        avatarPath: data.avatar_path,
-    }, session }
+    return {
+        data: {
+            loggedIn: true,
+            id: data.id,
+            userName: data.user_name,
+            joinedAt: data.joined_at,
+            avatarPath: data.avatar_path,
+            privacyStatus: data.privacy_status,
+        },
+        session,
+    }
 }

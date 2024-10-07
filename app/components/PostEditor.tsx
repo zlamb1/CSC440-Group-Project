@@ -73,7 +73,6 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
                         content={content}
                         editorContainerProps={props?.containerProps}
                         immediatelyRender={false}>
-            <EditorContent editor={null} />
         </EditorProvider>
     )
 });
@@ -83,9 +82,7 @@ export function PostView({ content, containerProps }: { content: any, containerP
         <EditorProvider extensions={viewExtensions}
                         content={content}
                         editable={false}
-                        editorContainerProps={containerProps}
                         immediatelyRender={false}>
-            <EditorContent editor={null} />
         </EditorProvider>
     );
 }

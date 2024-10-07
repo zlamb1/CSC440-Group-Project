@@ -44,11 +44,11 @@ export default function Index() {
                         return (
                             <Card className="p-3 flex flex-col gap-3 select-none w-full" key={post.id}>
                                 <div className="flex gap-3">
-                                    <span className="font-bold">{post.user_name}</span>
+                                    <span className="font-bold">{post.userName}</span>
                                 </div>
                                 <PostView content={post.content} />
                                 {
-                                    post.poster_id === data.user.id ?
+                                    post.poster === data.user.id ?
                                         (<Form className="flex p-0" navigate={false} action="/delete-post" method="post">
                                             <input name="id" className="hidden" readOnly value={post.id} />
                                             <Button className="bg-red-600 hover:bg-red-500">Delete</Button>
