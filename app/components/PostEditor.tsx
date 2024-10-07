@@ -13,9 +13,11 @@ import {all, createLowlight} from "lowlight";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
 import React, {useImperativeHandle, useState} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
+import {Placeholder} from "@tiptap/extension-placeholder";
 
 const lowlight = createLowlight(all);
-const extensions = [
+
+const editorExtensions = [
     Document,
     Paragraph,
     Text,
@@ -31,7 +33,28 @@ const extensions = [
     CharacterCount.configure({
         limit: 300
     }),
-];
+    Placeholder.configure({
+        placeholder: 'Write something...'
+    }),
+]
+
+const viewExtensions = [
+    Document,
+    Paragraph,
+    Text,
+    Image,
+    Dropcursor,
+    CodeBlockLowlight.configure({
+        lowlight,
+    }),
+    Youtube.configure({
+        controls: false,
+        nocookie: true
+    }),
+    CharacterCount.configure({
+        limit: 300
+    }),
+]
 
 export interface PostEditorElement {
     getContent: () => string;
@@ -46,7 +69,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
     });
     return (
         <EditorProvider onUpdate={(evt) => setContent(evt.editor.getHTML())}
-                        extensions={extensions}
+                        extensions={editorExtensions}
                         content={content}
                         editorContainerProps={props?.containerProps}
                         immediatelyRender={false}>
@@ -57,11 +80,11 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
 
 export function PostView({ content, containerProps }: { content: any, containerProps?: any }) {
     return (
-        <EditorProvider extensions={extensions}
-                    content={content}
-                    editable={false}
-                    editorContainerProps={containerProps}
-                    immediatelyRender={false}>
+        <EditorProvider extensions={viewExtensions}
+                        content={content}
+                        editable={false}
+                        editorContainerProps={containerProps}
+                        immediatelyRender={false}>
             <EditorContent editor={null} />
         </EditorProvider>
     );

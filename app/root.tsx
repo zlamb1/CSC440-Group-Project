@@ -8,7 +8,7 @@ import NavBar from "@components/NavBar";
 
 import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import twStylesheet from "@css/tailwind.css?url";
-import codeStylesheet from "@css/code.css?url";
+import tiptapStylesheet from "@css/tiptap.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
@@ -16,7 +16,7 @@ import {colorSchemeStorageName} from "@/utils/prefers-color-scheme";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: twStylesheet },
-    { rel: "stylesheet", href: codeStylesheet },
+    { rel: "stylesheet", href: tiptapStylesheet },
 ];
 
 function parseColorSchemeCookie(cookieHeader: any) {
@@ -33,7 +33,7 @@ function parseColorSchemeCookie(cookieHeader: any) {
 
 export async function loader({context, request}: LoaderFunctionArgs) {
     const ssrColorScheme = parseColorSchemeCookie(request.headers.get("Cookie"));
-    return json({ ssrColorScheme, ...context.user });
+    return json({ ssrColorScheme, user: context.user });
 }
 
 export function Layout({children}: {children: React.ReactNode}) {
@@ -67,8 +67,7 @@ export function Layout({children}: {children: React.ReactNode}) {
 }
 
 export function ErrorBoundary() {
-    const error = useRouteError();
-    console.error(error);
+    console.error(useRouteError());
     return (
         <div className="mx-8 sm:mx-16 md:mx- 32 lg:mx-48 xl:mx-64 select-none flex-grow flex flex-col items-center mt-32 gap-1">
             <p className="text-5xl font-bold">Oops!</p>

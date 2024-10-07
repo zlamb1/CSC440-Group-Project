@@ -4,7 +4,7 @@ import {Button} from "@ui/button";
 import {json, LoaderFunctionArgs} from "@remix-run/node";
 import NotImplemented from "@components/NotImplemented";
 import {PostEditor, PostEditorElement, PostView} from "@components/PostEditor";
-import React, {createRef, FormEvent} from "react";
+import React, {FormEvent} from "react";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     const posts = await context.db.getPublicPosts();
