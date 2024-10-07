@@ -13,6 +13,7 @@ import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName} from "@/utils/prefers-color-scheme";
+import {Card} from "@ui/card";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: twStylesheet },
@@ -56,9 +57,15 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <title>Stories</title>
             </head>
             <body>
-                <div className="flex flex-col" style={{minHeight: '100vh'}}>
+                <div className="flex flex-col bg-gray-100 dark:bg-gray-900" style={{minHeight: '100vh'}}>
                     <NavBar {...data} />
-                    {children}
+                    <div className="flex-grow flex gap-3 w-full my-3">
+                        <div className="lg:w-[20%] xl:w-[25%] flex-shrink-0"></div>
+                        <Card className="border-0 flex-grow flex justify-center">
+                            {children}
+                        </Card>
+                        <div className="lg:w-[15%] xl:w-[20%] flex-shrink-0"></div>
+                    </div>
                 </div>
                 <Scripts/>
             </body>
@@ -69,7 +76,7 @@ export function Layout({children}: {children: React.ReactNode}) {
 export function ErrorBoundary() {
     console.error(useRouteError());
     return (
-        <div className="mx-8 sm:mx-16 md:mx- 32 lg:mx-48 xl:mx-64 select-none flex-grow flex flex-col items-center mt-32 gap-1">
+        <div className="mx-8 sm:mx-16 md:mx-32 lg:mx-48 xl:mx-64 select-none flex-grow flex flex-col items-center mt-32 gap-1">
             <p className="text-5xl font-bold">Oops!</p>
             <p className="text-gray-800 dark:text-gray-300 font-extralight">Something went wrong on our side.</p>
             <p className="text-gray-800 dark:text-gray-300 font-extralight">Contact us if this issue persists.</p>
@@ -82,6 +89,7 @@ export default function App() {
     return (
         <AnimatePresence mode="wait" initial={false}>
             <motion.main key={useLocation().pathname}
+                         className="w-full flex justify-center"
                          initial={{ opacity: 0 }}
                          animate={{ opacity: 1 }}
                          exit={{ opacity: 0 }}

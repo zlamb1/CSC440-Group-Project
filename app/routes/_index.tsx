@@ -30,36 +30,34 @@ export default function Index() {
         }
     }
     return (
-        <div className="flex justify-center">
-            <div className="flex flex-col gap-3 mt-16 w-[90%] md:w-[75%] xl:w-[50%]">
-                <Card className="p-5">
-                    <Form navigate={false} className="flex flex-col gap-5 items-center" onSubmit={onSubmit}>
-                        <span className="text-xl font-bold select-none">Create a Post</span>
-                        <PostEditor ref={ref} containerProps={{ className: 'w-full border px-1' }} />
-                        <Button type="submit">Upload Post</Button>
-                    </Form>
-                </Card>
-                {
-                    data?.posts.map((post: any) => {
-                        return (
-                            <Card className="p-3 flex flex-col gap-3 select-none w-full" key={post.id}>
-                                <div className="flex gap-3">
-                                    <span className="font-bold">{post.userName}</span>
-                                </div>
-                                <PostView content={post.content} />
-                                {
-                                    post.poster === data.user.id ?
-                                        (<Form className="flex p-0" navigate={false} action="/delete-post" method="post">
-                                            <input name="id" className="hidden" readOnly value={post.id} />
-                                            <Button className="bg-red-600 hover:bg-red-500">Delete</Button>
-                                        </Form>) :
-                                        null
-                                }
-                            </Card>
-                        );
-                    })
-                }
+        <div className="flex flex-col gap-3 w-full">
+            <div className="p-5">
+                <Form navigate={false} className="flex flex-col gap-5 items-center" onSubmit={onSubmit}>
+                    <span className="text-xl font-bold select-none">Create a Post</span>
+                    <PostEditor ref={ref} containerProps={{ className: 'w-full border px-1' }} />
+                    <Button type="submit">Upload Post</Button>
+                </Form>
             </div>
+            {
+                data?.posts.map((post: any) => {
+                    return (
+                        <div className="p-3 flex flex-col gap-3 select-none w-full" key={post.id}>
+                            <div className="flex gap-3">
+                                <span className="font-bold">{post.userName}</span>
+                            </div>
+                            <PostView content={post.content} />
+                            {
+                                post.poster === data.user.id ?
+                                    (<Form className="flex p-0" navigate={false} action="/delete-post" method="post">
+                                        <input name="id" className="hidden" readOnly value={post.id} />
+                                        <Button className="bg-red-600 hover:bg-red-500">Delete</Button>
+                                    </Form>) :
+                                    null
+                            }
+                        </div>
+                    );
+                })
+            }
         </div>
     )
 }

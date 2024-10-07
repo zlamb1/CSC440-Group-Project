@@ -22,7 +22,7 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
         { text: 'Link 3', to: '/test3' },
     ];
     return (
-        <NavigationMenu className="py-2 w-100 text-lg h-fit mx-4 sm:mx-16 md:mx-32 lg:mx-64 xl:mx-96">
+        <NavigationMenu className="bg-background py-2 w-100 text-lg h-fit px-4 sm:px-16 md:px-32 lg:px-64 xl:px-96">
             <NavigationMenuList className="flex flex-row items-baseline gap-5">
                 <NavigationMenuItem className="md:hidden">
                     <NavigationMenuTrigger>

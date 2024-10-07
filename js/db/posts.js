@@ -13,6 +13,20 @@ function sanitizeContent(content) {
     });
 }
 
+function ensureContentLength(content) {
+    const maxContentLength = 1200;
+    return content.length <= maxContentLength;
+}
+
+function ensureTextLength(content) {
+    const maxTextLength = 300;
+    const textContent = sanitizeHtml(content, {
+        allowedAttributes: {},
+        allowedTags: []
+    });
+    return textContent.length <= maxTextLength;
+}
+
 function formatPost(rowOrFn) {
     if (typeof rowOrFn === 'function') {
         return (row) => {
@@ -39,7 +53,14 @@ DBClient.prototype.createPost = async function(userId, content) {
             if (res.rows.length === 0) {
                 return reject(new DBError(`Invalid user id '${userId}'`));
             }
-            await client.query('INSERT INTO posts (poster_id, content) VALUES ($1, $2);', [userId, sanitizeContent(content)]);
+            const sanitizedContent = sanitizeContent(content);
+            if (!ensureContentLength(sanitizedContent)) {
+                return reject(new DBError('Text content and nodes must be less than 1200 characters.'));
+            }
+            if (!ensureTextLength(sanitizedContent)) {
+                return reject(new DBError('Content must be less than 300 characters.'));
+            }
+            await client.query('INSERT INTO posts (poster_id, content) VALUES ($1, $2);', [userId, sanitizedContent]);
             return resolve();
         } catch (err) {
             console.error('createPost: ', err);
@@ -77,8 +98,15 @@ DBClient.prototype.getPublicPosts = async function() {
 DBClient.prototype.editPost = async function(userId, postId, content) {
     return new Promise(async (resolve, reject) => {
         try {
+            const sanitizedContent = sanitizeContent(content);
+            if (!ensureContentLength(sanitizedContent)) {
+                return reject(new DBError('Content and nodes must be less than 1200 characters.'));
+            }
+            if (!ensureTextLength(sanitizedContent)) {
+                return reject(new DBError('Content must be less than 300 characters.'));
+            }
             const res = await client.query('UPDATE posts SET content = $1, last_edited = now() WHERE id = $2 AND poster_id = $3 RETURNING id;',
-                [ sanitizeContent(content), postId, userId ]);
+                [ sanitizedContent, postId, userId ]);
             if (res.rows.length === 0) {
                 return reject(new DBError('Post not found.'));
             }
