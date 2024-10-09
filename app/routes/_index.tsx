@@ -46,11 +46,12 @@ export default function Index() {
                             <PostEditor ref={ref}
                                         placeholder="Write a post..."
                                         onTextUpdate={(progress: number) => setEditorProgress(progress)}
+                                        editable={ createFetcher.state === 'idle' }
                                         editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
                                         containerProps={{className: 'flex-grow w-full text-lg'}} />
                         </div>
                         <Separator />
-                        <div className="self-end flex gap-3">
+                        <div className="self-end flex items-center gap-3">
                             <ProgressCircle percentage={ editorProgress } />
                             <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>
                                 {

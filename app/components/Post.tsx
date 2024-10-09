@@ -7,7 +7,6 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdo
 import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {useIsPresent} from "framer-motion";
-import {Skeleton} from "@ui/skeleton";
 
 function Post({ className, post, user }: { className?: string, post: any, user: any }) {
     const [ isExpanded, setExpanded ] = useState(false);

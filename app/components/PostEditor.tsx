@@ -64,7 +64,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
             textCounter: (text: string) => {
                 const cb = props?.onTextUpdate;
                 if (typeof cb === 'function') {
-                    cb(Math.round(text.length / characterCountLimit * 100));
+                    cb(Math.ceil(text.length / characterCountLimit * 100));
                 }
                 return text.length;
             }
@@ -76,6 +76,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
     const editor = useEditor({
         extensions: extensions,
         content: '',
+        editable: props?.editable,
         editorProps: props?.editorProps,
         immediatelyRender: false
     });
