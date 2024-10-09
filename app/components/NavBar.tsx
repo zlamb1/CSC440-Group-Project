@@ -11,7 +11,7 @@ import {HamburgerMenuIcon} from "@radix-ui/react-icons";
 import React from "react";
 import UserAvatar from "@components/UserAvatar";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import {DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
+import {DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Separator} from "@ui/separator";
 
@@ -22,6 +22,7 @@ export interface NavBarProps {
 
 export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
     const logoutFetcher = useFetcher();
+    const [ isOpen, setOpen ] = React.useState(false);
     const links = [
         { text: 'Link 1', to: '/test1' },
         { text: 'Link 2', to: '/test2' },
@@ -70,7 +71,7 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
                 <NavigationMenuItem className="flex items-center">
                     {
                         user?.loggedIn ?
-                            <DropdownMenu modal={false}>
+                            <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)} modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon">
                                         <UserAvatar userName={user?.userName} />
@@ -81,11 +82,13 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
                                         <UserRound size={20} />
                                         <span className="flex-grow text-left">Profile</span>
                                     </Button>
-                                    <Button containerClass="flex" className="flex-grow flex gap-4" variant="ghost">
-                                        <Settings size={20}/>
-                                        <span className="flex-grow text-left">Settings</span>
-                                    </Button>
-                                    <Separator />
+                                    <Link to="/settings">
+                                        <Button containerClass="flex" className="flex-grow flex gap-4" variant="ghost">
+                                            <Settings size={20}/>
+                                            <span className="flex-grow text-left">Settings</span>
+                                        </Button>
+                                    </Link>
+                                    <DropdownMenuSeparator />
                                     <logoutFetcher.Form method="POST" action="/logout">
                                         <Button containerClass="flex"
                                                 className="flex-grow flex gap-4 text-red-700 dark:text-red-500 hover:text-red-700 dark:hover:text-red-500"
@@ -99,7 +102,6 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
                                                     </>
                                                 )
                                             }
-
                                         </Button>
                                     </logoutFetcher.Form>
                                 </DropdownMenuContent>
