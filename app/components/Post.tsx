@@ -1,14 +1,23 @@
 import UserAvatar from "@components/UserAvatar";
 import {PostView} from "@components/PostEditor";
 import {Button} from "@ui/button";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {EllipsisVerticalIcon, TrashIcon} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {useIsPresent} from "framer-motion";
+import {Skeleton} from "@ui/skeleton";
 
-export default function Post({ className, post, user }: { className?: string, post: any, user: any }) {
+function Post({ className, post, user }: { className?: string, post: any, user: any }) {
+    const [ isExpanded, setExpanded ] = useState(false);
+    const [ isMounted, setMounted ] = useState(false);
     const fetcher = useFetcher();
+    const isPresent = useIsPresent();
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    const isTransitioning = fetcher.state !== 'idle' || !isPresent;
     return (
         <div className={"flex gap-3 " + className} key={post.id}>
             <div className="flex flex-col gap-2 w-full">
@@ -28,9 +37,9 @@ export default function Post({ className, post, user }: { className?: string, po
                                 post.poster === user.id ?
                                     (<fetcher.Form action="/delete-post" method="post">
                                         <input name="id" className="hidden" readOnly value={post.id}/>
-                                        <Button containerClass="w-100 flex" className="flex-grow text-red-600 hover:text-red-500" variant="ghost">
+                                        <Button containerClass="w-100 flex" className="flex-grow text-red-600 hover:text-red-500" variant="ghost" disabled={isTransitioning}>
                                             {
-                                                fetcher.state !== 'idle' ? <LoadingSpinner /> :
+                                                isTransitioning ? <LoadingSpinner /> :
                                                 <>
                                                     <TrashIcon className="w-[20px] h-[20px] mr-1" />
                                                     <span>Delete</span>
@@ -43,9 +52,15 @@ export default function Post({ className, post, user }: { className?: string, po
                     </DropdownMenu>
                 </div>
                 <div className="ml-10">
-                    <PostView editorProps={{ attributes: { class: 'break-all' } }} content={post.content}/>
+                    <PostView editorProps={{ attributes: { class: 'break-all' } }}
+                              content={post.content}
+                              isExpanded={isExpanded}
+                              onExpand={(isExpanded) => setExpanded(isExpanded)}
+                    />
                 </div>
             </div>
         </div>
     )
 }
+
+export default React.memo(Post);

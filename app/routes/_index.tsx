@@ -2,10 +2,13 @@ import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {json, LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/PostEditor";
-import React, {FormEvent} from "react";
+import React, {FormEvent, useEffect, useState} from "react";
 import Post from "@components/Post";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/UserAvatar";
+import ProgressCircle from "@components/ProgressCircle";
+import {AnimatePresence, motion} from "framer-motion";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     const posts = await context.db.getPublicPosts();
@@ -13,50 +16,67 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 export default function Index() {
+    const [ editorProgress, setEditorProgress ] = useState(0);
     const data = useLoaderData<typeof loader>();
-    const fetcher = useFetcher();
+    const createFetcher = useFetcher();
     const ref = React.createRef<PostEditorElement>();
     function onSubmit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();
         if (ref.current) {
             const formData = new FormData();
             formData.set('content', ref.current?.getContent());
-            fetcher.submit(formData, {
+            createFetcher.submit(formData, {
                 method: 'POST',
                 action: '/create-post',
             });
         }
     }
+    useEffect(() => {
+        if (ref?.current && createFetcher.state === 'idle') {
+            ref.current.clearEditor();
+        }
+    }, [createFetcher]);
     return (
-        <div className="flex flex-col gap-3 w-full">
+        <div className="flex flex-col w-full">
             {
                 data?.user.loggedIn ? (
-                    <div className="p-5">
-                        <Form navigate={false} className="flex flex-col flex-wrap gap-3 items-center" onSubmit={onSubmit}>
-                            <div className="flex self-start gap-3 flex-shrink-0">
-                                <UserAvatar userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
-                                <PostEditor ref={ref} editorProps={{ attributes: { class: 'focus-visible:outline-none' } }} containerProps={{className: 'break-all w-full text-lg'}}/>
-                            </div>
-                            <Button className="font-bold" containerClass="self-end" type="submit">Post</Button>
-                        </Form>
-                    </div>
+                    <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
+                        <div className="flex gap-3">
+                            <UserAvatar userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
+                            <PostEditor ref={ref}
+                                        placeholder="Write a post..."
+                                        onTextUpdate={(progress: number) => setEditorProgress(progress)}
+                                        editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
+                                        containerProps={{className: 'flex-grow w-full text-lg'}} />
+                        </div>
+                        <Separator />
+                        <div className="self-end flex gap-3">
+                            <ProgressCircle percentage={ editorProgress } />
+                            <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>
+                                {
+                                    createFetcher.state === 'idle' ? <>Post</> :
+                                        <LoadingSpinner />
+                                }
+                            </Button>
+                        </div>
+                    </Form>
                 ) : null
             }
-            <div className="mx-1">
+            <AnimatePresence>
                 {
-                    data?.posts.map((post: any, i: number) => {
+                    data?.posts.map((post: any) => {
                         return (
-                            <React.Fragment key={post.id}>
-                                <Separator />
-                                <Post className="p-3" post={post} user={data?.user} />
-                                {
-                                    i === data.posts.length - 1 ? <Separator /> : null
-                                }
-                            </React.Fragment>
+                            <motion.div initial={{ opacity: 0.25 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
+                                        transition={{ duration: 0.2 }}
+                                        key={post.id}>
+                                <Post className="p-3 px-5" post={post} user={data?.user} />
+                            </motion.div>
                         );
                     })
                 }
-            </div>
+            </AnimatePresence>
         </div>
     )
 }
