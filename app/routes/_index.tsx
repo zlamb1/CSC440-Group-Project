@@ -1,10 +1,11 @@
-import { Card } from "@/components/ui/card";
 import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {json, LoaderFunctionArgs} from "@remix-run/node";
-import NotImplemented from "@components/NotImplemented";
-import {PostEditor, PostEditorElement, PostView} from "@components/PostEditor";
+import {PostEditor, PostEditorElement} from "@components/PostEditor";
 import React, {FormEvent} from "react";
+import Post from "@components/Post";
+import {Separator} from "@ui/separator";
+import UserAvatar from "@components/UserAvatar";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     const posts = await context.db.getPublicPosts();
@@ -15,9 +16,6 @@ export default function Index() {
     const data = useLoaderData<typeof loader>();
     const fetcher = useFetcher();
     const ref = React.createRef<PostEditorElement>();
-    if (!data?.user.loggedIn) {
-        return <NotImplemented />
-    }
     function onSubmit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();
         if (ref.current) {
@@ -31,33 +29,34 @@ export default function Index() {
     }
     return (
         <div className="flex flex-col gap-3 w-full">
-            <div className="p-5">
-                <Form navigate={false} className="flex flex-col gap-5 items-center" onSubmit={onSubmit}>
-                    <span className="text-xl font-bold select-none">Create a Post</span>
-                    <PostEditor ref={ref} containerProps={{ className: 'w-full border px-1' }} />
-                    <Button type="submit">Upload Post</Button>
-                </Form>
-            </div>
             {
-                data?.posts.map((post: any) => {
-                    return (
-                        <div className="p-3 flex flex-col gap-3 select-none w-full" key={post.id}>
-                            <div className="flex gap-3">
-                                <span className="font-bold">{post.userName}</span>
+                data?.user.loggedIn ? (
+                    <div className="p-5">
+                        <Form navigate={false} className="flex flex-col flex-wrap gap-3 items-center" onSubmit={onSubmit}>
+                            <div className="flex self-start gap-3 flex-shrink-0">
+                                <UserAvatar userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
+                                <PostEditor ref={ref} editorProps={{ attributes: { class: 'focus-visible:outline-none' } }} containerProps={{className: 'break-all w-full text-lg'}}/>
                             </div>
-                            <PostView content={post.content} />
-                            {
-                                post.poster === data.user.id ?
-                                    (<Form className="flex p-0" navigate={false} action="/delete-post" method="post">
-                                        <input name="id" className="hidden" readOnly value={post.id} />
-                                        <Button className="bg-red-600 hover:bg-red-500">Delete</Button>
-                                    </Form>) :
-                                    null
-                            }
-                        </div>
-                    );
-                })
+                            <Button className="font-bold" containerClass="self-end" type="submit">Post</Button>
+                        </Form>
+                    </div>
+                ) : null
             }
+            <div className="mx-1">
+                {
+                    data?.posts.map((post: any, i: number) => {
+                        return (
+                            <React.Fragment key={post.id}>
+                                <Separator />
+                                <Post className="p-3" post={post} user={data?.user} />
+                                {
+                                    i === data.posts.length - 1 ? <Separator /> : null
+                                }
+                            </React.Fragment>
+                        );
+                    })
+                }
+            </div>
         </div>
     )
 }

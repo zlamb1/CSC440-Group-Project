@@ -35,9 +35,8 @@ export async function action({ context, request } : ActionFunctionArgs) {
 
 export default function LoginPortal() {
     return (
-        <div className="mx-8 sm:mx-16 md:mx-32 lg:mx-48 xl:mx-64 flex-grow flex gap-32 justify-center items-center">
+        <div className="flex-grow flex gap-32 justify-center">
             <LoginForm header="Sign in to Stories" submit="Log In" icon={<Lock className="text-primary" />} />
-            <span className="font-bold text-lg select-none">--OR--</span>
             <LoginForm header="Register for Stories" submit="Register" icon={<Key className="text-primary" />} action="/register" />
         </div>
     )

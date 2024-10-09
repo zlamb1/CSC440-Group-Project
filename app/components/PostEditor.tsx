@@ -17,27 +17,6 @@ import {Placeholder} from "@tiptap/extension-placeholder";
 
 const lowlight = createLowlight(all);
 
-const editorExtensions = [
-    Document,
-    Paragraph,
-    Text,
-    Image,
-    Dropcursor,
-    CodeBlockLowlight.configure({
-        lowlight,
-    }),
-    Youtube.configure({
-        controls: false,
-        nocookie: true
-    }),
-    CharacterCount.configure({
-        limit: 300
-    }),
-    Placeholder.configure({
-        placeholder: 'Write something...'
-    }),
-]
-
 const viewExtensions = [
     Document,
     Paragraph,
@@ -67,20 +46,43 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
             getContent: () => content
         }
     });
+    const extensions = [
+        Document,
+        Paragraph,
+        Text,
+        Image,
+        Dropcursor,
+        CodeBlockLowlight.configure({
+            lowlight,
+        }),
+        Youtube.configure({
+            controls: false,
+            nocookie: true
+        }),
+        CharacterCount.configure({
+            limit: 300
+        }),
+        Placeholder.configure({
+            placeholder: props?.placeholder ?? 'Write something...'
+        }),
+    ]
     return (
         <EditorProvider onUpdate={(evt) => setContent(evt.editor.getHTML())}
-                        extensions={editorExtensions}
+                        extensions={extensions}
                         content={content}
                         editorContainerProps={props?.containerProps}
+                        editorProps={props?.editorProps}
                         immediatelyRender={false}>
         </EditorProvider>
     )
 });
 
-export function PostView({ content, containerProps }: { content: any, containerProps?: any }) {
+export function PostView({ content, containerProps, editorProps }: { content: any, containerProps?: any, editorProps?: any }) {
     return (
         <EditorProvider extensions={viewExtensions}
                         content={content}
+                        editorContainerProps={containerProps}
+                        editorProps={editorProps}
                         editable={false}
                         immediatelyRender={false}>
         </EditorProvider>

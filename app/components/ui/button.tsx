@@ -39,11 +39,12 @@ export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>,
         VariantProps<typeof buttonVariants> {
     asChild?: boolean,
+    containerClass?: string,
     noClickAnimation?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({className, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
+    ({className, containerClass, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
         const Comp = asChild ? Slot : "button"
         const RippleProps = useRipple(props);
         const [scope, animate] = useAnimate();
@@ -56,7 +57,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             }
         }
         return (
-            <motion.div ref={scope}>
+            <motion.div className={containerClass} ref={scope}>
                 <Comp onClick={onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props}>
                     <Slottable>{children}</Slottable>
                     <Ripple {...RippleProps} />

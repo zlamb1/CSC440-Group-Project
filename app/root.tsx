@@ -86,9 +86,10 @@ export function ErrorBoundary() {
 
 export default function App() {
     const outlet = useOutlet();
+    const { pathname } = useLocation();
     return (
         <AnimatePresence mode="wait" initial={false}>
-            <motion.main key={useLocation().pathname}
+            <motion.main key={pathname}
                          className="w-full flex justify-center"
                          initial={{ opacity: 0 }}
                          animate={{ opacity: 1 }}
