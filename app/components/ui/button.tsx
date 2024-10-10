@@ -39,27 +39,29 @@ const buttonVariants = cva(
 export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>,
         VariantProps<typeof buttonVariants> {
+    onClick?: (evt: React.MouseEvent<HTMLButtonElement>) => void,
     asChild?: boolean,
     containerClass?: string,
     noClickAnimation?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({className, containerClass, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
+    ({className, onClick, containerClass, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
         const Comp = asChild ? Slot : "button"
         const RippleProps = useRipple(props);
         const [scope, animate] = useAnimate();
-        const onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
+        const _onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
             RippleProps.onClick(evt);
             if (!noClickAnimation) {
                 animate(scope.current, {
                     scale: [ 0.9, 1 ]
                 });
             }
+            if (onClick) onClick(evt);
         }
         return (
-            <motion.div className={containerClass} ref={scope}>
-                <Comp onClick={onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props}>
+            <motion.div className={containerClass ?? "w-fit"} ref={scope}>
+                <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props}>
                     <Slottable>{children}</Slottable>
                     <Ripple {...RippleProps} />
                 </Comp>

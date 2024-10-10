@@ -1,15 +1,19 @@
 import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
-import React from "react";
+import React, { createRef, useEffect, useState } from "react";
 import {EllipsisVerticalIcon, TrashIcon} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {useIsPresent} from "framer-motion";
+import useOverflow from "@/utils/useOverflow";
 
 function Post({ className, post, user }: { className?: string, post: any, user: any }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
+    const [ isExpanded, setExpanded ] = useState(false); 
+    const ref = createRef<HTMLDivElement>();
+    const isOverflowing = useOverflow(ref, true, () => {}); 
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
     return (
         <div className={"flex gap-3 " + className} key={post.id}>
@@ -44,8 +48,15 @@ function Post({ className, post, user }: { className?: string, post: any, user: 
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <div className="ml-10">
-                    <div className="break-all" dangerouslySetInnerHTML={{__html: post.content}} />
+                <div className="ml-10 flex flex-col gap-2">
+                    <div className={`break-all max-h-[200px] ${isExpanded ? 'overflow-y-scroll' : 'overflow-y-hidden'}`} dangerouslySetInnerHTML={{__html: post.content}} ref={ref} />
+                    {
+                        isOverflowing || isExpanded ? (
+                            <Button containerClass="self-center" onClick={ () => setExpanded(!isExpanded) } variant="ghost">
+                                {isExpanded ? 'Show less...' : 'Show more...'}
+                            </Button>
+                        ) : null
+                    }
                 </div>
             </div>
         </div>
