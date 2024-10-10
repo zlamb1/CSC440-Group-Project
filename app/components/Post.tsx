@@ -1,7 +1,6 @@
 import UserAvatar from "@components/UserAvatar";
-import {PostView} from "@components/PostEditor";
 import {Button} from "@ui/button";
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {EllipsisVerticalIcon, TrashIcon} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {useFetcher} from "@remix-run/react";
@@ -9,13 +8,8 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {useIsPresent} from "framer-motion";
 
 function Post({ className, post, user }: { className?: string, post: any, user: any }) {
-    const [ isExpanded, setExpanded ] = useState(false);
-    const [ isMounted, setMounted ] = useState(false);
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
-    useEffect(() => {
-        setMounted(true);
-    }, []);
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
     return (
         <div className={"flex gap-3 " + className} key={post.id}>
@@ -51,11 +45,7 @@ function Post({ className, post, user }: { className?: string, post: any, user: 
                     </DropdownMenu>
                 </div>
                 <div className="ml-10">
-                    <PostView editorProps={{ attributes: { class: 'break-all' } }}
-                              content={post.content}
-                              isExpanded={isExpanded}
-                              onExpand={(isExpanded) => setExpanded(isExpanded)}
-                    />
+                    <div className="break-all" dangerouslySetInnerHTML={{__html: post.content}} />
                 </div>
             </div>
         </div>

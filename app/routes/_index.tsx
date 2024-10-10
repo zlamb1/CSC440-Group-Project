@@ -9,6 +9,7 @@ import UserAvatar from "@components/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import useIsSSR from "@/utils/useIsSSR";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     const posts = await context.db.getPublicPosts();
@@ -17,6 +18,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 export default function Index() {
     const [ editorProgress, setEditorProgress ] = useState(0);
+    const isSSR = useIsSSR(); 
     const data = useLoaderData<typeof loader>();
     const createFetcher = useFetcher();
     const ref = React.createRef<PostEditorElement>();
@@ -55,20 +57,19 @@ export default function Index() {
                             <ProgressCircle percentage={ editorProgress } />
                             <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>
                                 {
-                                    createFetcher.state === 'idle' ? <>Post</> :
-                                        <LoadingSpinner />
+                                    createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner />
                                 }
                             </Button>
                         </div>
                     </Form>
                 ) : null
             }
-            <AnimatePresence>
+            <AnimatePresence initial={!isSSR}>
                 {
                     data?.posts.map((post: any) => {
                         return (
-                            <motion.div initial={{ opacity: 0.25 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
+                            <motion.div initial={{ opacity: 0.25, transform: 'translateX(-10px)' }}
+                                        animate={{ opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
                                         exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
                                         transition={{ duration: 0.2 }}
                                         key={post.id}>
