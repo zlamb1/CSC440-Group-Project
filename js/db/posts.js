@@ -97,7 +97,7 @@ DBClient.prototype.getPost = async function(postId) {
 DBClient.prototype.getPublicPosts = async function() {
     try {
         const res = await client.query('SELECT posts.id, posts.poster_id, posts.posted_at, posts.content, users.user_name ' +
-            `FROM posts INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public';`);
+            `FROM posts INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' ORDER BY posts.posted_at DESC;`);
         return res.rows.map(formatPost((row, data) => ({ ...data, userName: row.user_name })))
     } catch (err) {
         console.error('getPublicPosts: ', err);
