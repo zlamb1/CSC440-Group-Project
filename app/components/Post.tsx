@@ -16,6 +16,7 @@ function Post({ className, post, user }: { className?: string, post: any, user: 
     const ref = createRef<HTMLDivElement>();
     const isOverflowing = useOverflow(ref, true, () => {});
     useEffect(() => {
+        highlight.safeMode();
         highlight.highlightAll();
     }, []);
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
