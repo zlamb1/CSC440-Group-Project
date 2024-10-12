@@ -8,6 +8,8 @@ export async function tryDatabaseAction(fn: Function) {
         if (err?.name == 'DBError') {
             // @ts-ignore
             return json(err?.data);
+        } else {
+            console.error(err)
         }
         return json({ error: 'Unknown error.' });
     }
