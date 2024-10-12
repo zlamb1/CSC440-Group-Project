@@ -1,12 +1,10 @@
-import {Computer, FileQuestion, Laptop, Moon, Sun} from "lucide-react";
+import {Laptop, Moon, Sun} from "lucide-react";
 import {themes, useTheme} from "@/utils/prefers-color-scheme";
 import {useEffect, useState} from "react";
 import React from "react";
 import {
     DropdownMenu,
-    DropdownMenuContent, DropdownMenuPortal,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
+    DropdownMenuContent,
     DropdownMenuTrigger
 } from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
@@ -82,7 +80,7 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
                 {
                     themes.map((theme, index) => (
                         <React.Fragment key={theme}>
-                            <Button className="flex flex-row w-full justify-between" variant="ghost" onClick={() => onClick(theme)} noClickAnimation>
+                            <Button containerClass="w-full" className="flex flex-row w-full justify-between" variant="ghost" onClick={() => onClick(theme)} noClickAnimation>
                                 {theme.charAt(0).toUpperCase() + theme.substring(1)}
                                 {React.createElement(themeIcons[theme], {})}
                             </Button>
