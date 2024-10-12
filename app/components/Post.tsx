@@ -1,13 +1,12 @@
 import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
-import React, { createRef, useEffect, useState } from "react";
+import React, { createRef, useState } from "react";
 import {EllipsisVerticalIcon, TrashIcon} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {useIsPresent} from "framer-motion";
 import useOverflow from "@/utils/useOverflow";
-import highlight from "highlight.js";
 
 function Post({ className, post, user }: { className?: string, post: any, user: any }) {
     const fetcher = useFetcher();
@@ -15,10 +14,6 @@ function Post({ className, post, user }: { className?: string, post: any, user: 
     const [ isExpanded, setExpanded ] = useState(false); 
     const ref = createRef<HTMLDivElement>();
     const isOverflowing = useOverflow(ref, true, () => {});
-    useEffect(() => {
-        highlight.safeMode();
-        highlight.highlightAll();
-    }, []);
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
     return (
         <div className={"flex gap-3 " + className} key={post.id}>

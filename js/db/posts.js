@@ -1,5 +1,7 @@
 import client, {DBClient, DBError} from "./db.js";
 import sanitizeHtml from 'sanitize-html';
+import highlight from "highlight.js";
+import jsdom from "jsdom";
 
 function sanitizeContent(content) {
     return sanitizeHtml(content, {
@@ -34,6 +36,15 @@ function ensureContentLength(content) {
     }
 }
 
+function processCodeBlocks(htmlContent) {
+    const dom = new jsdom.JSDOM(htmlContent);
+    dom.window.document.querySelectorAll('pre code').forEach((el) => {
+        // @ts-ignore
+        highlight.highlightElement(el);
+    });
+    return dom.window.document.body.innerHTML;
+}
+
 function formatPost(rowOrFn) {
     if (typeof rowOrFn === 'function') {
         return (row) => {
@@ -41,7 +52,7 @@ function formatPost(rowOrFn) {
                 id: row.id,
                 poster: row.poster_id,
                 postedAt: row.posted_at,
-                content: row.content
+                content: processCodeBlocks(row.content),
             });
         }
     }
@@ -49,7 +60,7 @@ function formatPost(rowOrFn) {
         id: rowOrFn.id,
         poster: rowOrFn.poster_id,
         postedAt: rowOrFn.posted_at,
-        content: rowOrFn.content
+        content: processCodeBlocks(rowOrFn.content),
     }
 }
 
@@ -68,8 +79,6 @@ DBClient.prototype.createPost = async function(userId, content) {
             if ((err = ensureContentLength(sanitizedContent))) {
                 return reject(new DBError(err));
             }
-            console.log('content', content);
-            console.log('sanitized', sanitizedContent);
             await client.query('INSERT INTO posts (poster_id, content) VALUES ($1, $2);', [userId, sanitizedContent]);
             return resolve();
         } catch (err) {
