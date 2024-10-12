@@ -14,7 +14,7 @@ function PostContextMenu({ post, user, onEdit }: { post: any, user: any, onEdit?
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
-    if (post.poster !== user.id) {
+    if (post.posterId !== user.id) {
         return null;
     }
     function onClickEdit() {
@@ -25,7 +25,7 @@ function PostContextMenu({ post, user, onEdit }: { post: any, user: any, onEdit?
     }
     return (
         <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)}  modal={false}>
-            <DropdownMenuTrigger className={post.poster !== user.id ? 'hidden' : ''} asChild>
+            <DropdownMenuTrigger className={post.posterId !== user.id ? 'hidden' : ''} asChild>
                 <Button className="rounded-full w-[25px] h-[25px]" variant="ghost" size="icon">
                     <EllipsisVerticalIcon className="w-[20px] h-[20px]" />
                 </Button>

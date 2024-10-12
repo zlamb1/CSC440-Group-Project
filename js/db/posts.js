@@ -1,4 +1,4 @@
-import client, {DBClient, DBError} from "./db.js";
+import client, {DBClient, DBError, validateUUID} from "./db.js";
 import sanitizeHtml from 'sanitize-html';
 import highlight from "highlight.js";
 import jsdom from "jsdom";
@@ -53,7 +53,7 @@ function formatPost(rowOrFn) {
         return (row) => {
             return rowOrFn(row, {
                 id: row.id,
-                poster: row.poster_id,
+                posterId: row.poster_id,
                 postedAt: row.posted_at,
                 content: processCodeBlocks(row.content),
             });
@@ -61,7 +61,7 @@ function formatPost(rowOrFn) {
     }
     return {
         id: rowOrFn.id,
-        poster: rowOrFn.poster_id,
+        posterId: rowOrFn.poster_id,
         postedAt: rowOrFn.posted_at,
         content: processCodeBlocks(rowOrFn.content),
     }
@@ -86,15 +86,18 @@ DBClient.prototype.createPost = async function(userId, content) {
             return resolve();
         } catch (err) {
             console.error('createPost: ', err);
-            return reject(new DBError());
+            return new DBError();
         }
     });
 }
 
-DBClient.prototype.getPost = async function(postId) {
+DBClient.prototype.getPost = async function(id) {
+    if (!validateUUID(id)) {
+        throw new DBError("Invalid post id.");
+    }
     return new Promise(async (resolve, reject) => {
         try {
-            const res = await client.query('SELECT * FROM posts WHERE id = $1;', [postId]);
+            const res = await client.query('SELECT * FROM posts WHERE id = $1;', [id]);
             if (res.rows.length === 0) {
                 return reject(new DBError('Post not found.'));
             }
@@ -106,10 +109,23 @@ DBClient.prototype.getPost = async function(postId) {
     });
 }
 
+DBClient.prototype.getReplies = async function(id) {
+    if (!validateUUID(id)) {
+        throw new DBError("Invalid post id.");
+    }
+    try {
+        const res = await client.query('SELECT * FROM posts WHERE reply_to = $1;', [id]);
+        return res.rows.map(formatPost((row, data) => ({ ...data })));
+    } catch (err) {
+        console.error('getPostWithReplies: ' , err);
+        throw new DBError();
+    }
+}
+
 DBClient.prototype.getPublicPosts = async function() {
     try {
-        const res = await client.query('SELECT posts.id, posts.poster_id, posts.posted_at, posts.content, users.user_name ' +
-            `FROM posts INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' ORDER BY posts.posted_at DESC;`);
+        const res = await client.query('SELECT posts.id, posts.poster_id, posts.posted_at, posts.content, posts.reply_to, posts.likes, posts.dislikes, users.user_name ' +
+            `FROM posts INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' WHERE posts.reply_to IS NULL ORDER BY posts.posted_at DESC;`);
         return res.rows.map(formatPost((row, data) => ({ ...data, userName: row.user_name })))
     } catch (err) {
         console.error('getPublicPosts: ', err);

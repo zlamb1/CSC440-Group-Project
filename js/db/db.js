@@ -48,4 +48,11 @@ export function throwDBError(errors) {
     }
 }
 
+export function validateUUID(uuid) {
+    if (typeof uuid !== 'string') {
+        return false;
+    }
+    return uuid.match(/^{?([0-9a-fA-F]{4}-?){8}}?$/)?.length > 0;
+}
+
 export default client;
