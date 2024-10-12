@@ -55,7 +55,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
     ];
     const editor = useEditor({
         extensions: extensions,
-        content: '',
+        content: props?.content ?? '',
         editable: props?.editable,
         editorProps: props?.editorProps,
         immediatelyRender: false
@@ -74,11 +74,3 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
         </div>
     )
 });
-
-export interface PostViewProps {
-    content?: string,
-    editorProps?: any,
-    containerClass?: string,
-    isExpanded?: boolean,
-    onExpand?: (isExpanded: boolean) => void,
-}
