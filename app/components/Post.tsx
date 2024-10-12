@@ -25,7 +25,7 @@ function Post({ className, post, user }: { className?: string, post: any, user: 
                     </div>
                     <DropdownMenu modal={false}>
                         <DropdownMenuTrigger className={post.poster !== user.id ? 'hidden' : ''} asChild>
-                            <Button className="rounded-full" variant="ghost" size="icon">
+                            <Button className="rounded-full w-[25px] h-[25px]" variant="ghost" size="icon">
                                 <EllipsisVerticalIcon className="w-[20px] h-[20px]" />
                             </Button>
                         </DropdownMenuTrigger>
