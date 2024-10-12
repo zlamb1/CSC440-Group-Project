@@ -1,6 +1,19 @@
 import bcrypt from "bcrypt";
 import client, {DBClient, DBError, throwDBError} from "./db.js";
 
+function formatUser(data) {
+    return {
+        id: data.id,
+        userName: data.user_name,
+        joinedAt: data.joined_at,
+        avatarPath: data.avatar_path,
+        role: data.role,
+        privacyStatus: data.privacy_status,
+        displayName: data.display_name,
+        bio: data.bio,
+    }
+}
+
 DBClient.prototype.isUsernameAvailable = async function(username) {
     try {
         const res = await client.query('SELECT id FROM users WHERE user_name = $1;', [username]);
@@ -82,7 +95,7 @@ export async function getUser(id) {
             if (res.rows.length === 0) {
                 return reject(new DBError('User not found.'));
             }
-            return resolve(res.rows[0]);
+            return resolve(formatUser(res.rows[0]));
         } catch (err) {
             console.error('getUser: ', err);
             return reject(new DBError());
@@ -91,3 +104,18 @@ export async function getUser(id) {
 }
 
 DBClient.prototype.getUser = getUser;
+
+DBClient.prototype.getUserByUsername = async function(userName) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const res = await client.query(`SELECT * FROM users WHERE user_name = $1 AND (id = '${this.user.id}' OR privacy_status = 'public');`, [userName]);
+            if (res.rows.length === 0) {
+                return reject(new DBError('User not found.'));
+            }
+            return resolve(formatUser(res.rows[0]));
+        } catch (err) {
+            console.error('getUserByUsername: ', err);
+            return reject(new DBError());
+        }
+    });
+}
