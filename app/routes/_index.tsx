@@ -29,7 +29,7 @@ export default function Index() {
             formData.set('content', ref.current?.getContent());
             createFetcher.submit(formData, {
                 method: 'POST',
-                action: '/create-post',
+                action: '/posts/create',
             });
         }
     }
@@ -67,7 +67,7 @@ export default function Index() {
             <Separator />
             <AnimatePresence initial={!isSSR}>
                 {
-                    data?.posts.map((post: any, i: number) => {
+                    data?.posts.map((post: any) => {
                         return <Fragment key={post.id}>
                             <motion.div initial={{ opacity: 0.25, transform: 'translateX(-10px)' }}
                                         animate={{ opacity: 1, height: 'auto', transform: 'translateX(0px)' }}

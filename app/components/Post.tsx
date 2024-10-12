@@ -37,8 +37,7 @@ function PostContextMenu({ post, user, onEdit }: { post: any, user: any, onEdit?
                         <span className="flex-grow text-left text-blue-400">Edit</span>
                     </Button>
                 </div>
-                <fetcher.Form action="/delete-post" method="post">
-                    <input name="id" className="hidden" readOnly value={post.id}/>
+                <fetcher.Form action={`/posts/delete/${post.id}`} method="POST">
                     <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-red-600 hover:text-red-500"
                             variant="ghost" disabled={isTransitioning}>
                         {
