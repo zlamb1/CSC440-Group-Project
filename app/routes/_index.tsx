@@ -2,7 +2,7 @@ import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {json, LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/PostEditor";
-import React, {FormEvent, useEffect, useState} from "react";
+import React, {FormEvent, Fragment, useEffect, useState} from "react";
 import Post from "@components/Post";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/UserAvatar";
@@ -64,18 +64,19 @@ export default function Index() {
                     </Form>
                 ) : null
             }
+            <Separator />
             <AnimatePresence initial={!isSSR}>
                 {
-                    data?.posts.map((post: any) => {
-                        return (
+                    data?.posts.map((post: any, i: number) => {
+                        return <Fragment key={post.id}>
                             <motion.div initial={{ opacity: 0.25, transform: 'translateX(-10px)' }}
                                         animate={{ opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
                                         exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
-                                        transition={{ duration: 0.2 }}
-                                        key={post.id}>
+                                        transition={{ duration: 3 }}>
                                 <Post className="p-3 px-5" post={post} user={data?.user} />
                             </motion.div>
-                        );
+                            <Separator />
+                        </Fragment>
                     })
                 }
             </AnimatePresence>
