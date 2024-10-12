@@ -8,12 +8,11 @@ import {LogIn, LogOut, MessageCircleCode, PersonStanding, Settings, TrashIcon, U
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
 import {HamburgerMenuIcon} from "@radix-ui/react-icons";
-import React from "react";
+import React, {useState} from "react";
 import UserAvatar from "@components/UserAvatar";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import {DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {Separator} from "@ui/separator";
 
 export interface NavBarProps {
     ssrColorScheme?: string;
@@ -22,7 +21,7 @@ export interface NavBarProps {
 
 export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
     const logoutFetcher = useFetcher();
-    const [ isOpen, setOpen ] = React.useState(false);
+    const [ isOpen, setOpen ] = useState(false);
     const links = [
         { text: 'Link 1', to: '/test1' },
         { text: 'Link 2', to: '/test2' },

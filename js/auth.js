@@ -38,7 +38,10 @@ export async function useUserData(req, res){
             userName: data.user_name,
             joinedAt: data.joined_at,
             avatarPath: data.avatar_path,
+            role: data.role,
             privacyStatus: data.privacy_status,
+            displayName: data.display_name,
+            bio: data.bio,
         },
         session,
     }
