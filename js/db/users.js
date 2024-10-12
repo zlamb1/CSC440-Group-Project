@@ -108,7 +108,8 @@ DBClient.prototype.getUser = getUser;
 DBClient.prototype.getUserByUsername = async function(userName) {
     return new Promise(async (resolve, reject) => {
         try {
-            const res = await client.query(`SELECT * FROM users WHERE user_name = $1 AND (id = '${this.user.id}' OR privacy_status = 'public');`, [userName]);
+            const res = await client.query(`SELECT * FROM users WHERE user_name = $1 AND (${this.user.loggedIn ? 'id = $2 OR ' : ''}privacy_status = 'public');`,
+                this.user.loggedIn ? [userName, this.user.id] : [userName]);
             if (res.rows.length === 0) {
                 return reject(new DBError('User not found.'));
             }
