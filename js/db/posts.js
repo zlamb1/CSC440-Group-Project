@@ -41,6 +41,9 @@ function processCodeBlocks(htmlContent) {
     dom.window.document.querySelectorAll('pre code').forEach((el) => {
         // @ts-ignore
         highlight.highlightElement(el);
+        if (el?.dataset?.highlighted) {
+            delete el.dataset.highlighted;
+        }
     });
     return dom.window.document.body.innerHTML;
 }
