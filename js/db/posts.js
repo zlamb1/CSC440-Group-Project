@@ -4,12 +4,14 @@ import sanitizeHtml from 'sanitize-html';
 function sanitizeContent(content) {
     return sanitizeHtml(content, {
         allowedAttributes: {
-            code: [ 'class' ]
+            code: [ 'class' ],
+            span: [ 'class' ],
         },
         allowedClasses: {
-            'code': [ 'language-*', 'lang-*' ]
+            'code': [ 'language-*', 'lang-*' ],
+            'span': [ 'hljs-*' ],
         },
-        allowedTags: [ 'pre', 'code', 'p' ],
+        allowedTags: [ 'pre', 'code', 'p', 'span' ],
     });
 }
 
@@ -66,6 +68,8 @@ DBClient.prototype.createPost = async function(userId, content) {
             if ((err = ensureContentLength(sanitizedContent))) {
                 return reject(new DBError(err));
             }
+            console.log('content', content);
+            console.log('sanitized', sanitizedContent);
             await client.query('INSERT INTO posts (poster_id, content) VALUES ($1, $2);', [userId, sanitizedContent]);
             return resolve();
         } catch (err) {

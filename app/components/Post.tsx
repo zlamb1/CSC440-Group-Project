@@ -7,13 +7,17 @@ import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {useIsPresent} from "framer-motion";
 import useOverflow from "@/utils/useOverflow";
+import highlight from "highlight.js";
 
 function Post({ className, post, user }: { className?: string, post: any, user: any }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isExpanded, setExpanded ] = useState(false); 
     const ref = createRef<HTMLDivElement>();
-    const isOverflowing = useOverflow(ref, true, () => {}); 
+    const isOverflowing = useOverflow(ref, true, () => {});
+    useEffect(() => {
+        highlight.highlightAll();
+    }, []);
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
     return (
         <div className={"flex gap-3 " + className} key={post.id}>

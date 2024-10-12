@@ -11,9 +11,10 @@ import Text from '@tiptap/extension-text'
 import {Youtube} from "@tiptap/extension-youtube";
 import {all, createLowlight} from "lowlight";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import React, {useImperativeHandle} from "react";
+import React, {useImperativeHandle, useRef} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
+import highlight from 'highlight.js';
 
 const lowlight = createLowlight(all);
 
