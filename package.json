@@ -6,10 +6,8 @@
   "type": "module",
   "scripts": {
     "server": "node index.js",
-    "live-server": "node js/live_server/live_server.js",
     "build": "remix vite:build",
     "dev": "cross-env NODE_ENV=development npm run server",
-    "testing": "cross-env NODE_ENV=production SERVER_UNPRIV=true npm-run-all --serial build server",
     "start": "cross-env NODE_ENV=production npm-run-all --serial build server"
   },
   "repository": {
