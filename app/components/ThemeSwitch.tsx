@@ -13,6 +13,7 @@ import {Button} from "@ui/button";
 import {AnimatePresence} from "framer-motion";
 import {Separator} from "@ui/separator";
 import {motion} from 'framer-motion';
+import useIsSSR from "@/utils/useIsSSR";
 
 interface ThemeIcons {
     [index: string]: React.FunctionComponent
@@ -30,14 +31,10 @@ const colorSchemeIcons = {
 }
 
 export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any }) {
-    const [isSSR, setSSR] = useState(false);
-    useEffect(() => {
-        // is server-side rendered
-        setSSR(true);
-    });
-    const [counter, setCounter] = useState(0);
-    const [isOpen, setIsOpen] = useState(false);
+    const [ counter, setCounter ] = useState(0);
+    const [ isOpen, setIsOpen ] = useState(false);
     const { themeStore, setTheme } = useTheme();
+    const isSSR = useIsSSR(); 
     useEffect(() => {
         setCounter(counter + 1);
     }, [themeStore]);

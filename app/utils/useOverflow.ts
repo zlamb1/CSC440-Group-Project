@@ -5,17 +5,19 @@ import {useLayoutEffect, useState} from "react";
 const useOverflow = (ref: any, vertical: boolean, callback: Function) => {
     const [isOverflowed, setOverflowed] = useState<boolean | undefined>(undefined);
     // suppress SSR warning
-    if (typeof document !== "undefined" && ref?.current) {
+    if (typeof document !== "undefined") {
         useLayoutEffect(() => {
-            const { current } = ref;
-            const { clientWidth, scrollWidth, clientHeight, scrollHeight } = current;
-            const trigger = () => {
-                const hasOverflow = vertical ? scrollHeight > clientHeight : scrollWidth > clientWidth;
-                setOverflowed(hasOverflow);
-                if (callback) callback(hasOverflow);
-            };
-            if (current) {
-                trigger();
+            if (ref?.current) {
+                const { current } = ref;
+                const { clientWidth, scrollWidth, clientHeight, scrollHeight } = current;
+                const trigger = () => {
+                    const hasOverflow = vertical ? scrollHeight > clientHeight : scrollWidth > clientWidth;
+                    setOverflowed(hasOverflow);
+                    if (callback) callback(hasOverflow);
+                };
+                if (current) {
+                    trigger();
+                }
             }
         }, [callback, ref, vertical]);
     }

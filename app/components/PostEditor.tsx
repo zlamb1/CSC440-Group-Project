@@ -11,34 +11,13 @@ import Text from '@tiptap/extension-text'
 import {Youtube} from "@tiptap/extension-youtube";
 import {all, createLowlight} from "lowlight";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import React, {createRef, forwardRef, useImperativeHandle, useState} from "react";
+import React, {useImperativeHandle} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
-import useOverflow from "@/utils/useOverflow";
-import {Button} from "@ui/button";
-import UserAvatar from "@components/UserAvatar";
 
 const lowlight = createLowlight(all);
 
 const characterCountLimit = 300;
-
-const viewExtensions = [
-    Document,
-    Paragraph,
-    Text,
-    Image,
-    Dropcursor,
-    CodeBlockLowlight.configure({
-        lowlight,
-    }),
-    Youtube.configure({
-        controls: false,
-        nocookie: true
-    }),
-    CharacterCount.configure({
-        limit: characterCountLimit
-    }),
-]
 
 export interface PostEditorElement {
     getContent: () => string;
@@ -101,37 +80,4 @@ export interface PostViewProps {
     containerClass?: string,
     isExpanded?: boolean,
     onExpand?: (isExpanded: boolean) => void,
-}
-
-export function PostView({ content, editorProps, containerClass, isExpanded = false, onExpand = () => {} }: PostViewProps) {
-    const editor = useEditor({
-        extensions: viewExtensions,
-        content: content,
-        editorProps: editorProps,
-        editable: false,
-        immediatelyRender: false
-    });
-    const ref = createRef<HTMLDivElement>();
-    const isOverflowed = useOverflow(ref, true, () => {});
-    function onClick(isExpanded: boolean) {
-        onExpand(isExpanded);
-    }
-    return (
-        <div className="flex flex-col gap-1">
-            <div className={isExpanded ? '' : 'max-h-[200px] overflow-y-hidden'} ref={ref}>
-                <EditorContext.Provider value={{editor}}>
-                    <EditorContent className={containerClass} editor={editor} />
-                </EditorContext.Provider>
-            </div>
-            {
-                (isOverflowed && !isExpanded) ?
-                <Button containerClass="w-fit" variant="ghost" onClick={() => onClick(true)}>Show
-                    post...</Button> : null
-            }
-            {
-                (isExpanded) ?
-                    <Button containerClass="w-fit" variant="ghost" onClick={() => onClick(false)}>Hide post</Button> : null
-            }
-        </div>
-    );
 }
