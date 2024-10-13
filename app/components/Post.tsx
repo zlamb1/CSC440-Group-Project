@@ -1,7 +1,7 @@
 import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
 import React, { createRef, useState } from "react";
-import {Edit, Edit2, EllipsisVerticalIcon, Trash, TrashIcon} from "lucide-react";
+import {Edit2, EllipsisVerticalIcon, Trash} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";

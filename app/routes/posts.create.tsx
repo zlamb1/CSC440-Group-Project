@@ -1,6 +1,10 @@
 import {ActionFunctionArgs, json} from "@remix-run/node";
 import {tryDatabaseAction} from "@/utils/database-error";
 
+export async function loader() {
+    return json({});
+}
+
 export async function action({context, request}: ActionFunctionArgs) {
     return await tryDatabaseAction(async () => {
         if (!context.user.loggedIn) {
