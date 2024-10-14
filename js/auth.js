@@ -2,7 +2,7 @@ import {createCookie, createSessionStorage} from "@remix-run/node";
 import {createData, deleteData, readData, updateData} from "./db/sessions.js";
 import {getUser} from "./db/users.js";
 
-const cookie = createCookie('__session', {
+export const cookie = createCookie('__session', {
     httpOnly: true,
     // lasts three days
     maxAge: 60 * 60 * 24 * 3,

@@ -56,6 +56,10 @@ function formatPost(rowOrFn) {
                 posterId: row.poster_id,
                 postedAt: row.posted_at,
                 content: processCodeBlocks(row.content),
+                replyTo: row.reply_to,
+                likeCount: row.like_count,
+                tags: row.tags,
+                replyCount: row.reply_count,
             });
         }
     }
@@ -64,12 +68,19 @@ function formatPost(rowOrFn) {
         posterId: rowOrFn.poster_id,
         postedAt: rowOrFn.posted_at,
         content: processCodeBlocks(rowOrFn.content),
+        replyTo: rowOrFn.reply_to,
+        likeCount: rowOrFn.like_count,
+        tags: rowOrFn.tags,
+        replyCount: rowOrFn.reply_count,
     }
 }
 
 DBClient.prototype.createPost = async function(userId, content) {
     if (!content || typeof content !== 'string' || content.length === 0) {
         throw new DBError('Post content is required.');
+    }
+    if (!(await this.checkAuth())) {
+        throw new DBError({ error: 'Unauthorized' });
     }
     return new Promise(async (resolve, reject) => {
         try {
@@ -97,7 +108,7 @@ DBClient.prototype.getPost = async function(id) {
     }
     return new Promise(async (resolve, reject) => {
         try {
-            const res = await client.query('SELECT * FROM posts WHERE id = $1;', [id]);
+            const res = await client.query('SELECT * FROM posts WHERE id = $1', [id]);
             if (res.rows.length === 0) {
                 return reject(new DBError('Post not found.'));
             }
@@ -124,16 +135,26 @@ DBClient.prototype.getReplies = async function(id) {
 
 DBClient.prototype.getPublicPosts = async function() {
     try {
-        const res = await client.query('SELECT posts.id, posts.poster_id, posts.posted_at, posts.content, posts.reply_to, posts.likes, posts.dislikes, users.user_name ' +
-            `FROM posts INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' WHERE posts.reply_to IS NULL ORDER BY posts.posted_at DESC;`);
-        return res.rows.map(formatPost((row, data) => ({ ...data, userName: row.user_name })))
+        const res = await client.query(
+            'SELECT posts.*, users.user_name, post_likes.liked FROM posts ' +
+            `INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' ` +
+            'LEFT JOIN post_likes ON post_likes.post_id = posts.id AND post_likes.user_id = $1 ' +
+            'WHERE posts.reply_to IS NULL ORDER BY posts.posted_at DESC;',
+            [this.user?.id]
+        );
+        return res.rows.map(formatPost((row, data) => ({ ...data, liked: row?.liked, userName: row?.user_name })))
     } catch (err) {
         console.error('getPublicPosts: ', err);
         throw new DBError();
     }
 }
 
+
+
 DBClient.prototype.editPost = async function(userId, postId, content) {
+    if (!(await this.checkAuth())) {
+        throw new DBError({ error: 'Unauthorized' });
+    }
     return new Promise(async (resolve, reject) => {
         try {
             const sanitizedContent = sanitizeContent(content);
@@ -155,6 +176,9 @@ DBClient.prototype.editPost = async function(userId, postId, content) {
 }
 
 DBClient.prototype.deletePost = async function deletePost(userId, postId) {
+    if (!(await this.checkAuth())) {
+        throw new DBError({ error: 'Unauthorized' });
+    }
     return new Promise(async (resolve, reject) => {
         try {
             const res = await client.query('DELETE FROM posts WHERE posts.id = $1 AND posts.poster_id = $2 RETURNING id;', [postId, userId]);

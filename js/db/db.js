@@ -23,6 +23,22 @@ export class DBClient {
         this.user = user;
         this.session = session;
     }
+
+    async checkAuth(checkSession) {
+        if (!this.session || !this.session.id) {
+            return false;
+        }
+        if (checkSession === undefined || checkSession) {
+            try {
+                const res = await client.query('SELECT id FROM sessions WHERE id = $1', [this.session.id]);
+                return res.rows.length > 0;
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 export class DBError extends Error {
@@ -49,7 +65,7 @@ export function throwDBError(errors) {
 }
 
 export function validateUUID(uuid) {
-    if (typeof uuid !== 'string') {
+    if (typeof uuid !== 'string' || !uuid.length || uuid.length < 32 || uuid.length > 42) {
         return false;
     }
     return uuid.match(/^{?([0-9a-fA-F]{4}-?){8}}?$/)?.length > 0;
