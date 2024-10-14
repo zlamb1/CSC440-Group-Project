@@ -1,7 +1,7 @@
 import {
     Links,
     Meta,
-    Scripts, useLoaderData, useLocation, useOutlet, useRouteError,
+    Scripts, useLoaderData, useLocation, useOutlet, useRouteError, useRouteLoaderData,
 } from "@remix-run/react";
 
 import NavBar from "@components/NavBar";
@@ -38,7 +38,7 @@ export async function loader({context, request}: LoaderFunctionArgs) {
 }
 
 export function Layout({children}: {children: React.ReactNode}) {
-    const data = useLoaderData<typeof loader>();
+    const data = useRouteLoaderData("root");
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
