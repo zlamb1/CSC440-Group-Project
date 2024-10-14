@@ -8,14 +8,7 @@ DBClient.prototype.createPostLike = async function(id, liked) {
         throw new DBError({ error: 'Unauthorized' });
     }
     try {
-        const res = await client.query('SELECT post_id FROM post_likes WHERE post_id = $1 and user_id = $2;', [id, this.user.id]);
-        if (res.rows.length === 0) {
-            await client.query(
-                'INSERT INTO post_likes (post_id, user_id, liked) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;', [id, this.user.id, liked]
-            );
-        } else {
-            await client.query('UPDATE post_likes SET liked = $1 WHERE post_id = $2 AND user_id = $3;', [liked, id, this.user.id]);
-        }
+        await client.query('CALL insert_post_like($1, $2, $3);', [id, this.user.id, liked]);
     } catch (err) {
         console.error('createPostLike: ', err);
         throw new DBError();
