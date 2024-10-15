@@ -1,6 +1,6 @@
 import {Laptop, Moon, Sun} from "lucide-react";
 import {themes, useTheme} from "@/utils/prefers-color-scheme";
-import {useEffect, useState} from "react";
+import {startTransition, Suspense, useEffect, useState} from "react";
 import React from "react";
 import {
     DropdownMenu,
@@ -12,6 +12,7 @@ import {AnimatePresence} from "framer-motion";
 import {Separator} from "@ui/separator";
 import {motion} from 'framer-motion';
 import useIsSSR from "@/utils/useIsSSR";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 interface ThemeIcons {
     [index: string]: React.FunctionComponent
@@ -32,13 +33,14 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
     const [ counter, setCounter ] = useState(0);
     const [ isOpen, setIsOpen ] = useState(false);
     const { themeStore, setTheme } = useTheme();
-    const isSSR = useIsSSR(); 
+    const isSSR = useIsSSR();
     useEffect(() => {
         setCounter(counter + 1);
     }, [themeStore]);
+    if (!ssrColorScheme)
+        return null;
     // @ts-ignore
-    const SchemeIcon = colorSchemeIcons[isSSR ? themeStore.colorScheme : ssrColorScheme] ?? undefined;
-    if (!SchemeIcon) return null;
+    const SchemeIcon = colorSchemeIcons[isSSR ? ssrColorScheme : themeStore.colorScheme] ?? undefined;
     const variants = {
         hidden: {
             y: '100%',

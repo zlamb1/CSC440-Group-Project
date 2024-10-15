@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {startTransition, useEffect, useState} from "react";
 
 export const themeStorageName = 'client-hint-prefers-theme';
 export const colorSchemeStorageName = 'client-hint-prefers-color-scheme';

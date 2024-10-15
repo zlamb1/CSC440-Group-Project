@@ -1,7 +1,7 @@
 import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
 import React, { createRef, useState } from "react";
-import {Edit2, EllipsisVerticalIcon, ThumbsDown, ThumbsUp, Trash} from "lucide-react";
+import {Edit2, EllipsisVerticalIcon, MessageSquare, ThumbsDown, ThumbsUp, Trash} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {Form, useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
@@ -127,7 +127,7 @@ function Post({className, post, user}: { className?: string, post: any, user: an
                                         type="submit"
                                         disabled={!user?.loggedIn}>
                                     <input className="hidden" name="liked" value={ isLiked === true ? 'null' : 'true' } readOnly />
-                                    <ThumbsUp size={16} className={"text-green-400 " + (isLiked === true ? 'fill-green-400' : '')} />
+                                    <ThumbsUp size={16} className={"stroke-primary " + (isLiked === true ? 'fill-primary' : '')} />
                                 </Button>
                             </fetcher.Form>
                             <span className="select-none text-sm font-medium">{likeCount}</span>
@@ -138,9 +138,15 @@ function Post({className, post, user}: { className?: string, post: any, user: an
                                         type="submit"
                                         disabled={!user?.loggedIn}>
                                     <input className="hidden" name="liked" value={ isLiked === false ? 'null' : 'false' } readOnly />
-                                    <ThumbsDown size={16} className={"text-red-400 " + (isLiked === false ? 'fill-red-400' : '')} />
+                                    <ThumbsDown size={16} className={"stroke-primary " + (isLiked === false ? 'fill-primary' : '')} />
                                 </Button>
                             </fetcher.Form>
+                        </div>
+                        <div className="flex items-center gap-1 p-1 rounded-full bg-gray-100 dark:bg-gray-900">
+                            <Button className="h-[25px] flex gap-1 items-center rounded-full" size="icon" variant="ghost">
+                                <MessageSquare size={16} />
+                                <span className="text-bold">{ post.replyCount }</span>
+                            </Button>
                         </div>
                     </div>
                 </div>
