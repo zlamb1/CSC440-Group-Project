@@ -119,3 +119,15 @@ DBClient.prototype.getUserByUsername = async function(userName) {
         }
     });
 }
+
+DBClient.prototype.updateUser = async function(data) {
+    if (!(await this.checkAuth())) {
+        throw new DBError('Unauthorized.');
+    }
+    try {
+        await client.query('UPDATE users SET avatar_path = $1 WHERE id = $2;', [data.avatar, this.user.id]);
+    } catch (err) {
+        console.error('updateUser: ', err);
+        throw new DBError();
+    }
+}

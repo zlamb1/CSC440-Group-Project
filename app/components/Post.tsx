@@ -104,7 +104,7 @@ function Post({className, post, user}: { className?: string, post: any, user: an
             <div className="flex flex-col gap-2 w-full">
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
-                        <UserAvatar userName={post.userName} />
+                        <UserAvatar avatar={post.avatarPath} userName={post.userName} />
                         <span className="font-bold">{post.userName}</span>
                     </div>
                     <PostContextMenu post={post} user={user} onEdit={ () => setEditing(true) } />

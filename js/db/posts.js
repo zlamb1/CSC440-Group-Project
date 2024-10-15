@@ -136,13 +136,13 @@ DBClient.prototype.getReplies = async function(id) {
 DBClient.prototype.getPublicPosts = async function() {
     try {
         const res = await client.query(
-            'SELECT posts.*, users.user_name, post_likes.liked FROM posts ' +
+            'SELECT posts.*, users.user_name, users.avatar_path, post_likes.liked FROM posts ' +
             `INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' ` +
             'LEFT JOIN post_likes ON post_likes.post_id = posts.id AND post_likes.user_id = $1 ' +
             'WHERE posts.reply_to IS NULL ORDER BY posts.posted_at DESC;',
             [this.user?.id]
         );
-        return res.rows.map(formatPost((row, data) => ({ ...data, liked: row?.liked, userName: row?.user_name })))
+        return res.rows.map(formatPost((row, data) => ({ ...data, liked: row?.liked, userName: row?.user_name, avatarPath: row?.avatar_path })))
     } catch (err) {
         console.error('getPublicPosts: ', err);
         throw new DBError();

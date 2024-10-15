@@ -7,9 +7,14 @@ export interface UserAvatarProps {
 
 export default function UserAvatar({ className, avatar, userName, size = 25 }: UserAvatarProps) {
     return (
-        <div className={`flex justify-center items-center bg-primary rounded-full select-none font-medium text-white ` + (className ?? '')}
+        <div className={`flex justify-center items-center ${avatar ? '' : 'bg-primary'} rounded-full select-none font-medium text-white ` + (className ?? '')}
              style={{ width: size, height: size }}>
-            {userName?.substring(0, 1).toUpperCase()}
+            {
+                avatar ?
+                    <img src={avatar} alt="Profile avatar" />
+                    : userName?.substring(0, 1).toUpperCase()
+            }
+
         </div>
     );
 }

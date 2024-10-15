@@ -73,7 +73,7 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
                             <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)} modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon">
-                                        <UserAvatar userName={user?.userName} />
+                                        <UserAvatar avatar={user?.avatarPath} userName={user?.userName} />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="flex flex-col">

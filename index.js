@@ -5,6 +5,9 @@ import {createRequestHandler} from "@remix-run/express";
 import * as vite from "vite";
 import {commitSession, destroySession, getSession, useUserData} from "./js/auth.js";
 import DBClient from './js/db/imports.js';
+import { installGlobals } from "@remix-run/node";
+
+installGlobals();
 
 const isProduction = process.env.NODE_ENV === 'production';
 

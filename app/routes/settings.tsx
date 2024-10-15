@@ -6,28 +6,79 @@ import {Textarea} from "@ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@ui/select";
 import {Button} from "@ui/button";
 import UserAvatar from "@components/UserAvatar";
-import {json, LoaderFunctionArgs} from "@remix-run/node";
-import {Edit} from "lucide-react";
+import {
+    ActionFunctionArgs,
+    json,
+    LoaderFunctionArgs,
+    unstable_parseMultipartFormData
+} from "@remix-run/node";
+import {Edit2} from "lucide-react";
 import { motion } from "framer-motion";
+import {useRef, useState} from "react";
+import {createBase64Src, createImageUploader, getContentType, imageCdn} from "@/utils/image-uploader";
+import * as fs from "node:fs";
+import {tryDatabaseAction} from "@/utils/database-error";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     return json(context?.user);
 }
 
+export async function action({ context, request }: ActionFunctionArgs) {
+    const uploadHandler = createImageUploader({ directory: isProduction ? '/www/data/images' : undefined });
+
+    const formData = await unstable_parseMultipartFormData(
+        request,
+        uploadHandler
+    );
+
+    const file = formData.get("avatar");
+
+    return await tryDatabaseAction(async () => {
+        await context.db.updateUser({
+            avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file.name, file.getFilePath()),
+        });
+        file.remove();
+        return json();
+    });
+}
+
 export default function SettingsRoute() {
     const data = useLoaderData<typeof loader>();
+    const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.avatarPath);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    function onClick() {
+        fileInputRef.current?.click();
+    }
+    function onChangeAvatar() {
+        if (fileInputRef.current) {
+            if (fileInputRef.current?.files && fileInputRef.current.files?.length > 0) {
+                const file = fileInputRef.current.files[0];
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    if (evt?.target) {
+                        // @ts-ignore
+                        setUserAvatar(evt.target.result);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    }
     return (
         <div className="flex-grow flex flex-col gap-3 m-4">
             <span className="text-xl font-medium select-none">Account Settings</span>
             <Separator />
-            <Form className="flex flex-col gap-5">
+            <Form method="POST" encType="multipart/form-data" className="flex flex-col gap-5">
                 <div className="flex items-center gap-3">
-                    <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon">
-                        <UserAvatar size="100%" className="text-2xl" userName={data?.userName} />
+                    <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon" type="button" onClick={ onClick }>
+                        <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.userName} />
                         <motion.div animate={{ opacity: 0 }}
                                     whileHover={{ opacity: 1 }}
-                                    className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-50">
-                            <Edit />
+                                    className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
+                            <Edit2 className="text-white" size={20} />
+                            <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
                         </motion.div>
                     </Button>
                     <Label className="flex-grow flex flex-col gap-2">
@@ -64,7 +115,6 @@ export default function SettingsRoute() {
                         Delete Account
                     </Button>
                 </div>
-
             </Form>
         </div>
     )
