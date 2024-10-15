@@ -12,12 +12,12 @@ import {
     LoaderFunctionArgs,
     unstable_parseMultipartFormData
 } from "@remix-run/node";
-import {Edit2} from "lucide-react";
-import { motion } from "framer-motion";
+import {Edit2, X} from "lucide-react";
+import {AnimatePresence, motion} from "framer-motion";
 import {useRef, useState} from "react";
-import {createBase64Src, createImageUploader, getContentType, imageCdn} from "@/utils/image-uploader";
-import * as fs from "node:fs";
+import {createBase64Src, createImageUploader, imageCdn} from "@/utils/image-uploader";
 import {tryDatabaseAction} from "@/utils/database-error";
+import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -37,10 +37,10 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
     return await tryDatabaseAction(async () => {
         await context.db.updateUser({
-            avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file.name, file.getFilePath()),
+            avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file?.name, file?.getFilePath && file.getFilePath()),
         });
-        file.remove();
-        return json();
+        file?.remove && file.remove();
+        return json({});
     });
 }
 
@@ -66,24 +66,51 @@ export default function SettingsRoute() {
             }
         }
     }
+    function clearAvatar() {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+            setUserAvatar(undefined);
+        }
+    }
     return (
         <div className="flex-grow flex flex-col gap-3 m-4">
             <span className="text-xl font-medium select-none">Account Settings</span>
             <Separator />
             <Form method="POST" encType="multipart/form-data" className="flex flex-col gap-5">
                 <div className="flex items-center gap-3">
-                    <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon" type="button" onClick={ onClick }>
-                        <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.userName} />
-                        <motion.div animate={{ opacity: 0 }}
-                                    whileHover={{ opacity: 1 }}
-                                    className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
-                            <Edit2 className="text-white" size={20} />
-                            <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
-                        </motion.div>
-                    </Button>
+                    <HoverCard>
+                        <HoverCardTrigger asChild>
+                            <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon" type="button" onClick={ onClick }>
+                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.userName} />
+                                <motion.div animate={{ opacity: 0 }}
+                                            whileHover={{ opacity: 1 }}
+                                            className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
+                                    <Edit2 className="text-white" size={20} />
+                                    <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
+                                </motion.div>
+                            </Button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="rounded-full border-0 w-fit h-fit p-0">
+                            <AnimatePresence initial={false}>
+                                {
+                                    userAvatar ?
+                                        <motion.div initial={{opacity: 0}}
+                                                    animate={{opacity: 1}}
+                                                    exit={{opacity: 0}}
+                                                    transition={{duration: 0.5}}>
+                                            <Button className="w-[25px] h-[25px] rounded-full" size="icon" variant="destructive" type="button"
+                                                    onClick={clearAvatar}>
+                                                <X size={16} />
+                                            </Button>
+                                        </motion.div>
+                                        : null
+                                }
+                            </AnimatePresence>
+                        </HoverCardContent>
+                    </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
                         Username
-                        <Input placeholder={data?.userName} />
+                        <Input placeholder={data?.userName}/>
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">

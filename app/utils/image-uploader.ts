@@ -24,6 +24,9 @@ export function getContentType(filename: string) {
 }
 
 export function createBase64Src(filename: string, filepath: string) {
+    if (!filename || !filepath) {
+        return null;
+    }
     return `data:${getContentType(filename)};charset=utf-8;base64,` + fs.readFileSync(filepath, 'base64');
 }
 
