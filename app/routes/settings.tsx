@@ -1,6 +1,6 @@
 import {Separator} from "@ui/separator";
 import {Input} from "@ui/input";
-import {Form, useLoaderData} from "@remix-run/react";
+import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Label} from "@ui/label";
 import {Textarea} from "@ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@ui/select";
@@ -14,7 +14,7 @@ import {
 } from "@remix-run/node";
 import {Edit2, X} from "lucide-react";
 import {AnimatePresence, motion} from "framer-motion";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {createBase64Src, createImageUploader, imageCdn} from "@/utils/image-uploader";
 import {tryDatabaseAction} from "@/utils/database-error";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
@@ -33,10 +33,12 @@ export async function action({ context, request }: ActionFunctionArgs) {
         uploadHandler
     );
 
+    const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
     const file = formData.get("avatar");
 
     return await tryDatabaseAction(async () => {
         await context.db.updateUser({
+            isUpdatingAvatar,
             avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file?.name, file?.getFilePath && file.getFilePath()),
         });
         file?.remove && file.remove();
@@ -46,21 +48,22 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
 export default function SettingsRoute() {
     const data = useLoaderData<typeof loader>();
+    const fetcher = useFetcher();
     const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.avatarPath);
+    const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     function onClick() {
         fileInputRef.current?.click();
     }
     function onChangeAvatar() {
+        setIsAvatarUpdated(true);
         if (fileInputRef.current) {
             if (fileInputRef.current?.files && fileInputRef.current.files?.length > 0) {
                 const file = fileInputRef.current.files[0];
                 const reader = new FileReader();
-                reader.onload = (evt) => {
-                    if (evt?.target) {
-                        // @ts-ignore
-                        setUserAvatar(evt.target.result);
-                    }
+                reader.onload = () => {
+                    // @ts-ignore
+                    setUserAvatar(reader.result);
                 }
                 reader.readAsDataURL(file);
             }
@@ -68,15 +71,27 @@ export default function SettingsRoute() {
     }
     function clearAvatar() {
         if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-            setUserAvatar(undefined);
+            if (userAvatar === data?.avatarPath) {
+                setUserAvatar(undefined);
+                setIsAvatarUpdated(true);
+                fileInputRef.current.value = '';
+            } else {
+                setUserAvatar(data?.avatarPath);
+                setIsAvatarUpdated(false);
+            }
         }
     }
+    useEffect(() => {
+        if (fetcher.state === 'idle') {
+            setUserAvatar(data?.avatarPath);
+            setIsAvatarUpdated(false)
+        }
+    }, [fetcher]);
     return (
         <div className="flex-grow flex flex-col gap-3 m-4">
             <span className="text-xl font-medium select-none">Account Settings</span>
             <Separator />
-            <Form method="POST" encType="multipart/form-data" className="flex flex-col gap-5">
+            <fetcher.Form method="POST" encType="multipart/form-data" className="flex flex-col gap-5">
                 <div className="flex items-center gap-3">
                     <HoverCard>
                         <HoverCardTrigger asChild>
@@ -86,6 +101,7 @@ export default function SettingsRoute() {
                                             whileHover={{ opacity: 1 }}
                                             className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
                                     <Edit2 className="text-white" size={20} />
+                                    <Input type="text" readOnly className="hidden" name="is-uploading-avatar" value={'' + isAvatarUpdated} />
                                     <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
                                 </motion.div>
                             </Button>
@@ -93,7 +109,7 @@ export default function SettingsRoute() {
                         <HoverCardContent className="rounded-full border-0 w-fit h-fit p-0">
                             <AnimatePresence initial={false}>
                                 {
-                                    userAvatar ?
+                                    userAvatar || data?.avatarPath ?
                                         <motion.div initial={{opacity: 0}}
                                                     animate={{opacity: 1}}
                                                     exit={{opacity: 0}}
@@ -142,7 +158,7 @@ export default function SettingsRoute() {
                         Delete Account
                     </Button>
                 </div>
-            </Form>
+            </fetcher.Form>
         </div>
     )
 }

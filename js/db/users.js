@@ -125,7 +125,9 @@ DBClient.prototype.updateUser = async function(data) {
         throw new DBError('Unauthorized.');
     }
     try {
-        await client.query('UPDATE users SET avatar_path = $1 WHERE id = $2;', [data.avatar, this.user.id]);
+        if (data.isUpdatingAvatar) {
+            await client.query('UPDATE users SET avatar_path = $1 WHERE id = $2;', [data.avatar, this.user.id]);
+        }
     } catch (err) {
         console.error('updateUser: ', err);
         throw new DBError();

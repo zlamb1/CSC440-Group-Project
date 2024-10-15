@@ -9,15 +9,25 @@ export interface UserAvatarProps {
 
 export default function UserAvatar({ className, avatar, userName, size = 25 }: UserAvatarProps) {
     return (
-        <div className={`flex justify-center items-center ${avatar ? '' : 'bg-primary'} rounded-full select-none font-medium text-white ` + (className ?? '')}
+        <div className={`flex justify-center items-center rounded-full select-none font-medium text-white ` + (className ?? '')}
              style={{ width: size, height: size }}>
             <AnimatePresence mode="wait" initial={false}>
                 {
                     avatar ?
-                        <motion.div className="origin-center" initial={{scale: 0}} animate={{scale: 1}} exit={{scale: 0}} transition={{duration: 0.1}} key={avatar}>
+                        <motion.div className="origin-center"
+                                    initial={{scale: 0.5, opacity: 0.25}}
+                                    animate={{scale: 1, opacity: 1}}
+                                    exit={{scale: 0.5, opacity: 0.25}}
+                                    transition={{duration: 0.1}}
+                                    key={avatar}>
                             <img src={avatar} alt="Profile avatar"/>
                         </motion.div> :
-                        <motion.div className="origin-center" initial={{scale: 0}} animate={{scale: 1}} exit={{scale: 0}} transition={{duration: 0.1}} key={0}>
+                        <motion.div className="origin-center bg-primary flex justify-center items-center w-full h-full rounded-full"
+                                    initial={{scale: 0.5, opacity: 0.25}}
+                                    animate={{scale: 1, opacity: 1}}
+                                    exit={{scale: 0.5, opacity: 0.25}}
+                                    transition={{duration: 0.1}}
+                                    key={0}>
                             { userName?.substring(0, 1).toUpperCase() }
                         </motion.div>
                 }
