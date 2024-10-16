@@ -11,12 +11,13 @@ import Text from '@tiptap/extension-text'
 import {Youtube} from "@tiptap/extension-youtube";
 import {all, createLowlight} from "lowlight";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import React, {useEffect, useImperativeHandle, useRef, useState, useTransition} from "react";
+import React, {Suspense, useEffect, useImperativeHandle, useRef, useState, useTransition} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import highlight from 'highlight.js';
 import {Separator} from "@ui/separator";
 import useIsSSR from "@/utils/useIsSSR";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 const lowlight = createLowlight(all);
 
@@ -29,6 +30,7 @@ export interface PostEditorElement {
 
 export const PostEditor = React.forwardRef((props: any, ref) => {
     const [ isFocused, setFocused ] = useState<boolean>(false);
+    const isSSR = useIsSSR();
     useEffect(() => {
         setFocused(props?.autofocus);
     }, [props?.autofocus]);
@@ -75,12 +77,22 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
             clearEditor: () => editor?.commands.clearContent(true)
         }
     });
-    return (
-        <div className="flex flex-col gap-1 w-full">
-            <EditorContext.Provider value={{editor}}>
-                <EditorContent {...props?.containerProps} editor={editor} />
-            </EditorContext.Provider>
-            <Separator className={isFocused ? 'bg-primary' : ''} style={{ transition: 'background-color ease-in-out 0.2s' }} />
-        </div>
-    )
+    if (isSSR) {
+        return (
+            <div className="w-full flex flex-col items-center gap-2">
+                <LoadingSpinner className="stroke-primary" strokeWidth={3} />
+                <Separator orientation="horizontal" />
+            </div>
+        );
+    } else {
+        return (
+            <div className="flex flex-col gap-1 w-full">
+                <EditorContext.Provider value={{editor}}>
+                    <EditorContent {...props?.containerProps} editor={editor}/>
+                </EditorContext.Provider>
+                <Separator className={isFocused ? 'bg-primary' : ''}
+                           style={{transition: 'background-color ease-in-out 0.2s'}}/>
+            </div>
+        );
+    }
 });

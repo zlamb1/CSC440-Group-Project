@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 
+let isHydrating = true;
+
 export default function useIsSSR() {
-    const [ isSSR, setIsSSR ] = useState(true);
+    const [ isSSR, setIsSSR ] = useState(isHydrating);
     useEffect(() => {
-        setIsSSR(false); 
+        isHydrating = false;
+        setIsSSR(false);
     }, []);
     return isSSR;
 }
