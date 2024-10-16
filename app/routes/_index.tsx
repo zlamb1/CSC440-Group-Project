@@ -52,7 +52,6 @@ export default function Index() {
                                         editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
                                         containerProps={{className: 'flex-grow w-full text-lg'}} />
                         </div>
-                        <Separator />
                         <div className="self-end flex items-center gap-3">
                             <ProgressCircle percentage={ editorProgress } />
                             <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>

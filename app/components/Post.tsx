@@ -1,13 +1,14 @@
 import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
 import React, { createRef, useState } from "react";
-import {Edit2, EllipsisVerticalIcon, MessageSquare, ThumbsDown, ThumbsUp, Trash} from "lucide-react";
+import {Edit2, EllipsisVerticalIcon, Hammer, MessageSquare, ThumbsDown, ThumbsUp, Trash} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
-import {Form, useFetcher} from "@remix-run/react";
+import {useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {useIsPresent} from "framer-motion";
+import {AnimatePresence, motion, useIsPresent} from "framer-motion";
 import useOverflow from "@/utils/useOverflow";
 import {PostEditor} from "@components/PostEditor";
+import {Separator} from "@ui/separator";
 
 function PostContextMenu({ post, user, onEdit }: { post: any, user: any, onEdit?: () => void }) {
     const fetcher = useFetcher();
@@ -31,12 +32,14 @@ function PostContextMenu({ post, user, onEdit }: { post: any, user: any, onEdit?
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="flex flex-col">
-                <div>
-                    <Button containerClass="w-100 flex" className="flex-grow flex gap-4" variant="ghost" onClick={ onClickEdit }>
-                        <Edit2 className="text-blue-500" size={20} />
-                        <span className="flex-grow text-left text-blue-400">Edit</span>
-                    </Button>
-                </div>
+                <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-primary hover:text-primary" variant="ghost" onClick={ onClickEdit }>
+                    <Edit2 className="" size={20} />
+                    <span className="flex-grow text-left">Edit</span>
+                </Button>
+                <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-yellow-500 hover:text-yellow-500" variant="ghost">
+                    <Hammer size={20} />
+                    <span className="flex-grow text-left">Moderate</span>
+                </Button>
                 <fetcher.Form action={`/posts/delete/${post.id}`} method="POST">
                     <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-red-600 hover:text-red-500"
                             variant="ghost" disabled={isTransitioning}>
@@ -109,15 +112,31 @@ function Post({className, post, user}: { className?: string, post: any, user: an
                     </div>
                     <PostContextMenu post={post} user={user} onEdit={ () => setEditing(true) } />
                 </div>
-                <div className="ml-10 flex flex-col gap-5">
-                    {
-                        isEditing ?
-                            <div className="flex flex-col gap-2">
-                                <PostEditor editorProps={{ attributes: { class: 'focus-visible:outline-none' }}} content={post.content} />
-                                <Button containerClass="w-fit align-end" variant="edit">Edit</Button>
-                            </div>
-                            : <RawPost content={post.content} />
-                    }
+                <div className="ml-10 flex flex-col gap-4">
+                    <div className="flex flex-col gap-3">
+                        {
+                            isEditing ?
+                                <PostEditor editorProps={{attributes: {class: 'focus-visible:outline-none'}}}
+                                            content={post.content} autofocus="end"/>
+                                : <RawPost content={post.content}/>
+                        }
+                        <AnimatePresence mode="wait">
+                            {
+                                isEditing ?
+                                    <motion.div initial={{opacity: 0, height: 0}}
+                                                animate={{opacity: 1, height: 'auto'}}
+                                                exit={{opacity: 0, height: 0}}
+                                                transition={{duration: 0.2}}
+                                                className="flex flex-col gap-4">
+                                        <div className="flex gap-2 justify-end">
+                                            <Button className="text-red-500 hover:text-red-400" variant="ghost"
+                                                    onClick={() => setEditing(false)}>Cancel</Button>
+                                            <Button containerClass="w-fit">Edit</Button>
+                                        </div>
+                                    </motion.div> : null
+                            }
+                        </AnimatePresence>
+                    </div>
                     <div className="flex gap-2">
                         <div className="flex items-center gap-1 p-1 rounded-full bg-gray-100 dark:bg-gray-900">
                             <fetcher.Form method="POST" action={`/posts/${post.id}/like`} className="flex items-center">

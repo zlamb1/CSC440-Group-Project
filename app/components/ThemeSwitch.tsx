@@ -37,7 +37,7 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
     useEffect(() => {
         setCounter(counter + 1);
     }, [themeStore]);
-    if (!ssrColorScheme)
+    if (isSSR && !ssrColorScheme)
         return null;
     // @ts-ignore
     const SchemeIcon = colorSchemeIcons[isSSR ? ssrColorScheme : themeStore.colorScheme] ?? undefined;

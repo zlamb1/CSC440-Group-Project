@@ -11,10 +11,12 @@ import Text from '@tiptap/extension-text'
 import {Youtube} from "@tiptap/extension-youtube";
 import {all, createLowlight} from "lowlight";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import React, {useImperativeHandle, useRef} from "react";
+import React, {useEffect, useImperativeHandle, useRef, useState, useTransition} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import highlight from 'highlight.js';
+import {Separator} from "@ui/separator";
+import useIsSSR from "@/utils/useIsSSR";
 
 const lowlight = createLowlight(all);
 
@@ -26,6 +28,10 @@ export interface PostEditorElement {
 }
 
 export const PostEditor = React.forwardRef((props: any, ref) => {
+    const [ isFocused, setFocused ] = useState<boolean>(false);
+    useEffect(() => {
+        setFocused(props?.autofocus);
+    }, [props?.autofocus]);
     const extensions = [
         Document,
         Paragraph,
@@ -58,7 +64,10 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
         content: props?.content ?? '',
         editable: props?.editable,
         editorProps: props?.editorProps,
-        immediatelyRender: false
+        immediatelyRender: false,
+        autofocus: props?.autofocus,
+        onFocus: () => setFocused(true),
+        onBlur: () => setFocused(false),
     });
     useImperativeHandle(ref, () => {
         return {
@@ -71,6 +80,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
             <EditorContext.Provider value={{editor}}>
                 <EditorContent {...props?.containerProps} editor={editor} />
             </EditorContext.Provider>
+            <Separator className={isFocused ? 'bg-primary' : ''} style={{ transition: 'background-color ease-in-out 0.2s' }} />
         </div>
     )
 });
