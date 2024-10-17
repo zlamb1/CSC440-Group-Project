@@ -36,7 +36,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
     const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
     const file = formData.get("avatar");
     const avatar = isProduction ?
-        `${imageCdn}${file?.name}` :
+        (file?.name ? `${imageCdn}${file?.name}` : null) :
         createBase64Src(file?.name, file?.getFilePath && file.getFilePath())
 
     return await tryDatabaseAction(async () => {
