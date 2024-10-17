@@ -1,4 +1,5 @@
 import {
+    NodeOnDiskFile,
     unstable_composeUploadHandlers,
     unstable_createFileUploadHandler,
     unstable_createMemoryUploadHandler
@@ -7,8 +8,10 @@ import crypto from "crypto";
 import {FileUploadHandlerFilterArgs} from "@remix-run/node/dist/upload/fileUploadHandler";
 import fs from "node:fs";
 
-export const imageCdn = 'https://cdn.zlamb1.com';
+export const imageCdn = 'https://cdn.zlamb1.com/images/';
+export const image_v1 = '/www/data/images/';
 
+const isProduction = process.env.NODE_ENV === "production";
 const allowedExtensions = ["jpg", "jpeg", "png"];
 
 export function getContentType(filename: string) {
@@ -30,10 +33,17 @@ export function createBase64Src(filename: string, filepath: string) {
     return `data:${getContentType(filename)};charset=utf-8;base64,` + fs.readFileSync(filepath, 'base64');
 }
 
-export function removeAvatar(filename: string) {
-    console.log('filename: ' + filename);
-    if (filename) {
-        fs.unlinkSync(`/www/data/images/${filename}`);
+export function removeAvatar(oldAvatar: string, file: any) {
+    if (isProduction) {
+        try {
+            const split = oldAvatar?.split("/");
+            const filename = split[split.length - 1];
+            fs.unlinkSync(`${image_v1}${filename}`);
+        } catch (err) {
+            console.error('failed to remove avatar: ', err);
+        }
+    } else {
+        file?.remove && file.remove();
     }
 }
 

@@ -15,7 +15,7 @@ import {
 import {Edit2, X} from "lucide-react";
 import {AnimatePresence, motion} from "framer-motion";
 import {useEffect, useRef, useState} from "react";
-import {createBase64Src, createImageUploader, imageCdn, removeAvatar} from "@/utils/image-uploader";
+import {createBase64Src, createImageUploader, image_v1, imageCdn, removeAvatar} from "@/utils/image-uploader";
 import {tryDatabaseAction} from "@/utils/database-error";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 
@@ -26,7 +26,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
-    const uploadHandler = createImageUploader({ directory: isProduction ? '/www/data/images' : undefined });
+    const uploadHandler = createImageUploader({ directory: isProduction ? image_v1 : undefined });
 
     const formData = await unstable_parseMultipartFormData(
         request,
@@ -36,7 +36,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
     const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
     const file = formData.get("avatar");
     const avatar = isProduction ?
-        (file.name ? `${imageCdn}/images/${file.name}` : null) :
+        `${imageCdn}${file?.name}` :
         createBase64Src(file?.name, file?.getFilePath && file.getFilePath())
 
     return await tryDatabaseAction(async () => {
@@ -45,11 +45,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
             isUpdatingAvatar,
             avatar,
         });
-        if (isProduction) {
-            removeAvatar(oldAvatar);
-        } else {
-            file?.remove && file.remove();
-        }
+        removeAvatar(oldAvatar, file);
         return json({});
     });
 }
