@@ -31,10 +31,9 @@ export function createBase64Src(filename: string, filepath: string) {
 }
 
 export function removeAvatar(filename: string) {
+    console.log('filename: ' + filename);
     if (filename) {
-        fs.unlink(`/www/data/images/${filename}`, () => {
-
-        });
+        fs.unlinkSync(`/www/data/images/${filename}`);
     }
 }
 
