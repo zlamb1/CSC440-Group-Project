@@ -37,7 +37,7 @@ function ensureContentLength(content) {
 }
 
 function processCodeBlocks(htmlContent) {
-    const dom = new jsdom.JSDOM(htmlContent);
+    /*const dom = new jsdom.JSDOM(htmlContent);
     dom.window.document.querySelectorAll('pre code').forEach((el) => {
         // @ts-ignore
         highlight.highlightElement(el);
@@ -45,7 +45,8 @@ function processCodeBlocks(htmlContent) {
             delete el.dataset.highlighted;
         }
     });
-    return dom.window.document.body.innerHTML;
+    return dom.window.document.body.innerHTML;*/
+    return htmlContent;
 }
 
 function formatPost(rowOrFn) {
@@ -75,7 +76,7 @@ function formatPost(rowOrFn) {
     }
 }
 
-DBClient.prototype.createPost = async function(userId, content) {
+DBClient.prototype.createPost = async function(content) {
     if (!content || typeof content !== 'string' || content.length === 0) {
         throw new DBError('Post content is required.');
     }
@@ -84,16 +85,12 @@ DBClient.prototype.createPost = async function(userId, content) {
     }
     return new Promise(async (resolve, reject) => {
         try {
-            const res = await client.query('SELECT id FROM users WHERE id = $1', [ userId ]);
-            if (res.rows.length === 0) {
-                return reject(new DBError(`Invalid user id '${userId}'`));
-            }
             const sanitizedContent = sanitizeContent(content);
             let err;
             if ((err = ensureContentLength(sanitizedContent))) {
                 return reject(new DBError(err));
             }
-            await client.query('INSERT INTO posts (poster_id, content) VALUES ($1, $2);', [userId, sanitizedContent]);
+            await client.query('INSERT INTO posts (poster_id, content) VALUES ($1, $2);', [this.user.id, sanitizedContent]);
             return resolve();
         } catch (err) {
             console.error('createPost: ', err);
@@ -102,9 +99,40 @@ DBClient.prototype.createPost = async function(userId, content) {
     });
 }
 
+DBClient.prototype.createReply = async function(replyTo, content) {
+    if (!validateUUID(replyTo)) {
+        throw new DBError('Post ID is invalid.');
+    }
+    if (!content || typeof content !== 'string' || content.length === 0) {
+        throw new DBError('Post content is required.');
+    }
+    if (!(await this.checkAuth())) {
+        throw new DBError({ error: 'Unauthorized' });
+    }
+    return new Promise(async (resolve, reject) => {
+        try {
+            const sanitizedContent = sanitizeContent(content);
+            let err;
+            if ((err = ensureContentLength(sanitizedContent))) {
+                return reject(new DBError(err));
+            }
+            const res = await client.query('SELECT users.privacy_status FROM posts INNER JOIN users ON posts.id = $1 AND posts.poster_id = users.id', [replyTo]);
+            if (res.rows?.length === 0 || res.rows[0].privacy_status !== 'public') {
+                return reject(new DBError('Post not found.'));
+            }
+            await client.query('INSERT INTO posts (poster_id, content, reply_to) VALUES ($1, $2, $3);', [this.user.id, sanitizedContent, replyTo]);
+            await client.query('UPDATE posts SET reply_count = reply_count + 1 WHERE id = $1;', [replyTo]);
+            return resolve();
+        } catch (err) {
+            console.error('createReply: ', err);
+            return reject(new DBError());
+        }
+    });
+}
+
 DBClient.prototype.getPost = async function(id) {
     if (!validateUUID(id)) {
-        throw new DBError("Invalid post id.");
+        throw new DBError("Invalid post ID.");
     }
     return new Promise(async (resolve, reject) => {
         try {
@@ -125,8 +153,8 @@ DBClient.prototype.getReplies = async function(id) {
         throw new DBError("Invalid post id.");
     }
     try {
-        const res = await client.query('SELECT * FROM posts WHERE reply_to = $1;', [id]);
-        return res.rows.map(formatPost((row, data) => ({ ...data })));
+        const res = await client.query('SELECT posts.*, users.user_name, users.avatar_path FROM posts INNER JOIN users ON posts.reply_to = $1 AND users.id = posts.poster_id;', [id]);
+        return res.rows.map(formatPost((row, data) => ({ ...data, userName: row?.user_name, avatar: row?.avatar_path })));
     } catch (err) {
         console.error('getPostWithReplies: ' , err);
         throw new DBError();
@@ -140,7 +168,7 @@ DBClient.prototype.getPublicPosts = async function() {
             `INNER JOIN users ON posts.poster_id = users.id AND users.privacy_status = 'public' ` +
             'LEFT JOIN post_likes ON post_likes.post_id = posts.id AND post_likes.user_id = $1 ' +
             'WHERE posts.reply_to IS NULL ORDER BY posts.posted_at DESC;',
-            [this.user?.id]
+            [ this.user?.id ]
         );
         return res.rows.map(formatPost((row, data) => ({ ...data, liked: row?.liked, userName: row?.user_name, avatarPath: row?.avatar_path })))
     } catch (err) {

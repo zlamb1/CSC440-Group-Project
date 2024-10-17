@@ -14,14 +14,27 @@ import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
 import React, {Suspense, useEffect, useImperativeHandle, useRef, useState, useTransition} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
-import highlight from 'highlight.js';
 import {Separator} from "@ui/separator";
 import useIsSSR from "@/utils/useIsSSR";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 
 const lowlight = createLowlight(all);
-
 const characterCountLimit = 300;
+
+const defaultExt = [
+    Document,
+    Paragraph,
+    Text,
+    Image,
+    Dropcursor,
+    CodeBlockLowlight.configure({
+        lowlight,
+    }),
+    Youtube.configure({
+        controls: false,
+        nocookie: true
+    }),
+];
 
 export interface PostEditorElement {
     getContent: () => string;
@@ -35,18 +48,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
         setFocused(props?.autofocus);
     }, [props?.autofocus]);
     const extensions = [
-        Document,
-        Paragraph,
-        Text,
-        Image,
-        Dropcursor,
-        CodeBlockLowlight.configure({
-            lowlight,
-        }),
-        Youtube.configure({
-            controls: false,
-            nocookie: true
-        }),
+        ...defaultExt,
         CharacterCount.configure({
             limit: characterCountLimit,
             textCounter: (text: string) => {
@@ -58,13 +60,13 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
             }
         }),
         Placeholder.configure({
-            placeholder: props?.placeholder ?? 'Write something...'
+            placeholder: props?.placeholder ?? 'Write something...',
         }),
     ];
     const editor = useEditor({
         extensions: extensions,
-        content: props?.content ?? '',
-        editable: props?.editable,
+        content: props?.content,
+        editable: props?.editable ?? true,
         editorProps: props?.editorProps,
         immediatelyRender: false,
         autofocus: props?.autofocus,
