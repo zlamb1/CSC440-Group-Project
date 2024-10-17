@@ -35,12 +35,15 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
     const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
     const file = formData.get("avatar");
+    const avatar = isProduction ?
+        (file.name ? `${imageCdn}/images/${file.name}` : null) :
+        createBase64Src(file?.name, file?.getFilePath && file.getFilePath())
 
     return await tryDatabaseAction(async () => {
         const oldAvatar = context.user.avatarPath;
         await context.db.updateUser({
             isUpdatingAvatar,
-            avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file?.name, file?.getFilePath && file.getFilePath()),
+            avatar,
         });
         if (isProduction) {
             removeAvatar(oldAvatar);
