@@ -41,7 +41,9 @@ export async function action({ context, request }: ActionFunctionArgs) {
             isUpdatingAvatar,
             avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file?.name, file?.getFilePath && file.getFilePath()),
         });
-        file?.remove && file.remove();
+        if (!isProduction) {
+            file?.remove && file.remove();
+        }
         return json({});
     });
 }
