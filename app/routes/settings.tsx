@@ -15,7 +15,7 @@ import {
 import {Edit2, X} from "lucide-react";
 import {AnimatePresence, motion} from "framer-motion";
 import {useEffect, useRef, useState} from "react";
-import {createBase64Src, createImageUploader, imageCdn} from "@/utils/image-uploader";
+import {createBase64Src, createImageUploader, imageCdn, removeAvatar} from "@/utils/image-uploader";
 import {tryDatabaseAction} from "@/utils/database-error";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 
@@ -37,11 +37,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
     const file = formData.get("avatar");
 
     return await tryDatabaseAction(async () => {
+        const oldAvatar = context.user.avatarPath;
         await context.db.updateUser({
             isUpdatingAvatar,
             avatar: isProduction ? `${imageCdn}/images/` + file.name : createBase64Src(file?.name, file?.getFilePath && file.getFilePath()),
         });
-        if (!isProduction) {
+        if (isProduction) {
+            removeAvatar(oldAvatar);
+        } else {
             file?.remove && file.remove();
         }
         return json({});

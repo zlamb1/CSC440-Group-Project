@@ -30,6 +30,14 @@ export function createBase64Src(filename: string, filepath: string) {
     return `data:${getContentType(filename)};charset=utf-8;base64,` + fs.readFileSync(filepath, 'base64');
 }
 
+export function removeAvatar(filename: string) {
+    if (filename) {
+        fs.unlink(`/www/data/images/${filename}`, () => {
+
+        });
+    }
+}
+
 export function createImageUploader(opts: any) {
     return unstable_composeUploadHandlers(
         unstable_createFileUploadHandler({
