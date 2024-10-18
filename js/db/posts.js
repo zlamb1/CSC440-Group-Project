@@ -56,6 +56,7 @@ function formatPost(rowOrFn) {
                 id: row.id,
                 posterId: row.poster_id,
                 postedAt: row.posted_at,
+                lastEdited: row.last_edited,
                 content: processCodeBlocks(row.content),
                 replyTo: row.reply_to,
                 likeCount: row.like_count,
@@ -68,6 +69,7 @@ function formatPost(rowOrFn) {
         id: rowOrFn.id,
         posterId: rowOrFn.poster_id,
         postedAt: rowOrFn.posted_at,
+        lastEdited: rowOrFn.last_edited,
         content: processCodeBlocks(rowOrFn.content),
         replyTo: rowOrFn.reply_to,
         likeCount: rowOrFn.like_count,
@@ -153,7 +155,11 @@ DBClient.prototype.getReplies = async function(id) {
         throw new DBError("Invalid post id.");
     }
     try {
-        const res = await client.query('SELECT posts.*, users.user_name, users.avatar_path FROM posts INNER JOIN users ON posts.reply_to = $1 AND users.id = posts.poster_id;', [id]);
+        const res = await client.query(
+            'SELECT posts.*, users.user_name, users.avatar_path FROM posts ' +
+            'INNER JOIN users ON posts.reply_to = $1 AND users.id = posts.poster_id ORDER BY posts.posted_at DESC;',
+            [id]
+        );
         return res.rows.map(formatPost((row, data) => ({ ...data, userName: row?.user_name, avatar: row?.avatar_path })));
     } catch (err) {
         console.error('getPostWithReplies: ' , err);
@@ -177,9 +183,10 @@ DBClient.prototype.getPublicPosts = async function() {
     }
 }
 
-
-
-DBClient.prototype.editPost = async function(userId, postId, content) {
+DBClient.prototype.editPost = async function(id, content) {
+    if (!content || typeof content !== 'string' || content.length === 0) {
+        throw new DBError('Post content is required.');
+    }
     if (!(await this.checkAuth())) {
         throw new DBError({ error: 'Unauthorized' });
     }
@@ -190,8 +197,8 @@ DBClient.prototype.editPost = async function(userId, postId, content) {
             if ((err = ensureContentLength(sanitizedContent))) {
                 return reject(new DBError(err));
             }
-            const res = await client.query('UPDATE posts SET content = $1, last_edited = now() WHERE id = $2 AND poster_id = $3 RETURNING id;',
-                [ sanitizedContent, postId, userId ]);
+            const res = await client.query('UPDATE posts SET content = $1 WHERE id = $2 AND poster_id = $3 RETURNING id;',
+                [ sanitizedContent, id, this.user.id ]);
             if (res.rows.length === 0) {
                 return reject(new DBError('Post not found.'));
             }

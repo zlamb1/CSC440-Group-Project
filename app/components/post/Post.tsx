@@ -13,63 +13,9 @@ import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {AnimatePresence, motion} from "framer-motion";
 import {Skeleton} from "@ui/skeleton";
+import ReplyView from "@components/post/ReplyView";
 
-export interface ReplyListProps {
-    post: any;
-    user: any;
-    showReplies?: boolean;
-    onLoad?: (replies: any) => void;
-}
 
-function ReplyList({ post, user, showReplies = true, onLoad = () => {} }: ReplyListProps) {
-    const [ replies, setReplies ] = useState<any[]>([]);
-    const fetcher = useFetcher();
-    useEffect(() => {
-        if (fetcher.state === 'idle') {
-            setReplies(fetcher.data);
-            onLoad(replies);
-        }
-    }, [fetcher]);
-    useEffect(() => {
-        getReplies();
-    }, [showReplies]);
-    const getReplies = () => {
-        if (showReplies) {
-            fetcher.submit(null, {
-                action: `/posts/${post.id}/replies`,
-            });
-        }
-    }
-    function renderSkeletons() {
-        const skeletons = [];
-        for (let i = 0; i < post?.replyCount - (replies?.length ?? 0); i++) {
-            skeletons.push(
-                <Skeleton key={i} className="w-full h-[65px]" />
-            )
-        }
-        return skeletons;
-    }
-    return (
-        <AnimatePresence initial={false}>
-            {
-                showReplies ?
-                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.3 }} className="flex flex-col gap-2 overflow-hidden">
-                        {
-                            replies?.map((reply: any) =>
-                                <Post key={reply.id} post={reply} user={user} />
-                            )
-                        }
-                        {
-                            fetcher.state !== 'idle' ? renderSkeletons() : null
-                        }
-                    </motion.div> : null
-            }
-            {
-                fetcher.state !== 'idle' ? null : null
-            }
-        </AnimatePresence>
-    );
-}
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -185,7 +131,7 @@ function Post({className, post, user}: { className?: string, post: any, user: an
                             </div>
                         </div>
                     </div>
-                    <ReplyList post={post}
+                    <ReplyView post={post}
                                user={user}
                                showReplies={showReplies}
                     />

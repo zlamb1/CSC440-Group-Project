@@ -1,6 +1,5 @@
 import {
-    EditorContent, EditorContext,
-    EditorProvider, useCurrentEditor, useEditor,
+    EditorContent, EditorContext, useEditor,
 } from "@tiptap/react";
 
 import Document from '@tiptap/extension-document'
@@ -11,7 +10,7 @@ import Text from '@tiptap/extension-text'
 import {Youtube} from "@tiptap/extension-youtube";
 import {all, createLowlight} from "lowlight";
 import {CodeBlockLowlight} from "@tiptap/extension-code-block-lowlight";
-import React, {Suspense, useEffect, useImperativeHandle, useRef, useState, useTransition} from "react";
+import React, {useEffect, useImperativeHandle, useState} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import {Separator} from "@ui/separator";
@@ -21,7 +20,7 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 const lowlight = createLowlight(all);
 const characterCountLimit = 300;
 
-const defaultExt = [
+const defaultExtensions = [
     Document,
     Paragraph,
     Text,
@@ -48,7 +47,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
         setFocused(props?.autofocus);
     }, [props?.autofocus]);
     const extensions = [
-        ...defaultExt,
+        ...defaultExtensions,
         CharacterCount.configure({
             limit: characterCountLimit,
             textCounter: (text: string) => {
