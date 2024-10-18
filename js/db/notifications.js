@@ -2,10 +2,11 @@ import client, {DBClient, DBError, validateUUID} from "./db.js";
 
 function formatNotification(row) {
     return {
-        dateIssued: row.dateIssued,
+        id: row.id,
+        dateIssued: row.date_issued,
         type: row.type,
         content: row.content,
-        expiration: row.expiration,
+        expiresOn: row.expires_on,
     }
 }
 
