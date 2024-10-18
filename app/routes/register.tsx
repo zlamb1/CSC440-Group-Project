@@ -12,7 +12,9 @@ export async function action({ context, request }: ActionFunctionArgs) {
         const password = String(formData.get("password"));
 
         const session = await context.session.getSession();
-        session.set('userId', await context.db.createUser(username, password));
+        const id = await context.db.registerUser(username, password);
+        session.set('userId', id);
+
         return redirect('/', {
             headers: {
                 'Set-Cookie': await context.session.commitSession(session)

@@ -34,7 +34,15 @@ function parseColorSchemeCookie(cookieHeader: any) {
 
 export async function loader({context, request}: LoaderFunctionArgs) {
     const ssrColorScheme = parseColorSchemeCookie(request.headers.get("Cookie"));
-    return json({ ssrColorScheme, user: context.user });
+    let notificationCount = 0;
+    if (context?.user?.loggedIn) {
+        try {
+            notificationCount = await context.db.getNotificationCount();
+        } catch (err) {
+
+        }
+    }
+    return json({ ssrColorScheme, user: context.user, notificationCount });
 }
 
 export function Layout({children}: {children: React.ReactNode}) {

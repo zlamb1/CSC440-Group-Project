@@ -4,7 +4,7 @@ import {
     NavigationMenuList, NavigationMenuTrigger,
 } from "@ui/navigation-menu";
 import {Link, useFetcher} from "@remix-run/react";
-import {Bell, Inbox, LogIn, LogOut, MessageCircleCode, Settings, UserRound} from "lucide-react";
+import {Bell, LogIn, LogOut, MessageCircleCode, Settings, UserRound} from "lucide-react";
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
 import {HamburgerMenuIcon} from "@radix-ui/react-icons";
@@ -17,9 +17,10 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 export interface NavBarProps {
     ssrColorScheme?: string;
     user?: any;
+    notificationCount: number;
 }
 
-export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
+export default function NavBar({ ssrColorScheme, user, notificationCount }: NavBarProps) {
     const logoutFetcher = useFetcher();
     const [ isOpen, setOpen ] = useState(false);
     const links = [
@@ -70,9 +71,13 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
                 <NavigationMenuItem>
                     <Button className="relative" size="icon" variant="ghost">
                         <Bell size={20} />
-                        <div className="bg-primary text-white rounded-full absolute w-[12px] h-[12px] flex justify-center items-center text-[10px] right-[5px] bottom-[5px]">
-                            1
-                        </div>
+                        {
+                            notificationCount > 0 ?
+                                <div
+                                    className="bg-primary text-white rounded-full absolute w-[12px] h-[12px] flex justify-center items-center text-[10px] right-[5px] bottom-[5px]">
+                                    {notificationCount}
+                                </div> : null
+                        }
                     </Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem className="flex items-center">

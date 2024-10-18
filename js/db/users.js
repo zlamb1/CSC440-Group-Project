@@ -24,7 +24,7 @@ DBClient.prototype.isUsernameAvailable = async function(username) {
     }
 }
 
-DBClient.prototype.createUser = async function(username, password) {
+DBClient.prototype.registerUser = async function(username, password) {
     const errors = {};
     if (typeof username === 'string') {
         if (username.length < 4) {
@@ -58,11 +58,11 @@ DBClient.prototype.createUser = async function(username, password) {
     try {
         const saltRounds = 10;
         const hash = await bcrypt.hash(password, saltRounds);
-        const res = await client.query('INSERT INTO users (user_name, password_hash) VALUES ($1, $2) RETURNING id;', [username, hash]);
-        return res.rows[0].id;
+        const res = await client.query('CALL register_user($1, $2, $3);', [username, hash, null]);
+        return res.rows[0]._id;
     } catch (err) {
         console.error('createUser: ', err);
-        throw DBError();
+        throw new DBError();
     }
 }
 
