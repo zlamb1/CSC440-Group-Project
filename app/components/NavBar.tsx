@@ -4,7 +4,7 @@ import {
     NavigationMenuList, NavigationMenuTrigger,
 } from "@ui/navigation-menu";
 import {Link, useFetcher} from "@remix-run/react";
-import {LogIn, LogOut, MessageCircleCode, PersonStanding, Settings, TrashIcon, UserRound} from "lucide-react";
+import {Bell, Inbox, LogIn, LogOut, MessageCircleCode, Settings, UserRound} from "lucide-react";
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
 import {HamburgerMenuIcon} from "@radix-ui/react-icons";
@@ -66,6 +66,14 @@ export default function NavBar({ ssrColorScheme, user }: NavBarProps) {
             <NavigationMenuList className="flex flex-row items-center gap-1">
                 <NavigationMenuItem className="flex items-center">
                     <ThemeSwitch ssrColorScheme={ssrColorScheme} />
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                    <Button className="relative" size="icon" variant="ghost">
+                        <Bell size={20} />
+                        <div className="bg-primary text-white rounded-full absolute w-[12px] h-[12px] flex justify-center items-center text-[10px] right-[5px] bottom-[5px]">
+                            1
+                        </div>
+                    </Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem className="flex items-center">
                     {

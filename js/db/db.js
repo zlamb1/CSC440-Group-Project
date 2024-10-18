@@ -39,6 +39,12 @@ export class DBClient {
         }
         return true;
     }
+
+    async throwAuth() {
+        if (!(await this.checkAuth())) {
+            throw new DBError('Unauthorized.');
+        }
+    }
 }
 
 export class DBError extends Error {

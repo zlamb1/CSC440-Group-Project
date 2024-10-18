@@ -121,9 +121,7 @@ DBClient.prototype.getUserByUsername = async function(userName) {
 }
 
 DBClient.prototype.updateUser = async function(data) {
-    if (!(await this.checkAuth())) {
-        throw new DBError('Unauthorized.');
-    }
+    await this.throwAuth();
     try {
         if (data.isUpdatingAvatar) {
             await client.query('UPDATE users SET avatar_path = $1 WHERE id = $2;', [data.avatar, this.user.id]);

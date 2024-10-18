@@ -19,9 +19,7 @@ DBClient.prototype.deletePostLike = async function(id) {
     if (!validateUUID(id)) {
         throw new DBError('Invalid post id.');
     }
-    if (!(await this.checkAuth())) {
-        throw new DBError('Unauthorized.');
-    }
+    await this.throwAuth();
     try {
         await client.query('DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2;', [id, this.user.id]);
     } catch (err) {

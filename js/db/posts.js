@@ -82,9 +82,7 @@ DBClient.prototype.createPost = async function(content) {
     if (!content || typeof content !== 'string' || content.length === 0) {
         throw new DBError('Post content is required.');
     }
-    if (!(await this.checkAuth())) {
-        throw new DBError({ error: 'Unauthorized' });
-    }
+    await this.throwAuth();
     return new Promise(async (resolve, reject) => {
         try {
             const sanitizedContent = sanitizeContent(content);
@@ -108,9 +106,7 @@ DBClient.prototype.createReply = async function(replyTo, content) {
     if (!content || typeof content !== 'string' || content.length === 0) {
         throw new DBError('Post content is required.');
     }
-    if (!(await this.checkAuth())) {
-        throw new DBError({ error: 'Unauthorized' });
-    }
+    await this.throwAuth();
     return new Promise(async (resolve, reject) => {
         try {
             const sanitizedContent = sanitizeContent(content);
