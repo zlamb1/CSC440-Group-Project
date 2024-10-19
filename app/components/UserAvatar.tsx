@@ -20,7 +20,7 @@ export default function UserAvatar({ className, avatar, userName, size = 25 }: U
                                     exit={{scale: 0.5, opacity: 0.25}}
                                     transition={{duration: 0.1}}
                                     key={avatar}>
-                            <img src={avatar} alt="Profile avatar"/>
+                            <img className="object-cover rounded-full" style={{ width: size, height: size }} src={avatar} alt="Profile avatar"/>
                         </motion.div> :
                         <motion.div className="origin-center bg-primary flex justify-center items-center w-full h-full rounded-full"
                                     initial={{scale: 0.5, opacity: 0.25}}
