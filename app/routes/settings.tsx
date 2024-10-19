@@ -35,9 +35,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
     const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
     const file = formData.get("avatar");
+
     const avatar = isProduction ?
-        (file?.name ? `${imageCdn}${file?.name}` : null) :
-        createBase64Src(file?.name, file?.getFilePath && file.getFilePath())
+        (file?.name ? `${imageCdn}${file?.name}` : null) : null;
+
+    if (!isProduction && file?.remove) {
+        file.remove();
+        return json({ error: 'avatars unsupported in dev'});
+    }
 
     return await tryDatabaseAction(async () => {
         const oldAvatar = context.user.avatarPath;
@@ -45,7 +50,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
             isUpdatingAvatar,
             avatar,
         });
-        removeAvatar(oldAvatar, file);
+        removeAvatar(oldAvatar);
         return json({});
     });
 }

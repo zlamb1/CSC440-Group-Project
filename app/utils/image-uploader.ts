@@ -33,17 +33,13 @@ export function createBase64Src(filename: string, filepath: string) {
     return `data:${getContentType(filename)};charset=utf-8;base64,` + fs.readFileSync(filepath, 'base64');
 }
 
-export function removeAvatar(oldAvatar: string, file: any) {
-    if (isProduction) {
-        try {
-            const split = oldAvatar?.split("/");
-            const filename = split[split.length - 1];
-            fs.unlinkSync(`${image_v1}${filename}`);
-        } catch (err) {
-            console.error('failed to remove avatar: ', err);
-        }
-    } else {
-        file?.remove && file.remove();
+export function removeAvatar(oldAvatar: string) {
+    try {
+        const split = oldAvatar?.split("/");
+        const filename = split[split.length - 1];
+        fs.unlinkSync(`${image_v1}${filename}`);
+    } catch (err) {
+        console.error('failed to remove avatar: ', err);
     }
 }
 
