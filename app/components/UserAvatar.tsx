@@ -8,9 +8,10 @@ export interface UserAvatarProps {
     size?: number | string,
 }
 
-function UserAvatarFallback({ userName }: { userName: string }) {
+function UserAvatarFallback({ userName, size }: { userName: string, size: number | string }) {
     return (
         <motion.div className="origin-center bg-primary flex justify-center items-center w-full h-full rounded-full"
+                    style={{ width: size, height: size }}
                     initial={{scale: 0.5, opacity: 0.25}}
                     animate={{scale: 1, opacity: 1}}
                     exit={{scale: 0.5, opacity: 0.25}}
@@ -35,11 +36,11 @@ export default function UserAvatar({className, avatar, userName, size = 25}: Use
                                         exit={{scale: 0.5, opacity: 0.25}}
                                         transition={{duration: 0.1}}
                                         key={avatar}>
-                                <AvatarImage src={avatar} alt={`${userName}'s avatar image`} />
+                                <AvatarImage className="object-cover rounded-full" style={{ width: size, height: size }} src={avatar} alt={`${userName}'s avatar image`} />
                                 <AvatarFallback>
-                                    <UserAvatarFallback userName={userName} />
+                                    <UserAvatarFallback size={size} userName={userName} />
                                 </AvatarFallback>
-                            </motion.div> : <UserAvatarFallback userName={userName} />
+                            </motion.div> : <UserAvatarFallback size={size} userName={userName} />
                     }
                 </Avatar>
             </AnimatePresence>
