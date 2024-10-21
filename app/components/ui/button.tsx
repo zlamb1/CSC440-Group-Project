@@ -42,7 +42,8 @@ export interface ButtonProps
     onClick?: (evt: React.MouseEvent<HTMLButtonElement>) => void,
     asChild?: boolean,
     containerClass?: string,
-    noClickAnimation?: boolean
+    noClickAnimation?: boolean,
+    autoComplete?: string,
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -61,7 +62,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         }
         return (
             <motion.div className={containerClass ?? "w-fit"} ref={scope}>
-                <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props}>
+                <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} autoComplete="off" {...props}>
                     <Slottable>{children}</Slottable>
                     <Ripple {...RippleProps} />
                 </Comp>
