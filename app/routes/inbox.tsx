@@ -54,28 +54,27 @@ function formatDate(date: Date | string, suffix?: string) {
     return `${years} year${years > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
 }
 
-function usePagination(props?: { pageSize?: number, collection?: any[] }) {
+function usePagination(props?: { pageSize?: number, pageCount?: number}) {
     const [ page, setPage ] = useState(0);
-
-    const collectionSize = props?.collection?.length ?? 0;
-    const pageCount = Math.ceil(collectionSize / (props?.pageSize ?? 1));
 
     function prevPage() {
         return setPage(prev => Math.max(0, prev - 1));
     }
 
     function nextPage() {
-        return setPage(prev => Math.min(prev + 1, (pageCount ?? 1) - 1));
+        return setPage(prev => Math.min(prev + 1, (props?.pageCount ?? 1) - 1));
     }
 
-    return { page, pageCount, setPage, prevPage, nextPage };
+    return { page, setPage, prevPage, nextPage };
 }
 
 function useTable(props?: { collection?: any[], pageSize?: number, keyFn?: (row: any) => any }) {
-    const { page, pageCount, setPage, prevPage, nextPage } = usePagination({ pageSize: props?.pageSize, collection: props?.collection });
-    const [ selected, setSelected ] = useState<any[]>([]);
+    const collectionSize = props?.collection?.length ?? 0;
+    const pageSize = props?.pageSize ?? 10;
+    const pageCount = Math.ceil(collectionSize / pageSize);
 
-    const pageSize = props?.pageSize ?? 1;
+    const { page, setPage, prevPage, nextPage } = usePagination({ pageSize, pageCount });
+    const [ selected, setSelected ] = useState<any[]>([]);
 
     function defaultKeyFunction(row: any) {
         return row;
@@ -105,7 +104,7 @@ function useTable(props?: { collection?: any[], pageSize?: number, keyFn?: (row:
     }
 
     const keys = rows?.map(keyFn);
-    const selectedAll = keys?.some(key => selected.includes(key));
+    const selectedAll = keys?.every(key => selected.includes(key));
 
     function selectAll() {
         setSelected(() => {
@@ -130,7 +129,7 @@ export interface PrependProps {
 }
 
 function InboxTable({ notifications, prepend }: { notifications?: any[], prepend?: ({rows, selected}: PrependProps) => ReactNode }) {
-    const { page, selected, pageCount, rows, prevPage, nextPage, setPage, selectRow, selectAll, selectedAll } = useTable({ collection: notifications, keyFn: (row: any) => row.id });
+    const { page, selected, pageCount, rows, prevPage, nextPage, selectRow, selectAll, selectedAll } = useTable({ collection: notifications, keyFn: (row: any) => row.id });
 
     return (
         <div className="flex flex-col gap-3">
@@ -175,20 +174,23 @@ function InboxTable({ notifications, prepend }: { notifications?: any[], prepend
                             </div>
                         </div> : null
                 }
-                <div className="flex flex-row gap-3">
-                    <Button variant="outline"
-                            onClick={prevPage}
-                            disabled={page === 0}
-                    >
-                        Previous
-                    </Button>
-                    <Button variant="outline"
-                            onClick={nextPage}
-                            disabled={page === pageCount - 1}
-                    >
-                        Next
-                    </Button>
-                </div>
+                {
+                    pageCount > 1 ?
+                        <div className="flex flex-row gap-3">
+                            <Button variant="outline"
+                                    onClick={prevPage}
+                                    disabled={page === 0}
+                            >
+                                Previous
+                            </Button>
+                            <Button variant="outline"
+                                    onClick={nextPage}
+                                    disabled={page === pageCount - 1}
+                            >
+                                Next
+                            </Button>
+                        </div> : null
+                }
             </div>
         </div>
     )
@@ -197,12 +199,12 @@ function InboxTable({ notifications, prepend }: { notifications?: any[], prepend
 export default function InboxRoute() {
     const data = useLoaderData<typeof loader>();
 
-    function prepend({ selected }: PrependProps) {
+    function prepend({selected}: PrependProps) {
         return (
             <div className="flex flex-row w-full">
-                <Input className="w-1/3" placeholder="Filter" />
+                <Input className="w-1/3" placeholder="Filter"/>
                 <div className="flex-grow flex justify-end">
-                    <Fade show={ selected.length > 0 }>
+                    <Fade show={selected.length > 0}>
                         <Button className="flex flex-row items-center gap-2" variant="outline">Delete <Bell size={14} /></Button>
                     </Fade>
                 </div>
