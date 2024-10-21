@@ -3,9 +3,10 @@ import {json, LoaderFunctionArgs, redirect} from "@remix-run/node";
 import {useLoaderData} from "@remix-run/react";
 import {Checkbox} from "@ui/checkbox";
 import {Input} from "@ui/input";
-import {useEffect, useState} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import {Button} from "@ui/button";
-import notifications from "@/routes/notifications";
+import {Bell} from "lucide-react";
+import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (!context.user.loggedIn) {
@@ -126,12 +127,18 @@ function useTable(props?: { collection?: any[], pageSize?: number, keyFn?: (row:
     return { page, selected, pageCount, rows, selectedAll, getRows, prevPage, nextPage, selectRow, selectAll };
 }
 
-function InboxTable({ notifications }: { notifications?: any[] }) {
-    const { page, selected, pageCount, rows, selectedAll, selectRow, selectAll } = useTable({ collection: notifications, keyFn: (row: any) => row.id });
-    const [ filter, setFilter ] = useState<string | undefined>();
+export interface PrependProps {
+    rows?: any[];
+    selected: any[];
+}
 
+function InboxTable({ notifications, prepend }: { notifications?: any[], prepend?: ({rows, selected}: PrependProps) => ReactNode }) {
+    const { page, selected, pageCount, rows, selectedAll, selectRow, selectAll } = useTable({ collection: notifications, keyFn: (row: any) => row.id });
     return (
         <div className="flex flex-col gap-3">
+            {
+                prepend ? prepend({rows, selected}) : null
+            }
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -186,10 +193,22 @@ function InboxTable({ notifications }: { notifications?: any[] }) {
 export default function InboxRoute() {
     const data = useLoaderData<typeof loader>();
 
+    function prepend({ selected }: PrependProps) {
+        return (
+            <div className="flex flex-row w-full">
+                <Input className="w-1/3" placeholder="Filter" />
+                <div className="flex-grow flex justify-end">
+                    <Fade show={ selected.length > 0 }>
+                        <Button className="flex flex-row items-center gap-2" variant="outline">Delete <Bell size={14} /></Button>
+                    </Fade>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="m-8 w-full h-full flex flex-col gap-3">
-            <Input placeholder="Filter" />
-            <InboxTable notifications={data?.notifications} />
+            <InboxTable notifications={data?.notifications} prepend={prepend} />
         </div>
     );
 }

@@ -16,7 +16,7 @@ export async function action({context, request}: ActionFunctionArgs) {
         const formData = await request.formData();
         const content = String(formData.get("content"));
 
-        await context.db.createPost(context.user.id, content);
+        await context.db.createPost(content);
         return json({ success: 'created post' });
     });
 }

@@ -1,6 +1,6 @@
 import {Laptop, Moon, Sun} from "lucide-react";
 import {themes, useTheme} from "@/utils/prefers-color-scheme";
-import {startTransition, Suspense, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import React from "react";
 import {
     DropdownMenu,
@@ -12,7 +12,6 @@ import {AnimatePresence} from "framer-motion";
 import {Separator} from "@ui/separator";
 import {motion} from 'framer-motion';
 import useIsSSR from "@/utils/useIsSSR";
-import {LoadingSpinner} from "@components/LoadingSpinner";
 
 interface ThemeIcons {
     [index: string]: React.FunctionComponent

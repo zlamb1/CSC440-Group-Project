@@ -29,7 +29,7 @@ export default function Index() {
             formData.set('content', ref.current.getContent());
             createFetcher.submit(formData, {
                 method: 'POST',
-                action: '/post/create',
+                action: '/posts/create',
             });
         }
     }

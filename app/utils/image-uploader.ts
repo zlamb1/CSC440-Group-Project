@@ -1,5 +1,4 @@
 import {
-    NodeOnDiskFile,
     unstable_composeUploadHandlers,
     unstable_createFileUploadHandler,
     unstable_createMemoryUploadHandler
@@ -8,10 +7,10 @@ import crypto from "crypto";
 import {FileUploadHandlerFilterArgs} from "@remix-run/node/dist/upload/fileUploadHandler";
 import fs from "node:fs";
 
-export const imageCdn = 'https://cdn.zlamb1.com/images/';
-export const image_v1 = '/www/data/images/';
+export const IMAGE_CDN_URL = 'https://cdn.zlamb1.com/images/';
+export const IMAGE_DEV_CDN_URL = 'https://cdn.zlamb1.com/dev/images/';
+export const IMAGE_API_V1 = '/www/data/images/';
 
-const isProduction = process.env.NODE_ENV === "production";
 const allowedExtensions = ["jpg", "jpeg", "png"];
 
 export function getContentType(filename: string) {
@@ -26,18 +25,11 @@ export function getContentType(filename: string) {
     throw new Error("unsupported extension");
 }
 
-export function createBase64Src(filename: string, filepath: string) {
-    if (!filename || !filepath) {
-        return null;
-    }
-    return `data:${getContentType(filename)};charset=utf-8;base64,` + fs.readFileSync(filepath, 'base64');
-}
-
 export function removeAvatar(oldAvatar: string) {
     try {
         const split = oldAvatar?.split("/");
         const filename = split[split.length - 1];
-        fs.unlinkSync(`${image_v1}${filename}`);
+        fs.unlinkSync(`${IMAGE_API_V1}${filename}`);
     } catch (err) {
         console.error('failed to remove avatar: ', err);
     }

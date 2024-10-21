@@ -1,5 +1,6 @@
 import {AnimatePresence, motion} from "framer-motion";
 import {Avatar, AvatarFallback, AvatarImage} from "@ui/avatar";
+import Transition from "@ui/transition";
 
 export interface UserAvatarProps {
     className?: string,
@@ -26,24 +27,23 @@ export default function UserAvatar({className, avatar, userName, size = 25}: Use
     return (
         <div className={`flex justify-center items-center rounded-full select-none font-medium text-white ` + (className ?? '')}
              style={{width: size, height: size}}>
-            <AnimatePresence mode="wait" initial={false}>
-                <Avatar className="w-full h-full">
-                    {
-                        avatar ?
-                            <motion.div className="origin-center"
-                                        initial={{scale: 0.5, opacity: 0.25}}
-                                        animate={{scale: 1, opacity: 1}}
-                                        exit={{scale: 0.5, opacity: 0.25}}
-                                        transition={{duration: 0.1}}
-                                        key={avatar}>
-                                <AvatarImage className="object-cover rounded-full" style={{ width: size, height: size }} src={avatar} alt={`${userName}'s avatar image`} />
-                                <AvatarFallback>
-                                    <UserAvatarFallback size={size} userName={userName} />
-                                </AvatarFallback>
-                            </motion.div> : <UserAvatarFallback size={size} userName={userName} />
-                    }
-                </Avatar>
-            </AnimatePresence>
+            <Avatar className="w-full h-full">
+                <Transition duration={0.1}
+                            show={avatar}
+                            transition={{
+                                initial: {scale: 0.5, opacity: 0.25},
+                                exit: {scale: 0.5, opacity: 0.25},
+                            }}
+                            initial={false}
+                            className="origin-center"
+                            fallback={<UserAvatarFallback size={size} userName={userName} />}
+                >
+                    <AvatarImage className="object-cover rounded-full" style={{ width: size, height: size }} src={avatar} alt={`${userName}'s avatar image`} />
+                    <AvatarFallback>
+                        <UserAvatarFallback size={size} userName={userName} />
+                    </AvatarFallback>
+                </Transition>
+            </Avatar>
         </div>
     );
 }

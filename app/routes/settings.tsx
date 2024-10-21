@@ -13,11 +13,16 @@ import {
     unstable_parseMultipartFormData
 } from "@remix-run/node";
 import {Edit2, X} from "lucide-react";
-import {AnimatePresence, motion} from "framer-motion";
+import {motion} from "framer-motion";
 import {useEffect, useRef, useState} from "react";
-import {createBase64Src, createImageUploader, image_v1, imageCdn, removeAvatar} from "@/utils/image-uploader";
+import {
+    createImageUploader,
+    IMAGE_API_V1, IMAGE_CDN_URL, IMAGE_DEV_CDN_URL,
+    removeAvatar
+} from "@/utils/image-uploader";
 import {tryDatabaseAction} from "@/utils/database-error";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
+import Fade from "@ui/fade";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -26,7 +31,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
-    const uploadHandler = createImageUploader({ directory: isProduction ? image_v1 : undefined });
+    const uploadHandler = createImageUploader({ directory: isProduction ? IMAGE_API_V1 : undefined });
 
     const formData = await unstable_parseMultipartFormData(
         request,
@@ -37,11 +42,34 @@ export async function action({ context, request }: ActionFunctionArgs) {
     const file = formData.get("avatar");
 
     const avatar = isProduction ?
-        (file?.name ? `${imageCdn}${file?.name}` : null) : null;
+        (file?.name ? `${IMAGE_CDN_URL}${file?.name}` : null) :
+        (file?.name ? `${IMAGE_DEV_CDN_URL}${file.name}` : null);
 
-    if (!isProduction && file?.remove) {
-        file.remove();
-        return json({ error: 'avatars unsupported in dev'});
+    if (!isProduction) {
+        if (!process.env.CDN_API_KEY) {
+            console.error('Cannot upload images without CDN API key.');
+            return json({ error: 'Server error.' });
+        }
+
+        const CDN_UPLOAD_URL = 'https://cdn.zlamb1.com/images/upload/';
+
+        const formData = new FormData();
+        formData.set('image', file);
+        formData.set('api_key', process.env.CDN_API_KEY);
+
+        try {
+            await fetch(CDN_UPLOAD_URL, {
+                method: 'POST',
+                body: formData,
+            });
+        } catch (err) {
+            console.error('failed to upload image', err);
+            return json({ error: 'Unknown error.' });
+        } finally {
+            if (file.remove) {
+                file.remove();
+            }
+        }
     }
 
     return await tryDatabaseAction(async () => {
@@ -50,8 +78,10 @@ export async function action({ context, request }: ActionFunctionArgs) {
             isUpdatingAvatar,
             avatar,
         });
-        removeAvatar(oldAvatar);
-        return json({});
+        if (isProduction) {
+            removeAvatar(oldAvatar);
+        }
+        return json({ success: 'uploaded avatar' });
     });
 }
 
@@ -116,21 +146,12 @@ export default function SettingsRoute() {
                             </Button>
                         </HoverCardTrigger>
                         <HoverCardContent className="rounded-full border-0 w-fit h-fit p-0">
-                            <AnimatePresence initial={false}>
-                                {
-                                    userAvatar || data?.avatarPath ?
-                                        <motion.div initial={{opacity: 0}}
-                                                    animate={{opacity: 1}}
-                                                    exit={{opacity: 0}}
-                                                    transition={{duration: 0.5}}>
-                                            <Button className="w-[25px] h-[25px] rounded-full" size="icon" variant="destructive" type="button"
-                                                    onClick={clearAvatar}>
-                                                <X size={16} />
-                                            </Button>
-                                        </motion.div>
-                                        : null
-                                }
-                            </AnimatePresence>
+                            <Fade initial={false} show={userAvatar || data?.avatarPath}>
+                                <Button className="w-[25px] h-[25px] rounded-full" size="icon" variant="destructive" type="button"
+                                        onClick={clearAvatar}>
+                                    <X size={16} />
+                                </Button>
+                            </Fade>
                         </HoverCardContent>
                     </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
