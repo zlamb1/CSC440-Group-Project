@@ -46,7 +46,7 @@ export async function loader({context, request}: LoaderFunctionArgs) {
 }
 
 export function Layout({children}: {children: React.ReactNode}) {
-    const data = useRouteLoaderData("root");
+    const data = useRouteError() ? null : useRouteLoaderData("root");
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
