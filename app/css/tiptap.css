@@ -82,3 +82,37 @@ pre {
         }
     }
 }
+
+@keyframes show_check {
+    from {
+        stroke-dashoffset: 22.627;
+    }
+    to {
+        stroke-dashoffset: 45.254;
+    }
+}
+
+@keyframes hide_check {
+    from {
+        stroke-dashoffset: 45.254;
+    }
+    to {
+        stroke-dashoffset: 22.627;
+        visibility: hidden;
+    }
+}
+
+.z__checkbox-icon__z {
+    stroke-dasharray: 22.627;
+    animation-duration: 0.0s;
+}
+
+span[data-state=unchecked] .z__checkbox-icon__z {
+    animation-name: hide_check;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+span[data-state=checked] .z__checkbox-icon__z {
+    animation-name: show_check;
+}
