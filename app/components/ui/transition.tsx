@@ -1,5 +1,5 @@
 import {AnimatePresence, motion} from "framer-motion";
-import {Key, ReactNode} from "react";
+import {cloneElement, FunctionComponent, Key, ReactElement, ReactNode, ReactPortal} from "react";
 
 export interface SingleValueTransition {
     property: string;
@@ -22,9 +22,10 @@ export interface TransitionProps {
     duration?: number;
     initial?: boolean;
     fallback?: ReactNode;
+    container?: ReactElement;
 }
 
-export default function Transition({ children, transition, id, className, show = true, duration = 0.2, initial = true, fallback = null }: TransitionProps) {
+export default function Transition({ children, transition, id, className, show = true, duration = 0.2, initial = true, fallback = null, container }: TransitionProps) {
     function getProps() {
         if ('property' in transition) {
             if (transition.transitionTo === undefined) {
@@ -39,6 +40,33 @@ export default function Transition({ children, transition, id, className, show =
         } else {
             return transition;
         }
+    }
+
+    function getFallbackWithContainer() {
+        if (fallback && container) {
+            return cloneElement(container, {
+                ...container.props,
+                children: fallback
+            });
+        }
+
+        return null;
+    }
+
+    if (container) {
+        return (
+            <AnimatePresence mode="wait" initial={initial}>
+                {
+                    show ? cloneElement(container, {
+                        ...container.props,
+                        children:
+                            <motion.div key={id} className={className} transition={{duration}} {...getProps()}>
+                                {children}
+                            </motion.div>
+                    }) : getFallbackWithContainer()
+                }
+            </AnimatePresence>
+        );
     }
 
     return (
