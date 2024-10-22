@@ -1,7 +1,7 @@
 import {
     Links,
     Meta,
-    Scripts, useLoaderData, useLocation, useOutlet, useRouteError, useRouteLoaderData,
+    Scripts, useLocation, useOutlet, useRouteError, useRouteLoaderData,
 } from "@remix-run/react";
 
 import NavBar from "@components/NavBar";
@@ -9,6 +9,7 @@ import NavBar from "@components/NavBar";
 import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import twStylesheet from "@css/tailwind.css?url";
 import tiptapStylesheet from "@css/tiptap.css?url";
+import animationStylesheet from "@css/animation.css?url";
 import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
@@ -18,6 +19,7 @@ import {Card} from "@ui/card";
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: twStylesheet },
     { rel: "stylesheet", href: tiptapStylesheet },
+    { rel: "stylesheet", href: animationStylesheet },
 ];
 
 function parseColorSchemeCookie(cookieHeader: any) {
