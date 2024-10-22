@@ -34,7 +34,21 @@ const Checkbox = React.forwardRef<
       <CheckboxPrimitive.Indicator
           className={cn("grid place-content-center text-current")} forceMount
       >
-        <Check strokeWidth={3} style={isMounted ? { animationDuration } : undefined} className="z__checkbox-icon__z w-2.5 h-2.5"/>
+        <svg width={24}
+             height={24}
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             strokeDasharray={100}
+             strokeDashoffset={100}
+             strokeWidth={3}
+             strokeLinecap="round"
+             strokeLinejoin="round"
+             style={{ transition: `stroke-dashoffset ${animationDuration} ease-in-out` }}
+             className="z__checkbox-icon__z w-2.5 h-2.5"
+        >
+          <path d="M20 6 9 17l-5-5" pathLength={100} />
+        </svg>
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )
