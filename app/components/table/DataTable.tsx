@@ -4,120 +4,8 @@ import Omit from "@ui/omit";
 import {Button} from "@ui/button";
 import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
-
-export function usePagination(props?: { pageSize?: number, pageCount?: number}) {
-    const [ page, setPage ] = useState(0);
-
-    function prevPage() {
-        return setPage(prev => Math.max(0, prev - 1));
-    }
-
-    function nextPage() {
-        return setPage(prev => Math.min(prev + 1, (props?.pageCount ?? 1) - 1));
-    }
-
-    return { page, setPage, prevPage, nextPage };
-}
-
-export function useSelection({ rows, keyFn }: { rows: any[], keyFn: (row: any) => any }) {
-    const [ selected, setSelected ] = useState<any[]>([]);
-
-    const keys = rows?.map(keyFn);
-    const selectedAll = keys?.every(key => selected.includes(key));
-
-    function selectRow(row: any) {
-        setSelected(prev => {
-            const array = [...prev];
-            const key = keyFn(row);
-            const indexOf = prev.indexOf(key);
-            if (indexOf > -1) {
-                array.splice(indexOf, 1);
-            } else {
-                array.push(key);
-            }
-            return array;
-        });
-    }
-
-    function selectAll() {
-        setSelected(() => {
-            if (selectedAll) {
-                return [];
-            } else {
-                const array: any[] = [];
-                for (const row of rows || []) {
-                    array.push(keyFn(row));
-                }
-                return array;
-            }
-        });
-    }
-
-    return { selected, selectRow, selectAll, selectedAll }
-}
-
-export function useTable(props?: { collection?: any[], pageSize?: number, filterFn?: (row: any) => boolean, keyFn?: (row: any) => any }) {
-    const collectionSize = props?.collection?.length ?? 0;
-    const pageSize = props?.pageSize ?? 10;
-    const pageCount = Math.ceil(collectionSize / pageSize);
-
-    const [ sortedBy, setSorted ] = useState<string | undefined>();
-    const [ isSortedDescending, setSortedDescending ] = useState<boolean>();
-
-    const { page, setPage, prevPage, nextPage } = usePagination({ pageSize, pageCount });
-
-    const multiplier = isSortedDescending ? -1 : 1;
-    function defaultSort(a: any, b: any) {
-        if (!sortedBy) {
-            return 0;
-        }
-
-        const valueA = a[sortedBy];
-        const valueB = b[sortedBy];
-
-        switch (typeof valueA) {
-            case 'string':
-                return valueA.localeCompare(valueB) * multiplier;
-            case 'number':
-                return (valueA - valueB) * multiplier;
-        }
-
-        if (valueA instanceof Date) {
-            if (valueA > valueB) {
-                return 1 * multiplier;
-            } else if (valueA < valueB) {
-                return -1 * multiplier;
-            } else {
-                return 0;
-            }
-        }
-
-        return (valueA - valueB) * multiplier;
-    }
-
-    function getRows(page: number) {
-        const index = page * pageSize;
-        let slice = props?.collection?.slice(index, index + pageSize);
-        const filterFn = props?.filterFn;
-        if (filterFn) {
-            slice = slice?.filter(filterFn);
-        }
-        if (sortedBy) {
-            slice?.sort(defaultSort);
-            console.log(slice);
-        }
-        return slice;
-    }
-
-    const rows = getRows(page);
-    const defaultKeyFn = (row: any) => row.id;
-    const { selected, selectRow, selectAll, selectedAll } = useSelection({ rows: rows ?? [], keyFn: props?.keyFn ?? defaultKeyFn });
-
-    return { page, pageCount, rows, getRows, prevPage, nextPage, setPage,
-             selected, selectRow, selectAll, selectedAll, sortedBy, setSorted,
-             isSortedDescending, setSortedDescending
-           };
-}
+import {useTable} from "@components/table/table";
+import {cn} from "@/lib/utils";
 
 export interface Column {
     name: string;
@@ -130,14 +18,28 @@ export interface Column {
     sortable?: boolean;
 }
 
+export interface SlotProps {
+    page: number;
+    pageCount: number;
+    prevPage: () => void;
+    nextPage: () => void;
+    rows?: any[];
+    selected?: any[];
+}
+
+export type Slot = ((props: SlotProps) => ReactNode) | ReactNode;
+
 export interface DataTableProps {
     columns: Column[];
     data?: any;
+    className?: string;
     pageSize?: number;
     usePagination?: boolean;
     useSelection?: boolean;
     keyFn?: (row: any) => any;
     filterFn?: (row: any) => boolean;
+    prepend?: Slot;
+    append?: Slot;
 }
 
 function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: { column: Column, isSorted?: boolean, isDescending?: boolean, onSort?: () => void }) {
@@ -207,7 +109,6 @@ function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: 
                 { column?.header ? column.header : getHeaderCell() }
             </TableHead>
         </Omit>
-
     );
 }
 
@@ -244,8 +145,8 @@ function ColumnCell(row: any, column: Column) {
     );
 }
 
-export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true,
-                                    useSelection = true, keyFn = (row => row.id), filterFn
+export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, className,
+                                    useSelection = true, keyFn = (row => row.id), filterFn, prepend, append
                                   }: DataTableProps)
 {
     const table = useTable({
@@ -256,8 +157,8 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
     });
 
     const {
-            selected, rows, selectRow, selectAll, selectedAll,
-            sortedBy, setSorted, isSortedDescending, setSortedDescending
+            page, pageCount, prevPage, nextPage, rows, selected, selectRow, selectAll, selectedAll,
+            sortedBy, setSorted, isSortedDescending, setSortedDescending,
     } = table;
 
     const isEmpty = !rows || !rows.length || rows.length === 0;
@@ -278,52 +179,70 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
         }
     }
 
+    function getSlot(slot: Slot) {
+        if (typeof slot === 'function') {
+            return slot({ page, pageCount, prevPage, nextPage, rows, selected });
+        } else if (slot) {
+            return slot;
+        } else {
+            return null;
+        }
+    }
+
     return (
-        <Table>
-            <Omit omit={isEmpty}>
-                <TableHeader>
-                    <TableRow>
-                        {
-                            useSelection ?
-                                <TableHead>
-                                    <Checkbox checked={selectedAll} onClick={ selectAll } />
-                                </TableHead> : null
-                        }
-                        {
-                            columns.map(col =>
-                                <ColumnHead key={col.name}
-                                            column={col}
-                                            isSorted={col.name === sortedBy}
-                                            isDescending={isSortedDescending}
-                                            onSort={ () => onSort(col.name) }
-                                />
-                            )
-                        }
-                    </TableRow>
-                </TableHeader>
-            </Omit>
-            <TableBody>
-                <Omit omit={!isEmpty}>
-                    <TableRow>
-                        <TableCell>
-                            No data available. :(
-                        </TableCell>
-                    </TableRow>
-                </Omit>
-                {
-                    rows?.map(row => (
-                        <TableRow key={keyFn(row)}>
+        <div className={cn("flex flex-col gap-1", className)}>
+            {
+                getSlot(prepend)
+            }
+            <Table>
+                <Omit omit={isEmpty}>
+                    <TableHeader>
+                        <TableRow>
                             {
                                 useSelection ?
-                                    <TableCell>
-                                        <Checkbox className="w-4 h-4" checked={selected.includes(keyFn(row))} onClick={ () => selectRow(row) } />
-                                    </TableCell> : null
+                                    <TableHead>
+                                        <Checkbox checked={selectedAll} onClick={ selectAll } />
+                                    </TableHead> : null
                             }
-                            { columns.map(col => ColumnCell(row, col)) }
+                            {
+                                columns.map(col =>
+                                    <ColumnHead key={col.name}
+                                                column={col}
+                                                isSorted={col.name === sortedBy}
+                                                isDescending={isSortedDescending}
+                                                onSort={ () => onSort(col.name) }
+                                    />
+                                )
+                            }
                         </TableRow>
-                    ))
-                }
-            </TableBody>
-        </Table>
+                    </TableHeader>
+                </Omit>
+                <TableBody>
+                    <Omit omit={!isEmpty}>
+                        <TableRow>
+                            <TableCell className="text-center">
+                                No data available. :(
+                            </TableCell>
+                        </TableRow>
+                    </Omit>
+                    {
+                        rows?.map(row => (
+                            <TableRow key={keyFn(row)}>
+                                {
+                                    useSelection ?
+                                        <TableCell>
+                                            <Checkbox className="w-4 h-4" checked={selected.includes(keyFn(row))} onClick={ () => selectRow(row) } />
+                                        </TableCell> : null
+                                }
+                                { columns.map(col => ColumnCell(row, col)) }
+                            </TableRow>
+                        ))
+                    }
+                </TableBody>
+            </Table>
+            {
+                getSlot(append)
+            }
+        </div>
     )
 }

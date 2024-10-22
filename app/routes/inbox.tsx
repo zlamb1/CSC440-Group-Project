@@ -3,9 +3,10 @@ import {useLoaderData} from "@remix-run/react";
 import {Input} from "@ui/input";
 import { useState} from "react";
 import {Button} from "@ui/button";
-import {Bell} from "lucide-react";
+import {Bell, Search, X} from "lucide-react";
 import Fade from "@ui/fade";
-import InboxTable, {PrependProps} from "@components/table/InboxTable";
+import InboxTable from "@components/table/InboxTable";
+import {SlotProps} from "@components/table/DataTable";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (!context.user.loggedIn) {
@@ -20,12 +21,26 @@ export default function InboxRoute() {
     const data = useLoaderData<typeof loader>();
     const [ filter, setFilter ] = useState('');
 
-    function prepend({selected}: PrependProps) {
+    function prepend({selected}: SlotProps) {
+        const clear = (
+            <Fade id="clear" show={!!filter}>
+                <Button className="text-gray-400 w-6 h-6 rounded-full" size="icon" variant="ghost" onClick={ () => setFilter('') }>
+                    <X size={14} />
+                </Button>
+            </Fade>
+        );
+
         return (
             <div className="flex flex-row w-full">
-                <Input value={filter} onChange={ (evt) => setFilter(evt.target.value) } className="w-1/3" placeholder="Search" />
+                <Input value={filter}
+                       onChange={ (evt) => setFilter(evt.target.value) }
+                       className="w-1/3"
+                       placeholder="Search"
+                       prepend={<div className="flex justify-center items-center w-6 h-6"><Search size={14} className="text-gray-400" /></div>}
+                       append={clear}
+                />
                 <div className="flex-grow flex justify-end">
-                    <Fade show={selected.length > 0}>
+                    <Fade show={selected && selected.length > 0}>
                         <Button className="flex flex-row items-center gap-2" variant="outline">Delete <Bell size={14} /></Button>
                     </Fade>
                 </div>

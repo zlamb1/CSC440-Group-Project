@@ -60,6 +60,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             }
             if (onClick) onClick(evt);
         }
+        if (props.hidden) {
+            return null;
+        }
         return (
             <motion.div className={containerClass ?? "w-fit"} ref={scope}>
                 <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} autoComplete="off" {...props}>

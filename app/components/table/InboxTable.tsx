@@ -1,7 +1,5 @@
-import {ReactNode} from "react";
 import {Button} from "@ui/button";
-import DataTable, {useTable} from "@components/table/DataTable";
-import Fade from "@ui/fade";
+import DataTable, {Slot, SlotProps} from "@components/table/DataTable";
 
 function formatType(type: string) {
     return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
@@ -40,34 +38,31 @@ function formatDate(date: Date | string, suffix?: string) {
     return `${years} year${years > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
 }
 
-function DefaultAppend(props?: any) {
-    if ((!props?.rows || props?.rows.length <= 0) || (props.compact && props?.pageCount < 2)) {
+function DefaultAppend(props?: SlotProps) {
+    if ((!props?.rows || props?.rows.length <= 0) || props.pageCount < 2) {
         return null;
     }
 
     return (
         <div className="flex flex-row items-center gap-3">
+            <div className="flex-grow">
+                <div
+                    className="select-none font-medium text-gray-400 text-sm">{props?.selected?.length} of {props?.rows?.length} row(s)
+                    selected
+                </div>
+            </div>
             {
-                !props?.compact ?
-                    <div className="flex-grow">
-                        <div
-                            className="select-none font-medium text-gray-400 text-sm">{props?.selected.length} of {props?.rows?.length} row(s)
-                            selected
-                        </div>
-                    </div> : null
-            }
-            {
-                props?.pageCount > 1 ?
+                props.pageCount > 1 ?
                     <div className="flex flex-row gap-3">
                         <Button variant="outline"
                                 onClick={props?.prevPage}
-                                disabled={props?.page === 0}
+                                disabled={props.page === 0}
                         >
                             Previous
                         </Button>
                         <Button variant="outline"
                                 onClick={props?.nextPage}
-                                disabled={props?.page === props?.pageCount - 1}
+                                disabled={props.page === props.pageCount - 1}
                         >
                             Next
                         </Button>
@@ -76,13 +71,6 @@ function DefaultAppend(props?: any) {
         </div>
     );
 }
-
-export interface PrependProps {
-    rows?: any[];
-    selected: any[];
-}
-
-type Slot = (({rows, selected}: PrependProps) => ReactNode) | ReactNode;
 
 export interface InboxTableProps {
     notifications?: any[];
@@ -93,14 +81,6 @@ export interface InboxTableProps {
 }
 
 export default function InboxTable({notifications, filter, prepend, append, compact = false}: InboxTableProps) {
-    const table = useTable({
-        collection: notifications,
-        filterFn: row => row.content?.toLowerCase().includes(filter),
-        keyFn: row => row.id
-    });
-
-    const {selected, rows, selectRow, selectAll, selectedAll} = table;
-
     const columns = [
         {
             name: 'dateIssued',
@@ -129,35 +109,15 @@ export default function InboxTable({notifications, filter, prepend, append, comp
         }
     ];
 
-    function getReactNode(prop: Slot, fallback: ReactNode) {
-        if (typeof prop === 'undefined') {
-            return fallback;
-        }
-
-        if (typeof prop === "function") {
-            return prop({rows, selected});
-        }
-
-        return prop;
-    }
-
     return (
         <div className="flex flex-col gap-3">
-            {
-                getReactNode(prepend, null)
-            }
-            <Fade show={rows && rows.length > 0} fallback={<div>You have no notifications! :(</div>}>
-                <DataTable data={notifications}
-                           columns={columns}
-                           filterFn={ row => row?.content.includes(filter) }
-                           useSelection={!compact}
-                />
-            </Fade>
-            {
-                getReactNode(append,
-                    <DefaultAppend {...table} compact={compact} />
-                )
-            }
+            <DataTable data={notifications}
+                       columns={columns}
+                       filterFn={ row => row?.content?.toLowerCase().includes(filter?.toLowerCase()) }
+                       useSelection={!compact}
+                       prepend={prepend}
+                       append={append ?? DefaultAppend}
+            />
         </div>
     )
 }
