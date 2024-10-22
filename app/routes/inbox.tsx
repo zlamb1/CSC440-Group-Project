@@ -5,7 +5,7 @@ import {Checkbox} from "@ui/checkbox";
 import {Input} from "@ui/input";
 import {ReactNode, useEffect, useState} from "react";
 import {Button} from "@ui/button";
-import {Bell} from "lucide-react";
+import {Bell, Search} from "lucide-react";
 import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
@@ -68,7 +68,7 @@ function usePagination(props?: { pageSize?: number, pageCount?: number}) {
     return { page, setPage, prevPage, nextPage };
 }
 
-function useTable(props?: { collection?: any[], pageSize?: number, keyFn?: (row: any) => any }) {
+function useTable(props?: { collection?: any[], pageSize?: number, filterFn?: (row: any) => boolean, keyFn?: (row: any) => any }) {
     const collectionSize = props?.collection?.length ?? 0;
     const pageSize = props?.pageSize ?? 10;
     const pageCount = Math.ceil(collectionSize / pageSize);
@@ -84,7 +84,12 @@ function useTable(props?: { collection?: any[], pageSize?: number, keyFn?: (row:
 
     function getRows(page: number) {
         const index = page * pageSize;
-        return props?.collection?.slice(index, index + pageSize);
+        const slice = props?.collection?.slice(index, index + pageSize);
+        const filterFn = props?.filterFn;
+        if (filterFn) {
+            return slice?.filter(filterFn);
+        }
+        return slice;
     }
 
     const rows = getRows(page);
@@ -126,11 +131,16 @@ function useTable(props?: { collection?: any[], pageSize?: number, keyFn?: (row:
 export interface PrependProps {
     rows?: any[];
     selected: any[];
+    filter?: string;
 }
 
-function InboxTable({ notifications, prepend }: { notifications?: any[], prepend?: ({rows, selected}: PrependProps) => ReactNode }) {
-    const { page, selected, pageCount, rows, prevPage, nextPage, selectRow, selectAll, selectedAll } = useTable({ collection: notifications, keyFn: (row: any) => row.id });
-
+function InboxTable({ notifications, filter, prepend }: { notifications?: any[], filter?: string, prepend?: ({rows, selected}: PrependProps) => ReactNode }) {
+    const { page, selected, pageCount, rows, prevPage, nextPage, selectRow, selectAll, selectedAll } =
+        useTable({
+            collection: notifications,
+            filterFn: row => row.content?.toLowerCase().includes(filter),
+            keyFn: row => row.id
+        });
     return (
         <div className="flex flex-col gap-3">
             {
@@ -150,6 +160,12 @@ function InboxTable({ notifications, prepend }: { notifications?: any[], prepend
                 </TableHeader>
                 <TableBody>
                     {
+                        rows && rows.length > 0 ? null :
+                            <TableRow>
+                                <TableCell>You have no notifications! :(</TableCell>
+                            </TableRow>
+                    }
+                    {
                         rows?.map((n: any) =>
                             <TableRow key={n.id}>
                                 <TableCell>
@@ -166,7 +182,7 @@ function InboxTable({ notifications, prepend }: { notifications?: any[], prepend
             </Table>
             <div className="flex flex-row items-center gap-3">
                 {
-                    rows ?
+                    rows && rows.length > 0 ?
                         <div className="flex-grow">
                             <div
                                 className="select-none font-medium text-gray-400 text-sm">{selected.length} of {rows?.length} row(s)
@@ -198,11 +214,12 @@ function InboxTable({ notifications, prepend }: { notifications?: any[], prepend
 
 export default function InboxRoute() {
     const data = useLoaderData<typeof loader>();
+    const [ filter, setFilter ] = useState('');
 
     function prepend({selected}: PrependProps) {
         return (
             <div className="flex flex-row w-full">
-                <Input className="w-1/3" placeholder="Filter"/>
+                <Input value={filter} onChange={ (evt) => setFilter(evt.target.value) } className="w-1/3" placeholder="Search" />
                 <div className="flex-grow flex justify-end">
                     <Fade show={selected.length > 0}>
                         <Button className="flex flex-row items-center gap-2" variant="outline">Delete <Bell size={14} /></Button>
@@ -214,7 +231,7 @@ export default function InboxRoute() {
 
     return (
         <div className="m-8 w-full h-full flex flex-col gap-3">
-            <InboxTable notifications={data?.notifications} prepend={prepend} />
+            <InboxTable notifications={data?.notifications} filter={filter} prepend={prepend} />
         </div>
     );
 }
