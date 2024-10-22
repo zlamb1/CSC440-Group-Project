@@ -25,7 +25,7 @@ DBClient.prototype.getNotificationCount = async function() {
 DBClient.prototype.getNotifications = async function() {
     await this.throwAuth();
     try {
-        const res = await client.query('SELECT * FROM notifications WHERE user_id = $1;', [this.user.id]);
+        const res = await client.query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY date_issued;', [this.user.id]);
         if (res.rows && res.rows.length > 0) {
             for (const row of res.rows) {
                 if (row.id && !row.viewed) {
