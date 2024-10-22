@@ -1,9 +1,6 @@
-import {ReactNode, useState} from "react";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@ui/table";
-import {Checkbox} from "@ui/checkbox";
+import {ReactNode} from "react";
 import {Button} from "@ui/button";
-import useTable from "@components/table/table";
-import Omit from "@ui/omit";
+import DataTable, {useTable} from "@components/table/DataTable";
 import Fade from "@ui/fade";
 
 function formatType(type: string) {
@@ -100,6 +97,34 @@ export default function InboxTable({notifications, filter, prepend, append, comp
 
     const {selected, rows, selectRow, selectAll, selectedAll} = table;
 
+    const columns = [
+        {
+            name: 'dateIssued',
+            displayName: 'Date Issued',
+            align: 'center',
+            formatFn: formatDate,
+            sortable: true,
+            hidden: compact,
+        } as const,
+        {
+            name: 'type',
+            align: 'center',
+            formatFn: formatType,
+            sortable: true,
+        },
+        {
+            name: 'content',
+        },
+        {
+            name: 'expiresOn',
+            displayName: 'Expires In',
+            align: 'center',
+            formatFn: formatDate,
+            sortable: true,
+            hidden: compact,
+        }
+    ];
+
     function getReactNode(prop: Slot, fallback: ReactNode) {
         if (typeof prop === 'undefined') {
             return fallback;
@@ -118,42 +143,9 @@ export default function InboxTable({notifications, filter, prepend, append, comp
                 getReactNode(prepend, null)
             }
             <Fade show={rows && rows.length > 0} fallback={<div>You have no notifications! :(</div>}>
-                <Table id="inbox">
-                    <TableHeader>
-                        <TableRow>
-                            <Omit omit={compact}>
-                                <TableHead>
-                                    <Checkbox checked={selectedAll} onClick={ selectAll } />
-                                </TableHead>
-                                <TableHead>Date Issued</TableHead>
-                            </Omit>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Content</TableHead>
-                            <Omit omit={compact}>
-                                <TableHead>Expires In</TableHead>
-                            </Omit>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {
-                            rows?.map((n: any) =>
-                                <TableRow key={n.id}>
-                                    <Omit omit={compact}>
-                                        <TableCell>
-                                            <Checkbox className="w-4 h-4" checked={selected.includes(n.id)} onClick={ () => selectRow(n) } />
-                                        </TableCell>
-                                        <TableCell>{formatDate(n.dateIssued, 'ago')}</TableCell>
-                                    </Omit>
-                                    <TableCell>{formatType(n.type)}</TableCell>
-                                    <TableCell>{n.content}</TableCell>
-                                    <Omit omit={compact}>
-                                        <TableCell>{formatDate(n.expiresOn)}</TableCell>
-                                    </Omit>
-                                </TableRow>
-                            )
-                        }
-                    </TableBody>
-                </Table>
+                <DataTable data={notifications}
+                           columns={columns}
+                           filterFn={ row => row?.content.includes(filter) } />
             </Fade>
             {
                 getReactNode(append,
