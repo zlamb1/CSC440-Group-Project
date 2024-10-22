@@ -41,10 +41,14 @@ function formatDate(date: Date | string, suffix?: string) {
 }
 
 function DefaultAppend(props?: any) {
+    if ((!props?.rows || props?.rows.length <= 0) || (props.compact && props?.pageCount < 2)) {
+        return null;
+    }
+
     return (
         <div className="flex flex-row items-center gap-3">
             {
-                !props?.compact && props?.rows && props?.rows.length > 0 ?
+                !props?.compact ?
                     <div className="flex-grow">
                         <div
                             className="select-none font-medium text-gray-400 text-sm">{props?.selected.length} of {props?.rows?.length} row(s)
@@ -145,7 +149,9 @@ export default function InboxTable({notifications, filter, prepend, append, comp
             <Fade show={rows && rows.length > 0} fallback={<div>You have no notifications! :(</div>}>
                 <DataTable data={notifications}
                            columns={columns}
-                           filterFn={ row => row?.content.includes(filter) } />
+                           filterFn={ row => row?.content.includes(filter) }
+                           useSelection={!compact}
+                />
             </Fade>
             {
                 getReactNode(append,

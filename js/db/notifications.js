@@ -3,10 +3,10 @@ import client, {DBClient, DBError} from "./db.js";
 function formatNotification(row) {
     return {
         id: row.id,
-        dateIssued: row.date_issued,
+        dateIssued: new Date(row.date_issued),
         type: row.type,
         content: row.content,
-        expiresOn: row.expires_on,
+        expiresOn: new Date(row.expires_on),
         viewed: row.viewed,
     }
 }

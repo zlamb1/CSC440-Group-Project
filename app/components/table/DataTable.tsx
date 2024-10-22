@@ -2,7 +2,7 @@ import {ReactNode, useState} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@ui/table";
 import Omit from "@ui/omit";
 import {Button} from "@ui/button";
-import {CaretSortIcon} from "@radix-ui/react-icons";
+import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
 
 export function usePagination(props?: { pageSize?: number, pageCount?: number}) {
@@ -61,14 +61,50 @@ export function useTable(props?: { collection?: any[], pageSize?: number, filter
     const pageSize = props?.pageSize ?? 10;
     const pageCount = Math.ceil(collectionSize / pageSize);
 
+    const [ sortedBy, setSorted ] = useState<string | undefined>();
+    const [ isSortedDescending, setSortedDescending ] = useState<boolean>();
+
     const { page, setPage, prevPage, nextPage } = usePagination({ pageSize, pageCount });
+
+    const multiplier = isSortedDescending ? -1 : 1;
+    function defaultSort(a: any, b: any) {
+        if (!sortedBy) {
+            return 0;
+        }
+
+        const valueA = a[sortedBy];
+        const valueB = b[sortedBy];
+
+        switch (typeof valueA) {
+            case 'string':
+                return valueA.localeCompare(valueB) * multiplier;
+            case 'number':
+                return (valueA - valueB) * multiplier;
+        }
+
+        if (valueA instanceof Date) {
+            if (valueA > valueB) {
+                return 1 * multiplier;
+            } else if (valueA < valueB) {
+                return -1 * multiplier;
+            } else {
+                return 0;
+            }
+        }
+
+        return (valueA - valueB) * multiplier;
+    }
 
     function getRows(page: number) {
         const index = page * pageSize;
-        const slice = props?.collection?.slice(index, index + pageSize);
+        let slice = props?.collection?.slice(index, index + pageSize);
         const filterFn = props?.filterFn;
         if (filterFn) {
-            return slice?.filter(filterFn);
+            slice = slice?.filter(filterFn);
+        }
+        if (sortedBy) {
+            slice?.sort(defaultSort);
+            console.log(slice);
         }
         return slice;
     }
@@ -77,7 +113,10 @@ export function useTable(props?: { collection?: any[], pageSize?: number, filter
     const defaultKeyFn = (row: any) => row.id;
     const { selected, selectRow, selectAll, selectedAll } = useSelection({ rows: rows ?? [], keyFn: props?.keyFn ?? defaultKeyFn });
 
-    return { page, pageCount, rows, getRows, prevPage, nextPage, setPage, selected, selectRow, selectAll, selectedAll };
+    return { page, pageCount, rows, getRows, prevPage, nextPage, setPage,
+             selected, selectRow, selectAll, selectedAll, sortedBy, setSorted,
+             isSortedDescending, setSortedDescending
+           };
 }
 
 export interface Column {
@@ -101,15 +140,7 @@ export interface DataTableProps {
     filterFn?: (row: any) => boolean;
 }
 
-function ColumnHead(column: Column) {
-    function HeaderContent() {
-        if (column?.displayName) {
-            return column.displayName;
-        } else {
-            return column.name.substring(0, 1).toUpperCase() + column.name.substring(1).toLowerCase();
-        }
-    }
-
+function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: { column: Column, isSorted?: boolean, isDescending?: boolean, onSort?: () => void }) {
     function getMargin() {
         switch (column?.align) {
             case 'left':
@@ -136,17 +167,44 @@ function ColumnHead(column: Column) {
         }
     }
 
+    function onClick() {
+        if (onSort) {
+            onSort();
+        }
+    }
+
+    function getSortIcon() {
+        if (!isSorted) {
+            return <CaretSortIcon />
+        }
+
+        if (isDescending) {
+            return <CaretDownIcon />
+        } else {
+            return <CaretUpIcon />
+        }
+    }
+
+    function getHeaderCell() {
+        const text = (column?.displayName ? column.displayName :
+            column.name.substring(0, 1).toUpperCase() + column.name.substring(1).toLowerCase());
+        if (column.sortable) {
+            return (
+                <Button containerClass={`flex ${getJustify()}`} variant="ghost" onClick={ onClick }>
+                    { text }
+                    { getSortIcon() }
+                </Button>
+            );
+        }
+        return (
+            <span className={getMargin()}>{ text }</span>
+        )
+    }
+
     return (
-        <Omit key={column.name} omit={column?.hidden}>
+        <Omit omit={column?.hidden}>
             <TableHead>
-                {
-                    column.sortable ?
-                        <Button containerClass={`flex ${getJustify()}`} variant="ghost">
-                            { HeaderContent() }
-                            <CaretSortIcon />
-                        </Button> :
-                        <span className={getMargin()}>{ HeaderContent() }</span>
-                }
+                { column?.header ? column.header : getHeaderCell() }
             </TableHead>
         </Omit>
 
@@ -169,26 +227,56 @@ function ColumnCell(row: any, column: Column) {
         }
     }
 
-    return (
-        <Omit key={column.name} omit={column?.hidden}>
+    function getTableCell() {
+        return (
             <TableCell className={getTextAlign()} key={column.name}>
                 { column.formatFn ? column.formatFn(value) : value }
             </TableCell>
+        );
+    }
+
+    return (
+        <Omit key={column.name} omit={column?.hidden}>
+            {
+                column?.cell ? column.cell : getTableCell()
+            }
         </Omit>
     );
 }
 
 export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true,
-                                      useSelection = true, keyFn = (row => row.id), filterFn }: DataTableProps) {
+                                    useSelection = true, keyFn = (row => row.id), filterFn
+                                  }: DataTableProps)
+{
     const table = useTable({
         collection: data,
+        filterFn:   filterFn,
+        keyFn:      keyFn,
         pageSize,
-        filterFn: filterFn,
-        keyFn: keyFn
     });
 
-    const {selected, rows, selectRow, selectAll, selectedAll} = table;
+    const {
+            selected, rows, selectRow, selectAll, selectedAll,
+            sortedBy, setSorted, isSortedDescending, setSortedDescending
+    } = table;
+
     const isEmpty = !rows || !rows.length || rows.length === 0;
+
+    function onSort(name: any) {
+        if (name) {
+            if (name === sortedBy) {
+                if (isSortedDescending) {
+                    setSorted(undefined);
+                    setSortedDescending(false);
+                } else {
+                    setSortedDescending(true);
+                }
+            } else {
+                setSorted(name);
+                setSortedDescending(false);
+            }
+        }
+    }
 
     return (
         <Table>
@@ -201,7 +289,16 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
                                     <Checkbox checked={selectedAll} onClick={ selectAll } />
                                 </TableHead> : null
                         }
-                        { columns.map(ColumnHead) }
+                        {
+                            columns.map(col =>
+                                <ColumnHead key={col.name}
+                                            column={col}
+                                            isSorted={col.name === sortedBy}
+                                            isDescending={isSortedDescending}
+                                            onSort={ () => onSort(col.name) }
+                                />
+                            )
+                        }
                     </TableRow>
                 </TableHeader>
             </Omit>
