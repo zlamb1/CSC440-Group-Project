@@ -115,11 +115,13 @@ export default function InboxTable({notifications, filter, prepend, append, comp
         <div className="flex flex-col gap-3">
             <DataTable data={notifications}
                        columns={columns}
-                       filterFn={ row => row?.content?.toLowerCase().includes(filter?.toLowerCase()) }
+                       filter={filter}
+                       filterFn={row => row?.content?.toLowerCase().includes(filter?.toLowerCase())}
                        useSelection={!compact}
+                       useReordering={!compact}
                        prepend={prepend}
                        append={typeof append === 'undefined' ? DefaultAppend : append}
-                       pageSize={compact ? 5 : 20}
+                       pageSize={compact ? 5 : 15}
             />
         </div>
     )

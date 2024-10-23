@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 export function usePagination(props?: { pageSize?: number, pageCount?: number}) {
     const [ page, setPage ] = useState(0);
@@ -48,10 +48,10 @@ export function useSelection({ rows, keyFn }: { rows: any[], keyFn: (row: any) =
         });
     }
 
-    return { selected, selectRow, selectAll, selectedAll }
+    return { selected, setSelected, selectRow, selectAll, selectedAll }
 }
 
-export function useTable(props?: { collection?: any[], pageSize?: number, filterFn?: (row: any) => boolean, keyFn?: (row: any) => any }) {
+export function useTable(props?: { collection?: any[], pageSize?: number, filter?: any, filterFn?: (row: any) => boolean, keyFn?: (row: any) => any }) {
     const collectionSize = props?.collection?.length ?? 0;
     const pageSize = props?.pageSize ?? 10;
     const pageCount = Math.ceil(collectionSize / pageSize);
@@ -90,25 +90,37 @@ export function useTable(props?: { collection?: any[], pageSize?: number, filter
         return (valueA - valueB) * multiplier;
     }
 
-    function getRows(page: number) {
+    function getRowsByPage(page: number) {
+        if (!props?.collection) {
+            return [];
+        }
+
         const index = page * pageSize;
-        let slice = props?.collection?.slice(index, index + pageSize);
+        let slice = props.collection.slice(index, index + pageSize);
         const filterFn = props?.filterFn;
         if (filterFn) {
             slice = slice?.filter(filterFn);
         }
         if (sortedBy) {
             slice?.sort(defaultSort);
-            console.log(slice);
         }
         return slice;
     }
 
-    const rows = getRows(page);
-    const defaultKeyFn = (row: any) => row.id;
-    const { selected, selectRow, selectAll, selectedAll } = useSelection({ rows: rows ?? [], keyFn: props?.keyFn ?? defaultKeyFn });
+    const [ rows, setRows ] = useState<any[]>(getRowsByPage(page));
 
-    return { page, pageCount, rows, getRows, prevPage, nextPage, setPage,
+    useEffect(() => {
+        setRows(getRowsByPage(page));
+    }, [page, props?.filter, sortedBy, isSortedDescending]);
+
+    const defaultKeyFn = (row: any) => row.id;
+    const { selected, setSelected, selectRow, selectAll, selectedAll } = useSelection({ rows: rows ?? [], keyFn: props?.keyFn ?? defaultKeyFn });
+
+    useEffect(() => {
+        setSelected([]);
+    }, [page]);
+
+    return { page, pageCount, rows, setRows, getRowsByPage, prevPage, nextPage, setPage,
         selected, selectRow, selectAll, selectedAll, sortedBy, setSorted,
         isSortedDescending, setSortedDescending
     };

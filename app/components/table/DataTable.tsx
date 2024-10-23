@@ -6,7 +6,7 @@ import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
 import {useTable} from "@components/table/table";
 import {cn} from "@/lib/utils";
-import {AnimatePresence, motion} from "framer-motion";
+import {AnimatePresence, AnimateSharedLayout, LayoutGroup, motion, Reorder} from "framer-motion";
 
 export interface Column {
     name: string;
@@ -38,7 +38,9 @@ export interface DataTableProps {
     pageSize?: number;
     usePagination?: boolean;
     useSelection?: boolean;
+    useReordering?: boolean;
     keyFn?: (row: any) => any;
+    filter?: any;
     filterFn?: (row: any) => boolean;
     prepend?: Slot;
     append?: Slot;
@@ -148,23 +150,80 @@ function ColumnCell(row: any, column: Column) {
     );
 }
 
-export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, className, styleHeaderOnSelectAll = true,
-                                    useSelection = true, keyFn = (row => row.id), filterFn, prepend, append
+export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, useReordering = true, className,
+                                    styleHeaderOnSelectAll = true, useSelection = true, keyFn = (row => row.id), filterFn,
+                                    filter, prepend, append
                                   }: DataTableProps)
 {
     const table = useTable({
-        collection: data,
         filterFn:   filterFn,
         keyFn:      keyFn,
+        collection: data,
         pageSize,
+        filter,
     });
 
     const {
-            page, pageCount, prevPage, nextPage, rows, selected, selectRow, selectAll, selectedAll,
+            page, pageCount, prevPage, nextPage, rows, setRows, selected, selectRow, selectAll, selectedAll,
             sortedBy, setSorted, isSortedDescending, setSortedDescending,
     } = table;
 
     const isEmpty = !rows || !rows.length || rows.length === 0;
+
+    function getTableBody() {
+        if (useReordering) {
+            return (
+                <Reorder.Group as="tbody" className="[&_tr:last-child]:border-0 transition-[height]" axis="y" values={rows} onReorder={setRows}>
+                    {
+                        rows?.map((row => {
+                            const isSelected = selected?.includes(row.id);
+                            return (
+                                <Reorder.Item as="tr"
+                                              className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                                              data-state={isSelected ? 'selected' : 'false'}
+                                              key={keyFn(row)}
+                                              value={row}
+                                >
+                                    {
+                                        useSelection ?
+                                            <TableCell>
+                                                <Checkbox className="w-4 h-4" checked={isSelected}
+                                                          onClick={() => selectRow(row)}/>
+                                            </TableCell> : null
+                                    }
+                                    {columns.map(col => ColumnCell(row, col))}
+                                </Reorder.Item>
+                            )
+                        }))
+                    }
+                </Reorder.Group>
+            )
+        } else {
+            return (
+                <TableBody>
+                    {
+                        rows?.map(row => {
+                            const isSelected = selected?.includes(row.id);
+                            return (
+                                <TableRow data-state={isSelected ? 'selected' : 'false'}
+                                          key={keyFn(row)}
+                                >
+                                    {
+                                        useSelection ?
+                                            <TableCell>
+                                                <Checkbox className="w-4 h-4" checked={isSelected}
+                                                          onClick={() => selectRow(row)}/>
+                                            </TableCell> : null
+                                    }
+                                    {columns.map(col => ColumnCell(row, col))}
+                                </TableRow>
+                            )
+                        })
+                    }
+                </TableBody>
+            )
+        }
+    }
 
     function onSort(name: any) {
         if (name) {
@@ -220,34 +279,13 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
                         </TableRow>
                     </TableHeader>
                 </Omit>
-                <TableBody>
-                    <AnimatePresence mode="popLayout">
-                        <Omit omit={!isEmpty}>
-                            <TableRow>
-                                <TableCell className="text-center">
-                                    No data available. :(
-                                </TableCell>
-                            </TableRow>
-                        </Omit>
-                        {
-                            rows?.map(row => {
-                                const isSelected = selected?.includes(keyFn(row));
-                                return (
-                                    <TableRow data-state={isSelected ? 'selected' : 'false'} key={keyFn(row)}>
-                                        {
-                                            useSelection ?
-                                                <TableCell>
-                                                    <Checkbox className="w-4 h-4" checked={isSelected}
-                                                              onClick={() => selectRow(row)}/>
-                                                </TableCell> : null
-                                        }
-                                        {columns.map(col => ColumnCell(row, col))}
-                                    </TableRow>
-                                );
-                            })
-                        }
-                    </AnimatePresence>
-                </TableBody>
+                <Omit omit={!isEmpty} fallback={getTableBody()}>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell>No data available ¯\_(ツ)_/¯</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Omit>
             </Table>
             {
                 getSlot(append)
