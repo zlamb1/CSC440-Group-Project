@@ -25,21 +25,21 @@ function formatDate(date: Date | string, suffix?: string) {
                     const minutes = d1.getMinutes() - d2.getMinutes();
                     if (minutes == 0) {
                         const seconds = d1.getSeconds() - d2.getSeconds();
-                        return `${seconds} second${seconds > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
+                        return `${seconds} second${seconds !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
                     }
-                    return `${minutes} minute${minutes > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
+                    return `${minutes} minute${minutes !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
                 }
-                return `${hours} hour${hours > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
+                return `${hours} hour${hours !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
             }
-            return `${days} day${days > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
+            return `${days} day${days !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
         }
-        return `${months} month${months > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
+        return `${months} month${months !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
     }
-    return `${years} year${years > 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
+    return `${years} year${years !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
 }
 
 function DefaultAppend(props?: SlotProps) {
-    if ((!props?.rows || props?.rows.length <= 0) || props.pageCount < 2) {
+    if (!props?.rows || props?.rows.length <= 0) {
         return null;
     }
 
@@ -86,10 +86,11 @@ export default function InboxTable({notifications, filter, prepend, append, comp
             name: 'dateIssued',
             displayName: 'Date Issued',
             align: 'center',
-            formatFn: formatDate,
+            formatFn: (date: any) => formatDate(date, 'ago'),
             sortable: true,
             hidden: compact,
-        } as const,
+            suppressHydrationWarning: true,
+        },
         {
             name: 'type',
             align: 'center',
@@ -103,9 +104,10 @@ export default function InboxTable({notifications, filter, prepend, append, comp
             name: 'expiresOn',
             displayName: 'Expires In',
             align: 'center',
-            formatFn: formatDate,
+            formatFn:   formatDate,
             sortable: true,
             hidden: compact,
+            suppressHydrationWarning: true,
         }
     ];
 
@@ -116,7 +118,8 @@ export default function InboxTable({notifications, filter, prepend, append, comp
                        filterFn={ row => row?.content?.toLowerCase().includes(filter?.toLowerCase()) }
                        useSelection={!compact}
                        prepend={prepend}
-                       append={append ?? DefaultAppend}
+                       append={typeof append === 'undefined' ? DefaultAppend : append}
+                       pageSize={compact ? 5 : 20}
             />
         </div>
     )

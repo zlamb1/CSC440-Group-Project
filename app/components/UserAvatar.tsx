@@ -32,6 +32,7 @@ export default function UserAvatar({className, avatar, userName, size = 25}: Use
                             show={avatar}
                             transition={{
                                 initial: {scale: 0.5, opacity: 0.25},
+                                animate: {scale: 1, opacity: 1},
                                 exit: {scale: 0.5, opacity: 0.25},
                             }}
                             initial={false}

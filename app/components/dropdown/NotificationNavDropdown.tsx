@@ -33,7 +33,7 @@ export default function NotificationNavDropdown({ notificationCount = 0 }: { not
     }
 
     return (
-        <HoverCard open={isOpen} onOpenChange={onOpen}>
+        <HoverCard openDelay={200} open={isOpen} onOpenChange={onOpen}>
             <HoverCardTrigger asChild>
                 <Link to="/inbox">
                     <Button className="relative" size="icon" variant="ghost">
@@ -48,9 +48,9 @@ export default function NotificationNavDropdown({ notificationCount = 0 }: { not
                     </Button>
                 </Link>
             </HoverCardTrigger>
-            <HoverCardContent className="flex justify-center">
+            <HoverCardContent className="flex justify-center min-w-[300px]  ">
                 <Fade show={fetcher.state === 'idle'} fallback={<LoadingSpinner />}>
-                    <InboxTable notifications={notifications} filter="" compact />
+                    <InboxTable notifications={notifications} filter="" compact append={null} />
                 </Fade>
             </HoverCardContent>
         </HoverCard>

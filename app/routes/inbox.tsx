@@ -41,7 +41,7 @@ export default function InboxRoute() {
                 />
                 <div className="flex-grow flex justify-end">
                     <Fade show={selected && selected.length > 0}>
-                        <Button className="flex flex-row items-center gap-2" variant="outline">Delete <Bell size={14} /></Button>
+                        <Button className="flex flex-row items-center gap-2" variant="outline">Dismiss <Bell size={14} /></Button>
                     </Fade>
                 </div>
             </div>
@@ -49,7 +49,7 @@ export default function InboxRoute() {
     }
 
     return (
-        <div className="m-8 w-full h-full flex flex-col gap-3">
+        <div className="p-8 w-full h-full flex flex-col gap-3">
             <InboxTable notifications={data?.notifications} filter={filter} prepend={prepend} />
         </div>
     );

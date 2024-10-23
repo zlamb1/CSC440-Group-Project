@@ -67,9 +67,9 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <title>Stories</title>
             </head>
             <body>
-                <div className="flex flex-col bg-gray-100 dark:bg-gray-900" style={{minHeight: '100vh'}}>
+                <div className="flex flex-col bg-gray-100 dark:bg-gray-900 min-h-[100vh]">
                     <NavBar {...data} />
-                    <div className="flex-grow flex gap-3 w-full my-3">
+                    <div className="flex-grow flex gap-3 w-full py-3">
                         <div className="lg:w-[15%] xl:w-[20%] flex-shrink-0"></div>
                         <Card className="border-0 flex-grow flex justify-center">
                             {children}

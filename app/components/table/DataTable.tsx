@@ -6,6 +6,7 @@ import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
 import {useTable} from "@components/table/table";
 import {cn} from "@/lib/utils";
+import {AnimatePresence, motion} from "framer-motion";
 
 export interface Column {
     name: string;
@@ -16,6 +17,7 @@ export interface Column {
     header?: ReactNode;
     cell?: ReactNode;
     sortable?: boolean;
+    suppressHydrationWarning?: boolean;
 }
 
 export interface SlotProps {
@@ -40,6 +42,7 @@ export interface DataTableProps {
     filterFn?: (row: any) => boolean;
     prepend?: Slot;
     append?: Slot;
+    styleHeaderOnSelectAll?: boolean;
 }
 
 function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: { column: Column, isSorted?: boolean, isDescending?: boolean, onSort?: () => void }) {
@@ -130,7 +133,7 @@ function ColumnCell(row: any, column: Column) {
 
     function getTableCell() {
         return (
-            <TableCell className={getTextAlign()} key={column.name}>
+            <TableCell className={getTextAlign()} key={column.name} suppressHydrationWarning={column?.suppressHydrationWarning}>
                 { column.formatFn ? column.formatFn(value) : value }
             </TableCell>
         );
@@ -145,7 +148,7 @@ function ColumnCell(row: any, column: Column) {
     );
 }
 
-export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, className,
+export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, className, styleHeaderOnSelectAll = true,
                                     useSelection = true, keyFn = (row => row.id), filterFn, prepend, append
                                   }: DataTableProps)
 {
@@ -197,7 +200,7 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
             <Table>
                 <Omit omit={isEmpty}>
                     <TableHeader>
-                        <TableRow>
+                        <TableRow data-state={styleHeaderOnSelectAll ? (selectedAll ? 'selected' : 'false') : undefined}>
                             {
                                 useSelection ?
                                     <TableHead>
@@ -218,26 +221,32 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
                     </TableHeader>
                 </Omit>
                 <TableBody>
-                    <Omit omit={!isEmpty}>
-                        <TableRow>
-                            <TableCell className="text-center">
-                                No data available. :(
-                            </TableCell>
-                        </TableRow>
-                    </Omit>
-                    {
-                        rows?.map(row => (
-                            <TableRow key={keyFn(row)}>
-                                {
-                                    useSelection ?
-                                        <TableCell>
-                                            <Checkbox className="w-4 h-4" checked={selected.includes(keyFn(row))} onClick={ () => selectRow(row) } />
-                                        </TableCell> : null
-                                }
-                                { columns.map(col => ColumnCell(row, col)) }
+                    <AnimatePresence mode="popLayout">
+                        <Omit omit={!isEmpty}>
+                            <TableRow>
+                                <TableCell className="text-center">
+                                    No data available. :(
+                                </TableCell>
                             </TableRow>
-                        ))
-                    }
+                        </Omit>
+                        {
+                            rows?.map(row => {
+                                const isSelected = selected?.includes(keyFn(row));
+                                return (
+                                    <TableRow data-state={isSelected ? 'selected' : 'false'} key={keyFn(row)}>
+                                        {
+                                            useSelection ?
+                                                <TableCell>
+                                                    <Checkbox className="w-4 h-4" checked={isSelected}
+                                                              onClick={() => selectRow(row)}/>
+                                                </TableCell> : null
+                                        }
+                                        {columns.map(col => ColumnCell(row, col))}
+                                    </TableRow>
+                                );
+                            })
+                        }
+                    </AnimatePresence>
                 </TableBody>
             </Table>
             {

@@ -22,7 +22,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, type, ...pr
 
     return (
         <div
-            className={cn("w-full flex gap-1 items-center p-1 h-9 border border-input bg-transparent cursor-text " +
+            className={cn("w-full flex gap-1 items-center py-1 px-2 h-9 border border-input bg-transparent cursor-text " +
                 "rounded-md text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 " +
                 "focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", className)}
             onClick={onClick}
