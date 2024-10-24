@@ -12,9 +12,17 @@ export async function action({ context, params }: ActionFunctionArgs) {
         }
 
         const [_, post] = await context.prisma.$transaction([
-            context.prisma.post.deleteMany({
+            context.prisma.post.update({
+                data: {
+                    postLikes: {
+                        deleteMany: {},
+                    },
+                    replies: {
+                        deleteMany: {},
+                    },
+                },
                 where: {
-                    replyTo: params.id,
+                    id: params.id,
                 },
             }),
             context.prisma.post.delete({

@@ -17,10 +17,6 @@ export default function ReplyView({ post, user, showReplies = true, onLoad = () 
     const [ replies, setReplies ] = useState<any[]>([]);
     const fetcher = useFetcher();
 
-    if (post.replyCount === 0) {
-        return null;
-    }
-
     useEffect(() => {
         if (fetcher.state === 'idle') {
             setReplies(fetcher.data?.replies);
@@ -31,6 +27,10 @@ export default function ReplyView({ post, user, showReplies = true, onLoad = () 
     useEffect(() => {
         getReplies();
     }, [showReplies]);
+
+    if (post.replyCount === 0) {
+        return null;
+    }
 
     function getReplies() {
         if (showReplies) {
