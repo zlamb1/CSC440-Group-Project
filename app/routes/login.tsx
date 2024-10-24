@@ -14,16 +14,16 @@ export async function loader({ context }: LoaderFunctionArgs) {
 export async function action({ context, request } : ActionFunctionArgs) {
     try {
         const formData = await request.formData();
-        const username = String(formData.get("username"));
-        const password = String(formData.get("password"));
+        const userName = String(formData.get("username"));
+        const passWord = String(formData.get("password"));
 
-        if (!username) {
+        if (!userName) {
             return json({
                 username: 'Username is required'
             });
         }
 
-        if (!password) {
+        if (!passWord) {
             return json({
                 password: 'Password is required'
             });
@@ -31,15 +31,15 @@ export async function action({ context, request } : ActionFunctionArgs) {
 
         const user = await context.prisma.user.findUnique({
             where: {
-                username,
+                userName,
             }
         });
 
         if (!user) {
-            return json({ error: 'Invalid credentials' });
+            return json({ password: 'Invalid credentials' });
         }
 
-        if (await context.bcrypt.compare(password, user.passwordHash)) {
+        if (await context.bcrypt.compare(passWord, user.passwordHash)) {
             const { session } = await useSession(context, request);
             session.set(context.cookieProperty.userID, user.id);
             return redirect('/', {
@@ -48,7 +48,7 @@ export async function action({ context, request } : ActionFunctionArgs) {
                 }
             })
         } else {
-            return json({ error: 'Invalid credentials' });
+            return json({ password: 'Invalid credentials' });
         }
     } catch (err) {
         console.error(err);

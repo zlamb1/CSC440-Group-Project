@@ -26,6 +26,16 @@ export async function action({ context, request }: ActionFunctionArgs) {
             return json({ password: 'Password must be between six and fifty characters' })
         }
 
+        const search = await context.prisma.user.findUnique({
+            where: {
+                userName
+            },
+        });
+
+        if (search) {
+            return json({ username: 'Username is unavailable' });
+        }
+
         const session = await context.session.getSession();
         const passwordHash = await context.bcrypt.hash(passWord);
         const user = await context.prisma.user.create({
