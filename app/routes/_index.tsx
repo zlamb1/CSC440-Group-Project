@@ -10,6 +10,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import useIsSSR from "@/utils/useIsSSR";
 import {Prisma, ProfileVisibility} from "@prisma/client";
+import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     let posts = await context.prisma.post.findMany({
@@ -74,32 +75,28 @@ export default function Index() {
 
     return (
         <div className="flex flex-col w-full px-1">
-            {
-                data?.user.loggedIn ? (
-                    <>
-                        <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
-                            <div className="flex gap-3">
-                                <UserAvatar avatar={data?.user.avatarPath} userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
-                                <PostEditor ref={ref}
-                                            placeholder="Write a post..."
-                                            onTextUpdate={(progress: number) => setEditorProgress(progress)}
-                                            editable={ createFetcher.state === 'idle' }
-                                            editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
-                                            containerProps={{className: 'flex-grow w-full text-lg'}} />
-                            </div>
-                            <div className="self-end flex items-center gap-3">
-                                <ProgressCircle percentage={ editorProgress } />
-                                <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>
-                                    {
-                                        createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner />
-                                    }
-                                </Button>
-                            </div>
-                        </Form>
-                        <hr />
-                    </>
-                ) : null
-            }
+            <Fade show={data?.user.loggedIn}>
+                <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
+                    <div className="flex gap-3">
+                        <UserAvatar avatar={data?.user.avatarPath} userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
+                        <PostEditor ref={ref}
+                                    placeholder="Write a post..."
+                                    onTextUpdate={(progress: number) => setEditorProgress(progress)}
+                                    editable={ createFetcher.state === 'idle' }
+                                    editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
+                                    containerProps={{className: 'flex-grow w-full text-lg'}} />
+                    </div>
+                    <div className="self-end flex items-center gap-3">
+                        <ProgressCircle percentage={ editorProgress } />
+                        <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>
+                            {
+                                createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner />
+                            }
+                        </Button>
+                    </div>
+                </Form>
+                <hr />
+            </Fade>
             <AnimatePresence initial={!isSSR}>
                 {
                     data?.posts.map((post: any) =>

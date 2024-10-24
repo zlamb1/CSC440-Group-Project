@@ -13,7 +13,7 @@ import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {AnimatePresence, motion} from "framer-motion";
 import ReplyView from "@components/post/ReplyView";
-import {PostLike, Prisma, User} from "@prisma/client";
+import {PostWithUser, UserWithLoggedIn} from "@/utils/types";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -37,17 +37,9 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
     return likeCount;
 }
 
-type PostWithUser = Prisma.PostGetPayload<{
-    include: {
-        user: true,
-    }
-}> & { postLike?: PostLike };
-
-type UserWithLoggedIn = User & { loggedIn: boolean };
-
-function Post({className, post, user}: { className?: string, post: PostWithUser, user: UserWithLoggedIn }) {
+function Post({className, post, user, depth = 1}: { className?: string, post: PostWithUser, user: UserWithLoggedIn, depth?: number }) {
     const [ isEditing, setEditing ] = useState<boolean>(false);
-    const [ showReplies, setShowReplies ] = useState<boolean>(false);
+    const [ showReplies, setShowReplies ] = useState<boolean>(depth > 0);
     const [ isReplying, setIsReplying ] = useState<boolean>(false);
     const replyEditorRef = useRef<PostEditorElement>();
     const likeFetcher = useFetcher();
@@ -140,6 +132,7 @@ function Post({className, post, user}: { className?: string, post: PostWithUser,
                     <ReplyView post={post}
                                user={user}
                                showReplies={showReplies}
+                               depth={depth}
                     />
                     <AnimatePresence mode="wait" initial={false}>
                         {
