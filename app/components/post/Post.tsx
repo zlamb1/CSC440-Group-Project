@@ -1,6 +1,6 @@
 import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
-import React, {FormEvent, useEffect, useRef, useState} from "react";
+import React, {FormEvent, useRef, useState} from "react";
 import {
     MessageCircle, NotebookPen,
     ThumbsDown,
@@ -12,10 +12,8 @@ import PostView from "@components/post/PostView";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {AnimatePresence, motion} from "framer-motion";
-import {Skeleton} from "@ui/skeleton";
 import ReplyView from "@components/post/ReplyView";
-
-
+import {PostLike, Prisma, User} from "@prisma/client";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -24,7 +22,7 @@ function getIsLiked(state: any) {
     return state === true || state === 'true';
 }
 
-function getLikeCount(likeCount: number, oldState: any, state: any) {
+function getLikeCount(likeCount: number, oldState?: any, state?: any) {
     const oldIsLiked = getIsLiked(oldState);
     const newIsLiked = getIsLiked(state);
     if (oldIsLiked !== newIsLiked) {
@@ -39,7 +37,15 @@ function getLikeCount(likeCount: number, oldState: any, state: any) {
     return likeCount;
 }
 
-function Post({className, post, user}: { className?: string, post: any, user: any }) {
+type PostWithUser = Prisma.PostGetPayload<{
+    include: {
+        user: true,
+    }
+}> & { postLike?: PostLike };
+
+type UserWithLoggedIn = User & { loggedIn: boolean };
+
+function Post({className, post, user}: { className?: string, post: PostWithUser, user: UserWithLoggedIn }) {
     const [ isEditing, setEditing ] = useState<boolean>(false);
     const [ showReplies, setShowReplies ] = useState<boolean>(false);
     const [ isReplying, setIsReplying ] = useState<boolean>(false);
@@ -47,8 +53,8 @@ function Post({className, post, user}: { className?: string, post: any, user: an
     const likeFetcher = useFetcher();
     const replyFetcher = useFetcher();
 
-    const isLiked = likeFetcher.formData ? getIsLiked(likeFetcher.formData.get('liked')) : post.liked;
-    const likeCount = likeFetcher.formData ? getLikeCount(post.likeCount, post.liked, likeFetcher.formData.get('liked')) : post.likeCount;
+    const isLiked = likeFetcher.formData ? getIsLiked(likeFetcher.formData.get('liked')) : post?.postLike?.liked;
+    const likeCount = likeFetcher.formData ? getLikeCount(post.likeCount ?? 0, post?.postLike?.liked, likeFetcher.formData.get('liked')) : post.likeCount;
 
     const onReply = (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
@@ -67,8 +73,8 @@ function Post({className, post, user}: { className?: string, post: any, user: an
             <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
-                        <UserAvatar avatar={post.avatarPath} userName={post.userName} />
-                        <span className="font-bold">{post.userName}</span>
+                        <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
+                        <span className="font-bold">{post.user?.userName}</span>
                     </div>
                     <ContextMenu post={post} user={user} onEdit={ () => setEditing(true) } />
                 </div>

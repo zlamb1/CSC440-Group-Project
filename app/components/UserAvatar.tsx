@@ -5,11 +5,11 @@ import Transition from "@ui/transition";
 export interface UserAvatarProps {
     className?: string,
     avatar?: any,
-    userName: string,
+    userName?: string,
     size?: number | string,
 }
 
-function UserAvatarFallback({ userName, size }: { userName: string, size: number | string }) {
+function UserAvatarFallback({ userName, size }: { userName?: string, size: number | string }) {
     return (
         <motion.div className="origin-center bg-primary flex justify-center items-center w-full h-full rounded-full"
                     style={{ width: size, height: size }}

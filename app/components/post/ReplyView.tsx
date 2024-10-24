@@ -3,10 +3,12 @@ import {useFetcher} from "@remix-run/react";
 import {Skeleton} from "@ui/skeleton";
 import {AnimatePresence, motion} from "framer-motion";
 import Post from "@components/post/Post";
+import {Post as PrismaPost} from "@prisma/client";
+import {UserWithLoggedIn} from "@/utils/types";
 
 export interface ReplyViewProps {
-    post: any;
-    user: any;
+    post: PrismaPost;
+    user: UserWithLoggedIn;
     showReplies?: boolean;
     onLoad?: (replies: any) => void;
 }
@@ -15,13 +17,13 @@ export default function ReplyView({ post, user, showReplies = true, onLoad = () 
     const [ replies, setReplies ] = useState<any[]>([]);
     const fetcher = useFetcher();
 
-    if (post?.replyCount === 0) {
+    if (post.replyCount === 0) {
         return null;
     }
 
     useEffect(() => {
         if (fetcher.state === 'idle') {
-            setReplies(fetcher.data);
+            setReplies(fetcher.data?.replies);
             onLoad(replies);
         }
     }, [fetcher]);
@@ -40,7 +42,7 @@ export default function ReplyView({ post, user, showReplies = true, onLoad = () 
 
     function renderSkeletons() {
         const skeletons = [];
-        for (let i = 0; i < post?.replyCount - (replies?.length ?? 0); i++) {
+        for (let i = 0; i < (post.replyCount ?? 0) - (replies?.length ?? 0); i++) {
             skeletons.push(
                 <Skeleton key={i} className="w-full h-[60px]" />
             )

@@ -1,8 +1,26 @@
-import {LoaderFunctionArgs} from "@remix-run/node";
-import {tryDatabaseAction} from "@/utils/database-error";
+import {json, LoaderFunctionArgs} from "@remix-run/node";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
-    return await tryDatabaseAction(async () => {
-        return context.db.getReplies(params.id);
-    });
+    try {
+        if (!params.id) {
+            return json({ error: 'Post ID is required' });
+        }
+
+        const replies = await context.prisma.post.findMany({
+            orderBy: {
+                postedAt: 'desc',
+            },
+            include: {
+                user: true,
+            },
+            where: {
+                replyTo: params.id,
+            },
+        });
+
+        return json({ replies });
+    } catch (err) {
+        console.error(err);
+        return json({ error: 'Unknown error' });
+    }
 }

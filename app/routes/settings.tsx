@@ -27,62 +27,79 @@ import Fade from "@ui/fade";
 const isProduction = process.env.NODE_ENV === "production";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    return json(context?.user);
+    return json(context.user);
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
-    const uploadHandler = createImageUploader({ directory: isProduction ? IMAGE_API_V1 : undefined });
+    try {
+        const uploadHandler = createImageUploader({ directory: isProduction ? IMAGE_API_V1 : undefined });
 
-    const formData = await unstable_parseMultipartFormData(
-        request,
-        uploadHandler
-    );
+        const formData = await unstable_parseMultipartFormData(
+            request,
+            uploadHandler
+        );
 
-    const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
-    const file = formData.get("avatar");
+        const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
+        const file = formData.get("avatar");
 
-    const avatar = isProduction ?
-        (file?.name ? `${IMAGE_CDN_URL}${file?.name}` : null) :
-        (file?.name ? `${IMAGE_DEV_CDN_URL}${file.name}` : null);
+        const avatar = isProduction ?
+            (file?.name ? `${IMAGE_CDN_URL}${file?.name}` : null) :
+            (file?.name ? `${IMAGE_DEV_CDN_URL}${file.name}` : null);
 
-    if (!isProduction) {
-        if (!process.env.CDN_API_KEY) {
-            console.error('Cannot upload images without CDN API key.');
-            return json({ error: 'Server error.' });
-        }
+        if (!isProduction) {
+            if (!process.env.CDN_API_KEY) {
+                console.error('Cannot upload images without CDN API key.');
+                return json({ error: 'Server error.' });
+            }
 
-        const CDN_UPLOAD_URL = 'https://cdn.zlamb1.com/images/upload/';
+            const CDN_UPLOAD_URL = 'https://cdn.zlamb1.com/images/upload/';
 
-        const formData = new FormData();
-        formData.set('image', file);
-        formData.set('api_key', process.env.CDN_API_KEY);
+            const formData = new FormData();
+            formData.set('image', file);
+            formData.set('api_key', process.env.CDN_API_KEY);
 
-        try {
-            await fetch(CDN_UPLOAD_URL, {
-                method: 'POST',
-                body: formData,
-            });
-        } catch (err) {
-            console.error('failed to upload image', err);
-            return json({ error: 'Unknown error.' });
-        } finally {
-            if (file.remove) {
-                file.remove();
+            try {
+                await fetch(CDN_UPLOAD_URL, {
+                    method: 'POST',
+                    body: formData,
+                });
+            } catch (err) {
+                console.error('Failed to upload image', err);
+                return json({ error: 'Unknown error' });
+            } finally {
+                if (file.remove) {
+                    file.remove();
+                }
             }
         }
-    }
 
-    return await tryDatabaseAction(async () => {
         const oldAvatar = context.user.avatarPath;
-        await context.db.updateUser({
-            isUpdatingAvatar,
-            avatar,
-        });
+
+        if (isUpdatingAvatar) {
+            const user = await context.prisma.user.update({
+                data: {
+                    avatarPath: avatar,
+                },
+                where: {
+                    id: context.user.id,
+                },
+            });
+
+            if (!user) {
+                return json({ error: 'User not found' });
+            }
+
+        }
+
         if (isProduction) {
             removeAvatar(oldAvatar);
         }
-        return json({ success: 'uploaded avatar' });
-    });
+
+        return json({ success: 'Updated user' });
+    } catch (err) {
+        console.error(err);
+        return json({ error: 'Unknown error' });
+    }
 }
 
 export default function SettingsRoute() {

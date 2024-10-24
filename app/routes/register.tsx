@@ -1,24 +1,50 @@
 import {ActionFunctionArgs, json, redirect} from "@remix-run/node";
-import {tryDatabaseAction} from "@/utils/database-error";
 
 export async function loader() {
     return json({});
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
-    return await tryDatabaseAction(async () => {
+    try {
         const formData = await request.formData();
-        const username = String(formData.get("username"));
-        const password = String(formData.get("password"));
+        const userName = String(formData.get("username"));
+        const passWord = String(formData.get("password"));
+
+        if (!userName) {
+            return json({ username: 'Username is required' });
+        }
+
+        if (userName.length < 4 || userName.length > 25) {
+            return json({ username: 'Username must be between four and twenty-five characters' })
+        }
+
+        if (!passWord) {
+            return json({ password: 'Password is required' });
+        }
+
+        if (passWord.length < 6 || passWord.length > 50) {
+            return json({ password: 'Password must be between six and fifty characters' })
+        }
 
         const session = await context.session.getSession();
-        const id = await context.db.registerUser(username, password);
-        session.set('userId', id);
+        const passwordHash = await context.bcrypt.hash(passWord);
+        const user = await context.prisma.user.create({
+            data: {
+                userName, passwordHash
+            },
+        });
+
+        session.set(context.cookieProperty.userID, user.id);
 
         return redirect('/', {
             headers: {
-                'Set-Cookie': await context.session.commitSession(session)
+                'Set-Cookie': await context.session.commitSession(session),
             }
         });
-    });
+    } catch (err) {
+        console.error(err);
+        return json({
+            error: 'Unknown error'
+        });
+    }
 }

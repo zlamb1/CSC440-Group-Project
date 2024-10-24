@@ -5,13 +5,15 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdo
 import {Button} from "@ui/button";
 import {Edit2, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {Post} from "@prisma/client";
+import {UserWithLoggedIn} from "@/utils/types";
 
-export default function ContextMenu({ post, user, onEdit }: { post: any, user: any, onEdit?: () => void }) {
+export default function ContextMenu({ post, user, onEdit }: { post: Post, user: UserWithLoggedIn, onEdit?: () => void }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
-    if (post.posterId !== user?.id) {
+    if (post.userId !== user?.id) {
         return null;
     }
     function onClickEdit() {
@@ -22,7 +24,7 @@ export default function ContextMenu({ post, user, onEdit }: { post: any, user: a
     }
     return (
         <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)}  modal={false}>
-            <DropdownMenuTrigger className={post.posterId !== user?.id ? 'hidden' : ''} asChild>
+            <DropdownMenuTrigger className={post.userId !== user?.id ? 'hidden' : ''} asChild>
                 <Button className="rounded-full w-[25px] h-[25px]" variant="ghost" size="icon">
                     <EllipsisVerticalIcon className="w-[20px] h-[20px]" />
                 </Button>

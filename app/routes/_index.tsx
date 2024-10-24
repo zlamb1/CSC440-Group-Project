@@ -4,16 +4,47 @@ import {json, LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import React, {FormEvent, Fragment, useEffect, useState} from "react";
 import Post from "@components/post/Post";
-import {Separator} from "@ui/separator";
 import UserAvatar from "@components/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import useIsSSR from "@/utils/useIsSSR";
+import {Prisma, ProfileVisibility} from "@prisma/client";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    const posts = await context.db.getPublicPosts();
-    return json({ user: context.user, posts });
+    let posts = await context.prisma.post.findMany({
+        where: {
+            replyTo: null,
+        },
+        include: {
+            user: {
+                where: {
+                    visibility: ProfileVisibility.PUBLIC
+                }
+            },
+            postLikes: {
+                where: {
+                    userId: context.user.id
+                },
+            },
+        },
+    });
+
+    posts = posts.map((post: Prisma.PostGetPayload<{ include: { postLikes: true } }>) => {
+        if (post?.postLikes && post.postLikes.length > 0) {
+            return {
+                ...post,
+                postLike: post.postLikes[0],
+            }
+        }
+
+        return post;
+    });
+
+    return json({
+        user: context.user,
+        posts,
+    });
 }
 
 export default function Index() {
@@ -22,6 +53,13 @@ export default function Index() {
     const data = useLoaderData<typeof loader>();
     const createFetcher = useFetcher();
     const ref = React.createRef<PostEditorElement>();
+
+    useEffect(() => {
+        if (ref?.current && createFetcher.state === 'idle') {
+            ref.current.clearEditor();
+        }
+    }, [createFetcher]);
+
     function onSubmit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();
         if (ref.current) {
@@ -33,11 +71,7 @@ export default function Index() {
             });
         }
     }
-    useEffect(() => {
-        if (ref?.current && createFetcher.state === 'idle') {
-            ref.current.clearEditor();
-        }
-    }, [createFetcher]);
+
     return (
         <div className="flex flex-col w-full px-1">
             {
@@ -45,7 +79,7 @@ export default function Index() {
                     <>
                         <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
                             <div className="flex gap-3">
-                                <UserAvatar userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
+                                <UserAvatar avatar={data?.user.avatarPath} userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
                                 <PostEditor ref={ref}
                                             placeholder="Write a post..."
                                             onTextUpdate={(progress: number) => setEditorProgress(progress)}

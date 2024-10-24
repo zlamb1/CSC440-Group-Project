@@ -1,11 +1,9 @@
 import {createCookie, createSessionStorage} from "@remix-run/node";
-import {createData, deleteData, readData, updateData} from "./db/sessions.js";
-import {getUser} from "./db/users.js";
 
 export const cookie = createCookie('__session', {
     httpOnly: true,
-    // lasts three days
-    maxAge: 60 * 60 * 24 * 3,
+    // lasts one week
+    maxAge: 60 * 60 * 24 * 7,
     path: "/",
     sameSite: "lax",
     // TODO: rotate secrets
@@ -13,26 +11,83 @@ export const cookie = createCookie('__session', {
     secure: true,
 });
 
-export const { getSession, commitSession, destroySession } = createSessionStorage({
-    cookie,
-    createData,
-    readData,
-    updateData,
-    deleteData
-})
+export const cookieUserID = 'user_id';
 
-export async function useUserData(req, res){
+export function createPrismaSessionStorage(prisma) {
+    return createSessionStorage({
+        cookie,
+        async createData(data, expiresAt) {
+            const session = await prisma.session.create({
+                data: {
+                    userId: data[cookieUserID],
+                    expiresAt,
+                    data,
+                }
+            })
+
+            return session.id;
+        },
+        async readData(id) {
+            const session = await prisma.session.findUnique({
+                where: {
+                    id
+                }
+            });
+
+            if (!session) {
+                return null;
+            }
+
+            return session.data;
+        },
+        async updateData(id, data, expiresAt) {
+            await prisma.session.update({
+                data: {
+                    data,
+                    expiresAt,
+                },
+                where: {
+                    id
+                },
+            });
+        },
+        async deleteData(id) {
+            await prisma.session.delete({
+                where: {
+                    id
+                }
+            });
+        }
+    });
+}
+
+export async function useUserSession(req, prisma, getSession) {
     const session = await getSession(req.headers.cookie);
-    const userId = session.get('userId');
-    if (!userId) {
-        return { data: { loggedIn: false }, session }
-    }
-    const data = await getUser(userId);
-    if (!data) {
-        return { data: { loggedIn: false }, session }
-    }
-    data.loggedIn = true;
-    return {
-        data, session,
+    const id = session.get(cookieUserID);
+
+    if (id) {
+        const user = await prisma.user.findUnique({
+            where: {
+                id
+            }
+        });
+        if (user) {
+            user.loggedIn = true;
+            return { session, user }
+        } else {
+            return {
+                session,
+                user: {
+                    loggedIn: false,
+                },
+            }
+        }
+    } else {
+        return {
+            session,
+            user: {
+                loggedIn: false,
+            },
+        }
     }
 }
