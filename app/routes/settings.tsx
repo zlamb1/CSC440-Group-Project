@@ -23,6 +23,7 @@ import {
 import {tryDatabaseAction} from "@/utils/database-error";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import Fade from "@ui/fade";
+import {ProfileVisibility} from "@prisma/client";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -39,8 +40,12 @@ export async function action({ context, request }: ActionFunctionArgs) {
             uploadHandler
         );
 
-        const isUpdatingAvatar = formData.get("is-uploading-avatar") === 'true';
+        const isUpdatingAvatar = formData.get("is-updating-avatar") === 'true';
         const file = formData.get("avatar");
+
+        const displayName = formData.get('displayName');
+        const bio = formData.get('bio');
+        const visibility = formData.get('visibility');
 
         const avatar = isProduction ?
             (file?.name ? `${IMAGE_CDN_URL}${file?.name}` : null) :
@@ -95,11 +100,24 @@ export async function action({ context, request }: ActionFunctionArgs) {
             removeAvatar(oldAvatar);
         }
 
+        await context.prisma.user.update({
+            data: {
+                displayName, bio, visibility,
+            },
+            where: {
+                id: context.user.id,
+            },
+        });
+
         return json({ success: 'Updated user' });
     } catch (err) {
         console.error(err);
         return json({ error: 'Unknown error' });
     }
+}
+
+function formatKey(key: string) {
+    return key.substring(0, 1).toUpperCase() + key.substring(1).toLowerCase();
 }
 
 export default function SettingsRoute() {
@@ -108,9 +126,18 @@ export default function SettingsRoute() {
     const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (fetcher.state === 'idle') {
+            setUserAvatar(data?.avatarPath);
+            setIsAvatarUpdated(false)
+        }
+    }, [fetcher]);
+
     function onClick() {
         fileInputRef.current?.click();
     }
+
     function onChangeAvatar() {
         setIsAvatarUpdated(true);
         if (fileInputRef.current) {
@@ -125,6 +152,7 @@ export default function SettingsRoute() {
             }
         }
     }
+
     function clearAvatar() {
         if (fileInputRef.current) {
             if (userAvatar === data?.avatarPath) {
@@ -137,12 +165,7 @@ export default function SettingsRoute() {
             }
         }
     }
-    useEffect(() => {
-        if (fetcher.state === 'idle') {
-            setUserAvatar(data?.avatarPath);
-            setIsAvatarUpdated(false)
-        }
-    }, [fetcher]);
+
     return (
         <div className="flex-grow flex flex-col gap-3 m-4">
             <span className="text-xl font-medium select-none">Account Settings</span>
@@ -157,7 +180,7 @@ export default function SettingsRoute() {
                                             whileHover={{ opacity: 1 }}
                                             className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
                                     <Edit2 className="text-white" size={20} />
-                                    <Input type="text" readOnly className="hidden" name="is-uploading-avatar" value={'' + isAvatarUpdated} />
+                                    <Input type="text" readOnly className="hidden" name="is-updating-avatar" value={'' + isAvatarUpdated} />
                                     <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
                                 </motion.div>
                             </Button>
@@ -177,23 +200,23 @@ export default function SettingsRoute() {
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">
-                    Name
-                    <Input />
+                    Display Name
+                    <Input defaultValue={data?.displayName} name="displayName" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Bio
-                    <Textarea />
+                    <Textarea defaultValue={data?.bio} name="bio" />
                 </Label>
                 <Label className="flex flex-col gap-2">
-                    Privacy Status
-                    <Select>
+                    Profile Visibility
+                    <Select name="visibility" defaultValue={data?.visibility}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Public" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="public">Public</SelectItem>
-                            <SelectItem value="friends">Friends Only</SelectItem>
-                            <SelectItem value="none">None</SelectItem>
+                            {
+                                Object.keys(ProfileVisibility).map(key => <SelectItem key={key} value={key}>{ formatKey(key) }</SelectItem>)
+                            }
                         </SelectContent>
                     </Select>
                 </Label>
