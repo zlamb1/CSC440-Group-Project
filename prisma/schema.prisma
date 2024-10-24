@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_CONNECTION_STRING")
+}
+
+model notifications {
+  date_issued DateTime @default(now()) @db.Timestamptz(6)
+  type        String?  @db.VarChar
+  content     String?  @db.VarChar
+  expires_on  DateTime @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
+  id          BigInt   @id @default(autoincrement())
+  user_id     String   @db.Uuid
+  viewed      Boolean  @default(false)
+  users       users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model post_likes {
+  post_id  String   @db.Uuid
+  user_id  String   @db.Uuid
+  liked    Boolean  @default(true)
+  liked_at DateTime @default(now()) @db.Timestamptz(6)
+  posts    posts    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users    users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, user_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model posts {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  posted_at   DateTime     @default(now()) @db.Timestamptz(6)
+  content     String
+  reply_to    String?      @db.Uuid
+  like_count  Int?         @default(0)
+  tags        String[]     @default([]) @db.VarChar(10)
+  reply_count Int?         @default(0)
+  last_edited DateTime     @default(now()) @db.Timestamptz(6)
+  poster_id   String?      @db.Uuid
+  post_likes  post_likes[]
+  users       users?       @relation(fields: [poster_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  posts       posts?       @relation("postsToposts", fields: [reply_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_posts posts[]      @relation("postsToposts")
+}
+
+model sessions {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  expires DateTime @db.Timestamptz(6)
+  data    Json?
+  user_id String   @db.Uuid
+  users   users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_name      String             @db.VarChar(25)
+  joined_at      DateTime           @default(now()) @db.Timestamptz(6)
+  password_hash  String             @db.Char(60)
+  avatar_path    String?            @db.VarChar
+  role           user_role          @default(none)
+  privacy_status profile_visibility @default(public)
+  display_name   String?            @db.VarChar(20)
+  bio            String?            @db.VarChar(300)
+  notifications  notifications[]
+  post_likes     post_likes[]
+  posts          posts[]
+  sessions       sessions[]
+}
+
+enum profile_visibility {
+  public
+  friends
+  none
+}
+
+enum user_role {
+  none
+  mod
+}

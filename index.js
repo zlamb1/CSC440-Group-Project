@@ -6,6 +6,7 @@ import * as vite from "vite";
 import {commitSession, destroySession, getSession, useUserData} from "./js/auth.js";
 import DBClient from './js/db/imports.js';
 import { installGlobals } from "@remix-run/node";
+import { PrismaClient } from '@prisma/client'
 
 installGlobals();
 
@@ -26,6 +27,8 @@ if (!isProduction) {
 
 app.use(viteServer ? viteServer.middlewares : express.static('build/client'));
 
+const prisma = new PrismaClient();
+
 const build = viteServer ? () => viteServer.ssrLoadModule(
     "virtual:remix/server-build") : await import("./build/server/index.js");
 
@@ -36,6 +39,7 @@ app.all("*", createRequestHandler({ build, async getLoadContext(req, res) {
             res.setHeader('Set-Cookie', await commitSession(session));
         }
         return {
+            client: prisma,
             db: new DBClient(data, session),
             session: {
                 getSession, commitSession, destroySession
