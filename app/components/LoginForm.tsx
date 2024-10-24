@@ -17,7 +17,7 @@ export interface LoginFormProps {
 export default function LoginForm({ header, submit, icon, action }: LoginFormProps) {
     const fetcher = useFetcher<{ errors?: any }>();
     return (
-        <div className="flex flex-col gap-3 items-center mt-16">
+        <div className="flex flex-col gap-3 items-center">
             <div className="border-4 border-primary p-2 rounded-full">
                 {icon}
             </div>
@@ -39,7 +39,7 @@ export default function LoginForm({ header, submit, icon, action }: LoginFormPro
                             <Input type="password" id="password" name="password" />
                             <ErrorContext msg={fetcher.data?.password}/>
                         </div>
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" containerClass="w-full" className="w-full">
                             {fetcher.state === 'submitting' ? <LoadingSpinner /> : submit}
                         </Button>
                     </fieldset>

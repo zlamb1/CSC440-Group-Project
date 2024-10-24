@@ -2,6 +2,8 @@ import {ActionFunctionArgs, redirect, json, LoaderFunctionArgs} from "@remix-run
 import {useSession} from "@/sessions.server";
 import LoginForm from "@components/LoginForm";
 import {Key, Lock} from "lucide-react";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
+import {LayoutGroup, motion} from "framer-motion";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (context.user.loggedIn) {
@@ -61,9 +63,24 @@ export async function action({ context, request } : ActionFunctionArgs) {
 export default function LoginPortal() {
     return (
         <div className="flex-grow flex gap-32 justify-center">
-            <LoginForm header="Sign in to Stories" submit="Log In" icon={<Lock className="text-primary"/>}/>
-            <LoginForm header="Register for Stories" submit="Register" icon={<Key className="text-primary"/>}
-                       action="/register"/>
+            <Tabs className="flex flex-col items-center gap-4 mt-16" defaultValue="login">
+                <TabsList className="flex justify-center w-fit">
+                    <LayoutGroup id="tabs">
+                        <TabsTrigger value="login">
+                            Log In
+                        </TabsTrigger>
+                        <TabsTrigger value="register">
+                            Register
+                        </TabsTrigger>
+                    </LayoutGroup>
+                </TabsList>
+                <TabsContent value="login">
+                    <LoginForm header="Sign in to Stories" submit="Log In" icon={<Lock className="text-primary"/>} />
+                </TabsContent>
+                <TabsContent value="register">
+                    <LoginForm header="Register for Stories" submit="Register" icon={<Key className="text-primary"/>} action="/register" />
+                </TabsContent>
+            </Tabs>
         </div>
     )
 }
