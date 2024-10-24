@@ -3,10 +3,10 @@ import {useFetcher} from "@remix-run/react";
 import {Skeleton} from "@ui/skeleton";
 import {AnimatePresence, motion} from "framer-motion";
 import Post from "@components/post/Post";
-import {PostWithUser, UserWithLoggedIn} from "@/utils/types";
+import {PostWithRelations, PostWithUser, UserWithLoggedIn} from "@/utils/types";
 
 export interface ReplyViewProps {
-    post: PostWithUser;
+    post: PostWithRelations | PostWithUser;
     user: UserWithLoggedIn;
     depth: number;
     showReplies?: boolean;
@@ -14,18 +14,22 @@ export interface ReplyViewProps {
 }
 
 export default function ReplyView({ post, user, depth, showReplies = true, onLoad = () => {} }: ReplyViewProps) {
-    const [ replies, setReplies ] = useState<PostWithUser[]>([]);
+    const hasReplies = 'replies' in post;
+
+    const [ replies, setReplies ] = useState<PostWithUser[]>(hasReplies ? post.replies : []);
     const fetcher = useFetcher();
 
     useEffect(() => {
-        if (fetcher.state === 'idle') {
+        if (fetcher.state === 'idle' && !hasReplies) {
             setReplies(fetcher.data?.replies);
             onLoad(replies);
         }
     }, [fetcher]);
 
     useEffect(() => {
-        getReplies();
+        if (!hasReplies) {
+            getReplies();
+        }
     }, [showReplies]);
 
     if (post.replyCount === 0) {

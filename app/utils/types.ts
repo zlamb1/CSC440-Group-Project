@@ -2,8 +2,6 @@ import {Post, PostLike, Prisma, User} from "@prisma/client";
 
 export type UserWithLoggedIn = User & { loggedIn: boolean }
 
-export type PrismaPost = Post;
-
 export type PostWithUser = Prisma.PostGetPayload<{
     include: {
         user: true,
@@ -16,4 +14,8 @@ export type PostWithReplies = Prisma.PostGetPayload<{
     },
 }>
 
-export type PostWithRelations = PostWithUser & PostWithReplies;
+export type PostWithRelations = Prisma.PostGetPayload<{
+    include: {
+        user: true,
+    },
+}> & { replies: PostWithUser[] };

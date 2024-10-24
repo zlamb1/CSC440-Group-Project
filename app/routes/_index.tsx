@@ -28,6 +28,15 @@ export async function loader({ context }: LoaderFunctionArgs) {
                     userId: context.user.id
                 },
             },
+            replies: {
+                include: {
+                    user: {
+                        where: {
+                            visibility: ProfileVisibility.PUBLIC,
+                        },
+                    },
+                },
+            },
         },
     });
 
