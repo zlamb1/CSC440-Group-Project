@@ -84,11 +84,17 @@ export default function UserRoute() {
                 <UserAvatar className="text-6xl mx-12 " avatar={data?.user?.avatarPath} userName={data?.user?.userName} size={100}/>
 
                 <div className="flex flex-col mr-8">
-                    <span className="font-bold text-3xl">{data?.user?.userName}</span>
-                    <span className="font-bold text-base">{data?.user?.displayName}</span>
+                    {
+                        data?.user?.displayName ?
+                            <>
+                                <span className="font-bold text-3xl">{data?.user?.displayName}</span>
+                                <span className="font-bold text-base text-gray-400">@{data?.user?.userName}</span>
+                            </> :
+                            <span className="font-bold text-3xl">@{data?.user?.userName}</span>
+                    }
                     <span className="text-sm mt-2">{"Joined " + getJoinedStr(data?.user?.joinedAt)}</span>
                     {
-                        data?.bio == null ?
+                        data?.user?.bio == null ?
                             <span className="text-sm mt-2">This user has not yet set a bio.</span> :
                             <span className="text-sm mt-2">{data?.user?.bio}</span>
                     }

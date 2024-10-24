@@ -6,7 +6,7 @@ import {
     ThumbsDown,
     ThumbsUp
 } from "lucide-react";
-import {useFetcher} from "@remix-run/react";
+import {Link, useFetcher} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
@@ -66,7 +66,9 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
                         <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
-                        <span className="font-bold">{post.user?.userName}</span>
+                        <Link to={`/users/${post.user?.userName}`} className="font-bold">
+                            {post.user?.userName}
+                        </Link>
                     </div>
                     <ContextMenu post={post} user={user} onEdit={ () => setEditing(true) } />
                 </div>
