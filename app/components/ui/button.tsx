@@ -50,21 +50,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({className, onClick, containerClass, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
         const Comp = asChild ? Slot : "button"
         const RippleProps = useRipple(props);
-        const [scope, animate] = useAnimate();
         const _onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
             RippleProps.onClick(evt);
-            if (!noClickAnimation) {
-                animate(scope.current, {
-                    scale: [ 0.9, 1 ]
-                });
-            }
             if (onClick) onClick(evt);
         }
         if (props.hidden) {
             return null;
         }
         return (
-            <motion.div className={containerClass ?? "w-fit"} ref={scope}>
+            <motion.div whileTap={noClickAnimation ? undefined : { scale: 0.95 }} className={containerClass ?? "w-fit"}>
                 <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} autoComplete="off" {...props}>
                     <Slottable>{children}</Slottable>
                     <Ripple {...RippleProps} />

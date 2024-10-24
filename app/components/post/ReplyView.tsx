@@ -58,7 +58,7 @@ export default function ReplyView({ post, user, depth, showReplies = true, onLoa
         <AnimatePresence initial={false}>
             {
                 showReplies ?
-                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.3 }} className="flex flex-col gap-2 overflow-hidden">
+                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-2 overflow-hidden">
                         {
                             replies?.map(reply =>
                                 <Post key={reply.id} post={reply} user={user} depth={depth - 1} />
