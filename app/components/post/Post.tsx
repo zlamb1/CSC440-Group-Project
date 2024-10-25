@@ -14,6 +14,7 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {AnimatePresence, motion} from "framer-motion";
 import ReplyView from "@components/post/ReplyView";
 import {PostWithUser, UserWithLoggedIn} from "@/utils/types";
+import UserHoverCard from "@components/hover/UserHoverCard";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -65,10 +66,12 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
             <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
-                        <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
-                        <Link to={`/users/${post.user?.userName}`} className="font-bold">
-                            {post.user?.userName}
-                        </Link>
+                        <UserHoverCard viewer={user} user={post.user}>
+                            <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
+                                <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
+                                {post.user?.userName}
+                            </Link>
+                        </UserHoverCard>
                     </div>
                     <ContextMenu post={post} user={user} onEdit={ () => setEditing(true) } />
                 </div>
