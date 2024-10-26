@@ -1,10 +1,12 @@
-import {User} from "@prisma/client";
+import {Follow, User} from "@prisma/client";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import { ReactNode } from "react";
 import UserAvatar from "@components/UserAvatar";
 import {UserWithLoggedIn} from "@/utils/types";
 import {Button} from "@ui/button";
-import {Form} from "@remix-run/react";
+import {Form, Link, useFetcher} from "@remix-run/react";
+import {LoadingSpinner} from "@components/LoadingSpinner";
+import Fade from "@ui/fade";
 
 function getFormattedDate(date: Date) {
     if (!date) {
@@ -24,19 +26,24 @@ function getFormattedDate(date: Date) {
 }
 
 export default function UserHoverCard({ viewer, user, children }: { viewer: UserWithLoggedIn, user: User | null, children: ReactNode }) {
+    const fetcher = useFetcher();
+
     if (!user) {
         return children;
     }
+
+    const isSelf = viewer?.id === user.id;
+    const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id)
 
     return (
         <HoverCard>
             <HoverCardTrigger asChild>
                 {children}
             </HoverCardTrigger>
-            <HoverCardContent className="flex flex-row min-w-fit gap-2">
+            <HoverCardContent className="flex flex-row w-fit gap-2">
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center gap-12">
-                        <div className="flex gap-2">
+                        <Link to={`users/${user.userName}`} className="flex gap-2">
                             <UserAvatar avatar={user.avatarPath} userName={user.userName} />
                             {
                                 user.displayName ?
@@ -45,11 +52,19 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                                         <span className="text-sm text-gray-400">@{user.userName}</span>
                                     </div> : <span className="font-bold">@{user.userName}</span>
                             }
-                        </div>
-                        <Form navigate={false} method="POST" action={`/users/${user.id}/follow`}>
-                            <input className="hidden" value="true" name="follow" readOnly />
-                            <Button>Follow</Button>
-                        </Form>
+                        </Link>
+                        <Fade show={viewer.loggedIn && !isSelf}>
+                            <fetcher.Form method="POST" action={`/users/${user.id}/follow`}>
+                                <input className="hidden" value={!isFollowing + ''} name="follow" readOnly/>
+                                <Button className="min-w-[90px]" variant="outline">
+                                    {
+                                        fetcher.state === 'idle' ?
+                                            isFollowing ? 'Unfollow' : 'Follow' :
+                                            <LoadingSpinner/>
+                                    }
+                                </Button>
+                            </fetcher.Form>
+                        </Fade>
                     </div>
                     <div className="text-sm dark:text-gray-300">
                         Joined {getFormattedDate(user.joinedAt)}
