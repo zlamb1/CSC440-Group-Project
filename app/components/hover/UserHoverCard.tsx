@@ -7,6 +7,7 @@ import {Button} from "@ui/button";
 import {Form, Link, useFetcher} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import Fade from "@ui/fade";
+import FollowButton from "@components/FollowButton";
 
 function getFormattedDate(date: Date) {
     if (!date) {
@@ -54,16 +55,7 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                             }
                         </Link>
                         <Fade show={viewer.loggedIn && !isSelf}>
-                            <fetcher.Form method="POST" action={`/users/${user.id}/follow`}>
-                                <input className="hidden" value={!isFollowing + ''} name="follow" readOnly/>
-                                <Button className="min-w-[90px]" variant="outline">
-                                    {
-                                        fetcher.state === 'idle' ?
-                                            isFollowing ? 'Unfollow' : 'Follow' :
-                                            <LoadingSpinner/>
-                                    }
-                                </Button>
-                            </fetcher.Form>
+                            <FollowButton user={user} isFollowing={isFollowing} />
                         </Fade>
                     </div>
                     <div className="text-sm dark:text-gray-300">

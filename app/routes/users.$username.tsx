@@ -4,10 +4,11 @@ import {useLoaderData} from "@remix-run/react";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@/components/UserAvatar";
 import {Button} from "@ui/button";
-import {ProfileVisibility, Post as _Post} from "@prisma/client";
+import {ProfileVisibility, Post as _Post, Follow} from "@prisma/client";
 import NotFound from "@/routes/$";
 import Post from "@components/post/Post";
 import {Fragment} from "react";
+import FollowButton from "@components/FollowButton";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -58,7 +59,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
     }
 }
 
-function getJoinedStr(joinedAt: Date) {
+function getFormattedDate(joinedAt: Date) {
     if (!joinedAt) {
         return null;
     } else {
@@ -75,15 +76,6 @@ function getJoinedStr(joinedAt: Date) {
     );
 }
 
-function isFollowed() {
-    // DOES NOTHING FOR THE TIME BEING
-    return false;
-}
-
-function followUnfollow() {
-    // DOES NOTHING FOR THE TIME BEING
-}
-
 export default function UserRoute() {
     const data = useLoaderData<typeof loader>();
 
@@ -95,9 +87,10 @@ export default function UserRoute() {
     }
 
     const posts = data?.user?.posts;
+    const isOwnPage = data?.self.id === data?.user?.id;
 
-    function isOwnPage() {
-        return data?.self.id === data?.user?.id;
+    function isFollowing() {
+        return data?.self.following.some((follow: Follow) => follow.followingId === data?.user?.id);
     }
 
     return (
@@ -114,7 +107,7 @@ export default function UserRoute() {
                             </> :
                             <span className="font-bold text-3xl">@{data?.user?.userName}</span>
                     }
-                    <span className="text-sm mt-2">{"Joined " + getJoinedStr(data?.user?.joinedAt)}</span>
+                    <span className="text-sm mt-2">{"Joined " + getFormattedDate(data?.user?.joinedAt)}</span>
                     {
                         data?.user?.bio == null ?
                             <span className="text-sm mt-2">This user has not yet set a bio.</span> :
@@ -122,15 +115,10 @@ export default function UserRoute() {
                     }
                 </div>
                 {
-                    isOwnPage() ?
+                    isOwnPage ?
                         <Button containerClass="w-fit" variant="edit">
                             Edit Profile
-                        </Button> :
-                        <Button containerClass="w-fit" variant="default">
-                            {
-                                isFollowed() ? "Unfollow" : "Follow"
-                            }
-                        </Button>
+                        </Button> : <FollowButton user={data?.user} isFollowing={isFollowing()} />
                 }
             </div>
             <Separator />
@@ -138,7 +126,7 @@ export default function UserRoute() {
                 {
                     posts?.map((post: _Post) =>
                         <Fragment key={post.id}>
-                            <Post post={{...post, user: data?.user}} viewer={data?.user} />
+                            <Post post={{...post, user: data?.user}} viewer={data?.self} />
                             <Separator />
                         </Fragment>
                     )

@@ -2,7 +2,7 @@ import UserAvatar from "@components/UserAvatar";
 import {Button} from "@ui/button";
 import React, {FormEvent, useRef, useState} from "react";
 import {
-    MessageCircle, NotebookPen,
+    MessageCircle, NotebookPen, Pencil,
     ThumbsDown,
     ThumbsUp
 } from "lucide-react";
@@ -119,7 +119,7 @@ function Post({className, post, viewer, depth = 1}: { className?: string, post: 
                                         variant={isReplying ? undefined : 'ghost'}
                                         disabled={!viewer.loggedIn}
                                         onClick={() => setIsReplying(!isReplying)}>
-                                    <NotebookPen size={16}/>
+                                    <Pencil size={16}/>
                                 </Button>
                             </div>
                             <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
@@ -143,7 +143,7 @@ function Post({className, post, viewer, depth = 1}: { className?: string, post: 
                         {
                             isReplying ?
                                 <replyFetcher.Form onSubmit={onReply}>
-                                    <motion.div initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}
+                                    <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} exit={{opacity: 0, height: 0}}
                                                 className="flex flex-col gap-3">
                                         <PostEditor placeholder="Write a reply..."
                                                     ref={replyEditorRef}
