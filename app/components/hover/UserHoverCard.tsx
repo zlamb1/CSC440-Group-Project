@@ -1,7 +1,7 @@
 import {Follow, User} from "@prisma/client";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import { ReactNode } from "react";
-import UserAvatar from "@components/UserAvatar";
+import UserAvatar from "@components/user/UserAvatar";
 import {UserWithLoggedIn} from "@/utils/types";
 import {Button} from "@ui/button";
 import {Form, Link, useFetcher} from "@remix-run/react";

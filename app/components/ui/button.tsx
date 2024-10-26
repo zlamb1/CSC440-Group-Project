@@ -43,22 +43,26 @@ export interface ButtonProps
     asChild?: boolean,
     containerClass?: string,
     noClickAnimation?: boolean,
+    clickAnimationScale?: number,
+    disableRipple?: boolean,
     autoComplete?: string,
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({className, onClick, containerClass, variant, size, asChild = false, noClickAnimation = false, children, ...props}, ref) => {
+    ({className, onClick, containerClass, variant, size, asChild = false, noClickAnimation = false, clickAnimationScale = 0.95, disableRipple = false, children, ...props}, ref) => {
         const Comp = asChild ? Slot : "button"
         const RippleProps = useRipple(props);
         const _onClick = (evt: React.MouseEvent<HTMLButtonElement>) => {
-            RippleProps.onClick(evt);
+            if (!disableRipple) {
+                RippleProps.onClick(evt);
+            }
             if (onClick) onClick(evt);
         }
         if (props.hidden) {
             return null;
         }
         return (
-            <motion.div whileTap={noClickAnimation ? undefined : { scale: 0.95 }} className={containerClass ?? "w-fit"}>
+            <motion.div whileTap={noClickAnimation ? undefined : { scale: clickAnimationScale }} className={cn('w-fit', containerClass)}>
                 <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} autoComplete="off" {...props}>
                     <Slottable>{children}</Slottable>
                     <Ripple {...RippleProps} />

@@ -4,7 +4,7 @@ import {json, LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import React, {FormEvent, Fragment, useEffect, useState} from "react";
 import Post from "@components/post/Post";
-import UserAvatar from "@components/UserAvatar";
+import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";

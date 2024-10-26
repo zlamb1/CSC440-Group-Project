@@ -3,7 +3,7 @@ import {Link, useFetcher} from "@remix-run/react";
 import {DropdownMenu} from "@radix-ui/react-dropdown-menu";
 import {DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
-import UserAvatar from "@components/UserAvatar";
+import UserAvatar from "@components/user/UserAvatar";
 import {LogOut, Settings, UserRound} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 

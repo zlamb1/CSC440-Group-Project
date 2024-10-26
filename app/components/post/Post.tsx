@@ -1,4 +1,4 @@
-import UserAvatar from "@components/UserAvatar";
+import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
 import React, {FormEvent, useRef, useState} from "react";
 import {

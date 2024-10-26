@@ -5,7 +5,7 @@ import {Label} from "@ui/label";
 import {Textarea} from "@ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@ui/select";
 import {Button} from "@ui/button";
-import UserAvatar from "@components/UserAvatar";
+import UserAvatar from "@components/user/UserAvatar";
 import {
     ActionFunctionArgs,
     json,
