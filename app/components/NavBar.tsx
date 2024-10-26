@@ -14,13 +14,14 @@ import NotificationNavDropdown from "@components/dropdown/NotificationNavDropdow
 
 export interface NavBarProps {
     ssrColorScheme?: string;
+    className?: string;
     user?: any;
     notificationCount: number;
 }
 
-export default function NavBar({ ssrColorScheme, user, notificationCount }: NavBarProps) {
+export default function NavBar({ ssrColorScheme, className, user, notificationCount }: NavBarProps) {
     return (
-        <NavigationMenu className="bg-background py-2 w-100 text-lg h-fit px-4 sm:px-16 md:px-32 lg:px-64 xl:px-96">
+        <NavigationMenu className={className}>
             <NavigationMenuList className="flex flex-row items-baseline gap-5">
                 <NavigationMenuItem>
                     <Link className="flex flex-row items-baseline font-bold gap-1" to="/">

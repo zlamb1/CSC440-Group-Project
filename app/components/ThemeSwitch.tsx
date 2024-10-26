@@ -77,11 +77,11 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="flex flex-col">
+            <DropdownMenuContent className="flex flex-col p-0">
                 {
                     themes.map((theme, index) => (
                         <React.Fragment key={theme}>
-                            <Button containerClass="w-full" className="flex flex-row w-full justify-between" variant="ghost" onClick={() => onClick(theme)} noClickAnimation>
+                            <Button containerClass="w-full" className="flex flex-row w-full justify-between rounded-none" variant="ghost" onClick={() => onClick(theme)} noClickAnimation>
                                 {theme.charAt(0).toUpperCase() + theme.substring(1)}
                                 {React.createElement(themeIcons[theme], {})}
                             </Button>
