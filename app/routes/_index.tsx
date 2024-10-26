@@ -114,7 +114,7 @@ export default function Index() {
                                         animate={{ opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
                                         exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
                                         transition={{ duration: 0.2 }}>
-                                <Post className="p-3 px-5" post={post} user={data?.user} />
+                                <Post className="p-3 px-5" post={post} viewer={data?.user} />
                             </motion.div>
                             <hr />
                         </Fragment>

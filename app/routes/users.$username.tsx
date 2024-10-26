@@ -4,8 +4,10 @@ import {useLoaderData} from "@remix-run/react";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@/components/UserAvatar";
 import {Button} from "@ui/button";
-import {ProfileVisibility} from "@prisma/client";
+import {ProfileVisibility, Post as _Post} from "@prisma/client";
 import NotFound from "@/routes/$";
+import Post from "@components/post/Post";
+import {Fragment} from "react";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -14,6 +16,24 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
         }
 
         const user = await context.prisma.user.findUnique({
+            include: {
+                posts: {
+                    where: {
+                        replyTo: null,
+                    },
+                    include: {
+                        replies: {
+                            include: {
+                                user: {
+                                    where: {
+                                        visibility: ProfileVisibility.PUBLIC,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             where: {
                 userName: params.username,
             },
@@ -74,6 +94,8 @@ export default function UserRoute() {
         // TODO: throw error boundary
     }
 
+    const posts = data?.user?.posts;
+
     function isOwnPage() {
         return data?.self.id === data?.user?.id;
     }
@@ -112,7 +134,16 @@ export default function UserRoute() {
                 }
             </div>
             <Separator />
-
+            <div className="flex flex-col gap-2">
+                {
+                    posts?.map((post: _Post) =>
+                        <Fragment key={post.id}>
+                            <Post post={{...post, user: data?.user}} viewer={data?.user} />
+                            <Separator />
+                        </Fragment>
+                    )
+                }
+            </div>
         </div>
     );
 }

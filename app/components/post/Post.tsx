@@ -38,10 +38,10 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
     return likeCount;
 }
 
-function Post({className, post, user, depth = 1}: { className?: string, post: PostWithUser, user: UserWithLoggedIn, depth?: number }) {
+function Post({className, post, viewer, depth = 1}: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn, depth?: number }) {
     const [ isEditing, setEditing ] = useState<boolean>(false);
     const [ showReplies, setShowReplies ] = useState<boolean>(depth > 0);
-    const [ isReplying, setIsReplying ] = useState<boolean>(user.loggedIn);
+    const [ isReplying, setIsReplying ] = useState<boolean>(viewer.loggedIn);
     const replyEditorRef = useRef<PostEditorElement>();
     const likeFetcher = useFetcher();
     const replyFetcher = useFetcher();
@@ -66,14 +66,14 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
             <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
-                        <UserHoverCard viewer={user} user={post.user}>
+                        <UserHoverCard viewer={viewer} user={post.user}>
                             <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
                                 <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
                                 {post.user?.userName}
                             </Link>
                         </UserHoverCard>
                     </div>
-                    <ContextMenu post={post} user={user} onEdit={ () => setEditing(true) } />
+                    <ContextMenu post={post} user={viewer} onEdit={ () => setEditing(true) } />
                 </div>
                 <div className="ml-10 flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
@@ -89,7 +89,7 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
                                             variant="ghost"
                                             size="icon"
                                             type="submit"
-                                            disabled={!user?.loggedIn}>
+                                            disabled={!viewer.loggedIn}>
                                         <input className="hidden" name="liked"
                                                value={isLiked === true ? 'null' : 'true'}
                                                readOnly/>
@@ -103,7 +103,7 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
                                             variant="ghost"
                                             size="icon"
                                             type="submit"
-                                            disabled={!user?.loggedIn}>
+                                            disabled={!viewer.loggedIn}>
                                         <input className="hidden" name="liked"
                                                value={isLiked === false ? 'null' : 'false'}
                                                readOnly/>
@@ -117,7 +117,7 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
                                         className="h-[25px] flex gap-1 items-center rounded-full"
                                         size="icon"
                                         variant={isReplying ? undefined : 'ghost'}
-                                        disabled={!user?.loggedIn}
+                                        disabled={!viewer.loggedIn}
                                         onClick={() => setIsReplying(!isReplying)}>
                                     <NotebookPen size={16}/>
                                 </Button>
@@ -135,7 +135,7 @@ function Post({className, post, user, depth = 1}: { className?: string, post: Po
                         </div>
                     </div>
                     <ReplyView post={post}
-                               user={user}
+                               user={viewer}
                                showReplies={showReplies}
                                depth={depth}
                     />
