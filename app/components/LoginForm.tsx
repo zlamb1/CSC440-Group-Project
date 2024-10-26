@@ -2,7 +2,7 @@ import {Card} from "@ui/card";
 import {useFetcher} from "@remix-run/react";
 import {Label} from "@ui/label";
 import {Input} from "@ui/input";
-import {ErrorContext} from "@components/ErrorContext";
+import {ErrorContext} from "@components/error/ErrorContext";
 import {Button} from "@ui/button";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {ReactNode} from "react";
