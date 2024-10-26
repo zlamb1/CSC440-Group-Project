@@ -41,7 +41,7 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
 function Post({className, post, user, depth = 1}: { className?: string, post: PostWithUser, user: UserWithLoggedIn, depth?: number }) {
     const [ isEditing, setEditing ] = useState<boolean>(false);
     const [ showReplies, setShowReplies ] = useState<boolean>(depth > 0);
-    const [ isReplying, setIsReplying ] = useState<boolean>(false);
+    const [ isReplying, setIsReplying ] = useState<boolean>(user.loggedIn);
     const replyEditorRef = useRef<PostEditorElement>();
     const likeFetcher = useFetcher();
     const replyFetcher = useFetcher();
