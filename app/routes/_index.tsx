@@ -14,6 +14,9 @@ import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     let posts = await context.prisma.post.findMany({
+        orderBy: {
+            postedAt: 'desc'
+        },
         where: {
             replyTo: null,
         },
