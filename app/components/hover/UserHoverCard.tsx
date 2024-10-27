@@ -42,7 +42,7 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                 {children}
             </HoverCardTrigger>
             <HoverCardContent className="flex flex-row w-fit gap-2">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col">
                     <div className="flex justify-between items-center gap-12">
                         <Link to={`users/${user.userName}`} className="flex gap-2">
                             <UserAvatar avatar={user.avatarPath} userName={user.userName} />
@@ -61,6 +61,12 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                     <div className="text-sm dark:text-gray-300">
                         Joined {getFormattedDate(user.joinedAt)}
                     </div>
+                    {
+                        user.bio ?
+                            <div className="text-sm dark:text-gray-300">
+                                { user.bio }
+                            </div> : null
+                    }
                 </div>
             </HoverCardContent>
         </HoverCard>

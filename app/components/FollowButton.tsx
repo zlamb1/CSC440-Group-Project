@@ -9,7 +9,7 @@ export default function FollowButton({ user, isFollowing }: { user: User, isFoll
     return (
         <fetcher.Form method="POST" action={`/users/${user.id}/follow`}>
             <input className="hidden" value={!isFollowing + ''} name="follow" readOnly/>
-            <Button className="min-w-[90px]" variant="outline">
+            <Button className="min-w-[90px] font-bold">
                 {
                     fetcher.state === 'idle' ?
                         isFollowing ? 'Unfollow' : 'Follow' :
