@@ -13,7 +13,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
         return redirect('/');
     }
 
-    const notifications = await context.prisma.notifications.findMany({
+    const notifications = await context.prisma.notification.findMany({
         orderBy: {
             dateIssued: 'desc',
         },

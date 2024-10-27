@@ -16,6 +16,8 @@ import {Placeholder} from "@tiptap/extension-placeholder";
 import {Separator} from "@ui/separator";
 import useIsSSR from "@/utils/useIsSSR";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {Card} from "@ui/card";
+import {AnimatePresence} from "framer-motion";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 300;
@@ -43,9 +45,17 @@ export interface PostEditorElement {
 export const PostEditor = React.forwardRef((props: any, ref) => {
     const [ isFocused, setFocused ] = useState<boolean>(false);
     const isSSR = useIsSSR();
+
     useEffect(() => {
         setFocused(props?.autofocus);
-    }, [props?.autofocus]);
+    }, []);
+
+    useEffect(() => {
+        if (typeof props?.focus === 'function' && isFocused) {
+            props.focus(isFocused);
+        }
+    }, [isFocused]);
+
     const extensions = [
         ...defaultExtensions,
         CharacterCount.configure({
@@ -62,22 +72,25 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
             placeholder: props?.placeholder ?? 'Write something...',
         }),
     ];
+
     const editor = useEditor({
         extensions: extensions,
         content: props?.content,
         editable: props?.editable ?? true,
         editorProps: props?.editorProps,
         immediatelyRender: false,
-        autofocus: props?.autofocus,
+        autofocus: props?.autofocus ?? false,
         onFocus: () => setFocused(true),
         onBlur: () => setFocused(false),
     });
+
     useImperativeHandle(ref, () => {
         return {
             getContent: () => editor?.getHTML(),
             clearEditor: () => editor?.commands.clearContent(true)
         }
     });
+
     if (isSSR) {
         return (
             <div className="w-full flex flex-col items-center gap-2">
@@ -87,13 +100,14 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
         );
     } else {
         return (
-            <div className="flex flex-col gap-1 w-full">
+            <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text" onClick={() => editor?.commands.focus()}>
                 <EditorContext.Provider value={{editor}}>
                     <EditorContent {...props?.containerProps} editor={editor}/>
                 </EditorContext.Provider>
-                <Separator className={isFocused ? 'bg-primary' : ''}
-                           style={{transition: 'background-color ease-in-out 0.2s'}}/>
-            </div>
+                <AnimatePresence mode="wait">
+                    { props?.isActive ? (props?.append ?? null) : null }
+                </AnimatePresence>
+            </Card>
         );
     }
 });

@@ -2,7 +2,8 @@ import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
 import React, {FormEvent, useRef, useState} from "react";
 import {
-    MessageCircle, NotebookPen, Pencil,
+    MessageCircle,
+    Pencil,
     ThumbsDown,
     ThumbsUp
 } from "lucide-react";
@@ -41,6 +42,7 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
 function Post({className, post, viewer, depth = 1}: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn, depth?: number }) {
     const [ isEditing, setEditing ] = useState<boolean>(false);
     const [ showReplies, setShowReplies ] = useState<boolean>(depth > 0);
+    const [ isReplyEditorActive, setReplyEditorActive ] = useState<boolean>(false);
     const [ isReplying, setIsReplying ] = useState<boolean>(viewer.loggedIn);
     const replyEditorRef = useRef<PostEditorElement>();
     const likeFetcher = useFetcher();
@@ -61,6 +63,11 @@ function Post({className, post, viewer, depth = 1}: { className?: string, post: 
         }
     }
 
+    function handleCancel(evt: React.MouseEvent) {
+        evt.stopPropagation();
+        setReplyEditorActive(false);
+    }
+
     return (
         <div className={"flex gap-3 " + className} key={post.id}>
             <div className="flex flex-col w-full">
@@ -79,7 +86,8 @@ function Post({className, post, viewer, depth = 1}: { className?: string, post: 
                     <div className="flex flex-col gap-1">
                         <div className="flex flex-col">
                             <PostView post={post} isEditing={isEditing}
-                                      onIsEditingChange={(_isEditing: boolean) => setEditing(_isEditing)}/>
+                                      onIsEditingChange={(_isEditing: boolean) => setEditing(_isEditing)}
+                            />
                         </div>
                         <div className="flex gap-2">
                             <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
@@ -143,22 +151,30 @@ function Post({className, post, viewer, depth = 1}: { className?: string, post: 
                         {
                             isReplying ?
                                 <replyFetcher.Form onSubmit={onReply}>
-                                    <motion.div initial={{opacity: 0, height: 0}} animate={{opacity: 1, height: 'auto'}} exit={{opacity: 0, height: 0}}
-                                                className="flex flex-col gap-3">
                                         <PostEditor placeholder="Write a reply..."
                                                     ref={replyEditorRef}
-                                                    editable={replyFetcher.state === 'idle'}
+                                                    isActive={isReplyEditorActive}
+                                                    focus={setReplyEditorActive}
+                                                    editable={replyFetcher.state !== 'submitting'}
                                                     editorProps={{attributes: {class: 'focus-visible:outline-none'}}}
+                                                    append={
+                                                        <motion.div initial={{opacity: 0, height: 0}}
+                                                                    animate={{opacity: 1, height: 'auto'}}
+                                                                    exit={{opacity: 0, height: 0}}
+                                                                    className="flex gap-2 justify-end overflow-y-hidden">
+                                                            <Button variant="ghost" onClick={handleCancel}>
+                                                                Cancel
+                                                            </Button>
+                                                            <Button type="submit"
+                                                                    disabled={replyFetcher.state !== 'idle'}>
+                                                                {
+                                                                    replyFetcher.state === 'idle' ?
+                                                                        'Reply' : <LoadingSpinner/>
+                                                                }
+                                                            </Button>
+                                                        </motion.div>
+                                                    }
                                         />
-                                        <div className="flex justify-end">
-                                            <Button type="submit" disabled={replyFetcher.state !== 'idle'}>
-                                                {
-                                                    replyFetcher.state === 'idle' ?
-                                                        'Reply' : <LoadingSpinner/>
-                                                }
-                                            </Button>
-                                        </div>
-                                    </motion.div>
                                 </replyFetcher.Form>
                                 : null
                         }

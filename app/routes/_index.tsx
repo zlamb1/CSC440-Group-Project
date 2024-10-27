@@ -2,7 +2,7 @@ import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {json, LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {FormEvent, Fragment, useEffect, useState} from "react";
+import React, {createRef, FormEvent, Fragment, useEffect, useState} from "react";
 import Post from "@components/post/Post";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
@@ -58,11 +58,12 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 export default function Index() {
-    const [ editorProgress, setEditorProgress ] = useState(0);
+    const [ editorProgress, setEditorProgress ] = useState<number>(0);
+    const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
     const isSSR = useIsSSR(); 
     const data = useLoaderData<typeof loader>();
     const createFetcher = useFetcher();
-    const ref = React.createRef<PostEditorElement>();
+    const ref = createRef<PostEditorElement>();
 
     useEffect(() => {
         if (ref?.current && createFetcher.state === 'idle') {
@@ -82,6 +83,11 @@ export default function Index() {
         }
     }
 
+    function handleCancel(evt: React.MouseEvent) {
+        evt.stopPropagation();
+        setEditorActive(false);
+    }
+
     return (
         <div className="flex flex-col w-full px-1">
             <Fade show={data?.user.loggedIn}>
@@ -89,29 +95,41 @@ export default function Index() {
                     <div className="flex gap-3">
                         <UserAvatar avatar={data?.user.avatarPath} userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
                         <PostEditor ref={ref}
+                                    focus={setEditorActive}
+                                    isActive={isEditorActive}
                                     placeholder="Write a post..."
                                     onTextUpdate={(progress: number) => setEditorProgress(progress)}
                                     editable={ createFetcher.state === 'idle' }
                                     editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
-                                    containerProps={{className: 'flex-grow w-full text-lg'}} />
-                    </div>
-                    <div className="self-end flex items-center gap-3">
-                        <ProgressCircle percentage={ editorProgress } />
-                        <Button className="font-bold" type="submit" disabled={createFetcher.state !== 'idle'}>
-                            {
-                                createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner />
-                            }
-                        </Button>
+                                    containerProps={{className: 'flex-grow w-full text-md'}}
+                                    append={
+                                        <motion.div className="self-end flex items-center overflow-y-hidden gap-3"
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    exit={{ opacity: 0, height: 0 }}>
+                                            <ProgressCircle percentage={editorProgress}/>
+                                            <Button type="button" variant="ghost" onClick={handleCancel}>
+                                                Cancel
+                                            </Button>
+                                            <Button className="font-bold" type="submit"
+                                                    disabled={createFetcher.state !== 'idle'}>
+                                                {
+                                                    createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner/>
+                                                }
+                                            </Button>
+                                        </motion.div>
+                                    }
+                        />
                     </div>
                 </Form>
-                <hr />
+                <hr/>
             </Fade>
             <AnimatePresence initial={!isSSR}>
                 {
                     data?.posts.map((post: any) =>
                         <Fragment key={post.id}>
-                            <motion.div initial={{ opacity: 0.25, transform: 'translateX(-10px)' }}
-                                        animate={{ opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
+                            <motion.div initial={{opacity: 0.25, transform: 'translateX(-10px)'}}
+                                        animate={{opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
                                         exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
                                         transition={{ duration: 0.2 }}>
                                 <Post className="p-3 px-5" post={post} viewer={data?.user} />
