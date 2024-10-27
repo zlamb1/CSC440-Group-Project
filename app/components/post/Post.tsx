@@ -39,11 +39,11 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
     return likeCount;
 }
 
-function Post({className, post, viewer, depth = 1}: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn, depth?: number }) {
+function Post({className, post, viewer, depth = 1, autoReply = true}: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn, depth?: number, autoReply?: boolean }) {
     const [ isEditing, setEditing ] = useState<boolean>(false);
     const [ showReplies, setShowReplies ] = useState<boolean>(depth > 0);
     const [ isReplyEditorActive, setReplyEditorActive ] = useState<boolean>(false);
-    const [ isReplying, setIsReplying ] = useState<boolean>(viewer.loggedIn);
+    const [ isReplying, setIsReplying ] = useState<boolean>(viewer.loggedIn && autoReply);
     const replyEditorRef = useRef<PostEditorElement>();
     const likeFetcher = useFetcher();
     const replyFetcher = useFetcher();
