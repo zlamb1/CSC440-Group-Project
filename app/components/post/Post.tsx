@@ -155,14 +155,14 @@ function Post({className, post, viewer, depth = 1}: { className?: string, post: 
                                                     ref={replyEditorRef}
                                                     isActive={isReplyEditorActive}
                                                     focus={setReplyEditorActive}
-                                                    editable={replyFetcher.state !== 'submitting'}
+                                                    editable={replyFetcher.state === 'idle'}
                                                     editorProps={{attributes: {class: 'focus-visible:outline-none'}}}
                                                     append={
                                                         <motion.div initial={{opacity: 0, height: 0}}
                                                                     animate={{opacity: 1, height: 'auto'}}
                                                                     exit={{opacity: 0, height: 0}}
                                                                     className="flex gap-2 justify-end overflow-y-hidden">
-                                                            <Button variant="ghost" onClick={handleCancel}>
+                                                            <Button variant="ghost" onClick={handleCancel} type="button">
                                                                 Cancel
                                                             </Button>
                                                             <Button type="submit"
