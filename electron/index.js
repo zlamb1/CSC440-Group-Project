@@ -6,8 +6,10 @@ const DEV_APP_URL = `http://localhost:${PORT}`;
 
 const createWindow = async () => {
     const win = new BrowserWindow({
+        title: 'Stories',
         width: 800,
-        height: 600
+        height: 600,
+        show: false,
     });
 
     const url = process.env.NODE_ENV === 'production' ?
@@ -15,6 +17,7 @@ const createWindow = async () => {
 
     win.removeMenu();
     await win.loadURL(url);
+    win.show();
 }
 
 app.on('window-all-closed', () => {
