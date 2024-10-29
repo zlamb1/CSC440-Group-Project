@@ -68,7 +68,11 @@ export async function useUserSession(req, prisma, getSession) {
     if (id) {
         const user = await prisma.user.findUnique({
             include: {
-                following: true,
+                following: {
+                    include: {
+                        following: true,
+                    },
+                },
             },
             where: {
                 id

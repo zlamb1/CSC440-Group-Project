@@ -15,6 +15,12 @@ import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName} from "@/utils/prefers-color-scheme";
 import {Card} from "@ui/card";
+import {Follow, Prisma} from "@prisma/client";
+import UserAvatar from "@components/user/UserAvatar";
+import {Button} from "@ui/button";
+import {ChevronLeft} from "lucide-react";
+import {Separator} from "@ui/separator";
+import FriendPanel from "@components/FriendPanel";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: twStylesheet },
@@ -47,6 +53,8 @@ export async function loader({context, request}: LoaderFunctionArgs) {
 
 export function Layout({children}: {children: React.ReactNode}) {
     const data = useRouteError() ? null : useRouteLoaderData("root");
+    const user = data?.user;
+
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
@@ -67,8 +75,8 @@ export function Layout({children}: {children: React.ReactNode}) {
             <body>
                 <div className="flex flex-col bg-background min-h-[100vh]">
                     <NavBar {...data} className="py-2 w-100 text-lg h-fit px-4 sm:px-16 md:px-32 lg:px-64 xl:px-96" />
-                    <div className="flex-grow flex gap-3 w-full py-3">
-                        <div className="lg:w-[15%] xl:w-[20%] flex-shrink-0"></div>
+                    <div className="flex-grow flex gap-3 w-full p-3">
+                        <FriendPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user} />
                         <div className="border-0 bg-background flex-grow flex justify-center">
                             {children}
                         </div>
