@@ -28,11 +28,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
                     include: {
                         replies: {
                             include: {
-                                user: {
-                                    where: {
-                                        visibility: ProfileVisibility.PUBLIC,
-                                    },
-                                },
+                                user: true,
                             },
                         },
                     },
@@ -113,7 +109,6 @@ export default function UserRoute() {
         if (data.error === 'User not found') {
             return <NotFound />;
         }
-        // TODO: throw error boundary
     }
 
     const self = data?.self;
@@ -125,7 +120,7 @@ export default function UserRoute() {
     const isOwnPage = self?.id === user?.id;
 
     function isFollowing() {
-        return self?.following.some((follow: Follow) => follow.followingId === user?.id);
+        return self?.following?.some((follow: Follow) => follow.followingId === user?.id);
     }
 
     const tabs = [

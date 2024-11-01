@@ -26,6 +26,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
                     visibility: ProfileVisibility.PUBLIC
                 }
             },
+
             postLikes: {
                 where: {
                     userId: context.user.id
