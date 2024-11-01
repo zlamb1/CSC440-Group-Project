@@ -33,17 +33,14 @@ export async function loader({ context }: LoaderFunctionArgs) {
             },
             replies: {
                 include: {
-                    user: {
-                        where: {
-                            visibility: ProfileVisibility.PUBLIC,
-                        },
-                    },
+                    user: true,
                 },
             },
         },
     });
 
-    posts = posts.map((post: Prisma.PostGetPayload<{ include: { postLikes: true } }>) => {
+    type PostType = Prisma.PostGetPayload<{ include: { user: true, postLikes: true } }>;
+    posts = posts.map((post: PostType) => {
         if (post?.postLikes && post.postLikes.length > 0) {
             return {
                 ...post,
@@ -52,7 +49,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
         }
 
         return post;
-    });
+    }).filter((post: PostType) => post.user);
 
     return json({
         user: context.user,
