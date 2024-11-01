@@ -19,10 +19,13 @@ export default function UserNavDropdown({ user }: { user: any }) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="flex flex-col">
-                <Button containerClass="flex" className="flex-grow flex gap-4" variant="ghost">
-                    <UserRound size={20} />
-                    <span className="flex-grow text-left">Profile</span>
-                </Button>
+                <Link to={"/users/" + user?.userName}>
+                    <Button containerClass="flex" className="flex-grow flex gap-4" variant="ghost">
+                        <UserRound size={20} />
+                        <span className="flex-grow text-left">Profile</span>
+                    </Button>
+                </Link>
+
                 <Link to="/settings">
                     <Button containerClass="flex" className="flex-grow flex gap-4" variant="ghost">
                         <Settings size={20}/>
