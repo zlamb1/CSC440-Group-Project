@@ -10,9 +10,13 @@ import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import useIsSSR from "@/utils/useIsSSR";
 import {Prisma, ProfileVisibility} from "@prisma/client";
+import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
+    const p = await context.prisma.$queryRawTyped(getPublicPosts());
+    console.log(p);
+
     const posts = await context.prisma.post.findMany({
         orderBy: {
             postedAt: 'desc'
