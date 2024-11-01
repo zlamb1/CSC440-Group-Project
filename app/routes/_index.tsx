@@ -10,10 +10,14 @@ import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import useIsSSR from "@/utils/useIsSSR";
 import {Prisma, ProfileVisibility} from "@prisma/client";
+import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    let posts = await context.prisma.post.findMany({
+    const p = await context.prisma.$queryRawTyped(getPublicPosts());
+    console.log(p);
+
+    const posts = await context.prisma.post.findMany({
         orderBy: {
             postedAt: 'desc'
         },
@@ -26,10 +30,14 @@ export async function loader({ context }: LoaderFunctionArgs) {
                     visibility: ProfileVisibility.PUBLIC
                 }
             },
-            postLikes: {
-                where: {
-                    userId: context.user.id
-                },
+            ...{
+                ...(context.user.loggedIn && {
+                    postLikes: {
+                        where: {
+                            userId: context.user.id
+                        },
+                    }
+                })
             },
             replies: {
                 include: {
@@ -40,20 +48,20 @@ export async function loader({ context }: LoaderFunctionArgs) {
     });
 
     type PostType = Prisma.PostGetPayload<{ include: { user: true, postLikes: true } }>;
-    posts = posts.map((post: PostType) => {
-        if (post?.postLikes && post.postLikes.length > 0) {
-            return {
-                ...post,
-                postLike: post.postLikes[0],
-            }
-        }
-
-        return post;
-    }).filter((post: PostType) => post.user);
+    const mappedPosts = posts
+        ?.filter((post: PostType) => post.user)
+        ?.map((post: PostType) => {
+            if (post?.postLikes) {
+                return {
+                    ...post,
+                    postLike: post.postLikes[0],
+                }
+            } else return post;
+        });
 
     return json({
         user: context.user,
-        posts,
+        posts: mappedPosts,
     });
 }
 
