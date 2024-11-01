@@ -111,7 +111,7 @@ export default function UserRoute() {
 
     if (data?.error) {
         if (data.error === 'User not found') {
-            return NotFound;
+            return <NotFound />;
         }
         // TODO: throw error boundary
     }
