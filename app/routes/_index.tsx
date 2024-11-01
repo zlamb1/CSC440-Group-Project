@@ -14,9 +14,6 @@ import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    const p = await context.prisma.$queryRawTyped(getPublicPosts());
-    console.log(p);
-
     const posts = await context.prisma.post.findMany({
         orderBy: {
             postedAt: 'desc'
