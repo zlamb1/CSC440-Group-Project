@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    colorSchemes, colorSchemeStorageName,
+    colorSchemes, colorSchemeStorageName, cookiePreferenceStorageName,
     defaultColorScheme, themes,
     themeStorageName,
 } from "@/utils/prefers-color-scheme";

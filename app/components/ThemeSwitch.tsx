@@ -1,5 +1,5 @@
 import {Laptop, Moon, Sun} from "lucide-react";
-import {themes, useTheme} from "@/utils/prefers-color-scheme";
+import {defaultColorScheme, themes, useTheme} from "@/utils/prefers-color-scheme";
 import {useEffect, useState} from "react";
 import React from "react";
 import {
@@ -33,11 +33,14 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
     const [ isOpen, setIsOpen ] = useState(false);
     const { themeStore, setTheme } = useTheme();
     const isSSR = useIsSSR();
+
     useEffect(() => {
         setCounter(counter + 1);
     }, [themeStore]);
+
     if (isSSR && !ssrColorScheme)
         return null;
+
     // @ts-ignore
     const SchemeIcon = colorSchemeIcons[isSSR ? ssrColorScheme : themeStore.colorScheme] ?? undefined;
     const variants = {
@@ -56,10 +59,12 @@ export default function ThemeSwitch({ ssrColorScheme }: { ssrColorScheme: any })
             scale: 1,
         }
     }
+
     function onClick(theme: string) {
         setIsOpen(false);
         setTheme(theme);
     }
+
     return (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
             <DropdownMenuTrigger asChild>
