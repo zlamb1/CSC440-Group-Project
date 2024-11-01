@@ -75,9 +75,9 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
 function getFormattedDate(joinedAt: Date) {
     if (!joinedAt) {
         return null;
-    } else {
-        joinedAt = new Date(joinedAt);
     }
+
+    joinedAt = new Date(joinedAt);
 
     const months = [
         "January", "February", "March", "April", "May", "June", "July", "August",
@@ -85,7 +85,7 @@ function getFormattedDate(joinedAt: Date) {
     ]
 
     return (
-        months[joinedAt.getMonth()] + ", " + joinedAt.getFullYear()
+        months[joinedAt.getMonth()] + " " + joinedAt.getDate() + ", " + joinedAt.getFullYear()
     );
 }
 
@@ -168,10 +168,14 @@ export default function UserRoute() {
                     }
                 </div>
                 {
-                    isOwnPage ?
-                        <Button containerClass="w-fit" variant="edit">
+                    isOwnPage ? (
+                        //this Link's classes make it match the look of a button.
+                        <Link to="/settings" className="flex flex-row gap-1   w-fit   items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
                             Edit Profile
-                        </Button> : <FollowButton user={user} isFollowing={isFollowing()} />
+                        </Link>
+                    ) : ( 
+                        <FollowButton user={user} isFollowing={isFollowing()} /> 
+                    )
                 }
             </div>
             <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
