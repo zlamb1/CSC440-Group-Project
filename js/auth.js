@@ -67,7 +67,15 @@ export async function useUserSession(req, prisma, getSession) {
 
     if (id) {
         const user = await prisma.user.findUnique({
-            include: {
+            select: {
+                id: true,
+                userName: true,
+                joinedAt: true,
+                avatarPath: true,
+                role: true,
+                visibility: true,
+                displayName: true,
+                bio: true,
                 following: {
                     include: {
                         following: true,

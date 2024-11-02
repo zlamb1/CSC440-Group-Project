@@ -19,8 +19,20 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             return json({ error: 'Username is required', self: context.user });
         }
 
+        const stdProps = {
+            id: true,
+            userName: true,
+            joinedAt: true,
+            avatarPath: true,
+            role: true,
+            visibility: true,
+            displayName: true,
+            bio: true,
+        }
+
         const user = await context.prisma.user.findUnique({
-            include: {
+            select: {
+                ...stdProps,
                 posts: {
                     where: {
                         replyTo: null,
@@ -28,7 +40,11 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
                     include: {
                         replies: {
                             include: {
-                                user: true,
+                                user: {
+                                    select: {
+                                        ...stdProps,
+                                    },
+                                },
                             },
                         },
                     },
