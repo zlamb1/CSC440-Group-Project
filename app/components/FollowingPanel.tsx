@@ -8,7 +8,7 @@ import React, {useState} from "react";
 import {UserWithLoggedIn} from "@/utils/types";
 import {cn} from "@/lib/utils";
 
-export default function FriendPanel({ className, user }: { className?: string, user: UserWithLoggedIn, }) {
+export default function FollowingPanel({ className, user }: { className?: string, user: UserWithLoggedIn, }) {
     if (!user?.loggedIn) {
         return <div className={className} />;
     }

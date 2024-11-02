@@ -14,7 +14,7 @@ import React from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName, cookiePreferenceStorageName, defaultColorScheme} from "@/utils/prefers-color-scheme";
-import FriendPanel from "@components/FriendPanel";
+import FollowingPanel from "@components/FollowingPanel";
 import CookieToast from "@components/toast/CookieToast";
 import * as Toast from "@radix-ui/react-toast";
 
@@ -70,7 +70,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <div className="flex flex-col bg-background min-h-[100vh]">
                     <NavBar {...data} className="py-2 w-100 text-lg h-fit px-4 sm:px-16 md:px-32 lg:px-64 xl:px-96"/>
                     <div className="flex-grow flex gap-3 w-full p-3">
-                        <FriendPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user}/>
+                        <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user}/>
                         <div className="border-0 bg-background flex-grow flex justify-center">
                             {children}
                         </div>
