@@ -1,6 +1,6 @@
 SELECT
     p."id", p."postedAt", p."content", p."replyTo", p."lastEdited", p."userId",
-    (COALESCE(SUM(CASE WHEN l."liked" THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN l."liked" THEN 0 ELSE 1 END), 0))::INTEGER as "likeCount",
+    (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
     COALESCE(COUNT(DISTINCT r."id"), 0)::INTEGER AS "replyCount",
     JSONB_BUILD_OBJECT(
         'id',           u."id",
@@ -34,7 +34,7 @@ LEFT JOIN "PostLike" l ON l."postId" = p."id"
 LEFT JOIN LATERAL (
     SELECT
         r."id", r."postedAt", r."content", r."replyTo", r."lastEdited", r."userId",
-        (COALESCE(SUM(CASE WHEN l."liked" THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN l."liked" THEN 0 ELSE 1 END), 0))::INTEGER as "likeCount",
+        (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
         COALESCE(COUNT(DISTINCT rr."id"), 0)::INTEGER AS "replyCount",
         JSONB_BUILD_OBJECT(
             'id',           u."id",

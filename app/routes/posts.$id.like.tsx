@@ -1,6 +1,5 @@
 import {ActionFunctionArgs, json} from "@remix-run/node";
 import NotFound from "@/routes/$";
-import {PostLike} from "@prisma/client";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
@@ -47,6 +46,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
                 create: {
                     postId: params.id,
                     userId: context.user.id,
+                    liked
                 },
             }),
         ]);
