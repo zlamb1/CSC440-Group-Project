@@ -16,7 +16,11 @@ SELECT
         JSONB_AGG(
             DISTINCT JSONB_BUILD_OBJECT(
                 'id',          r."id",
+                'postedAt',    r."postedAt",
                 'content',     r."content",
+                'replyTo',     r."replyTo",
+                'lastEdited',  r."lastEdited",
+                'userId',      r."userId",
                 'likeCount',   r."likeCount",
                 'replyCount',  r."replyCount",
                 'user',        r."user"
