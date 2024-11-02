@@ -1,7 +1,7 @@
 import {Input} from "@ui/input";
 import React, {useEffect, useState} from "react";
 import {Link, useFetcher} from "@remix-run/react";
-import {Search, SearchIcon, X} from "lucide-react";
+import {Search, X} from "lucide-react";
 import {User} from "@prisma/client";
 import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
 import {Button} from "@ui/button";
