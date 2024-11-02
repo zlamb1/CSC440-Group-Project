@@ -37,8 +37,6 @@ model Post {
   postedAt    DateTime     @default(now()) @db.Timestamptz(6)
   content     String
   replyTo     String?      @db.Uuid
-  likeCount   Int?         @default(0)
-  replyCount  Int?         @default(0)
   lastEdited  DateTime     @default(now()) @db.Timestamptz(6)
   userId      String?      @db.Uuid
   postLikes   PostLike[]
