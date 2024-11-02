@@ -4,7 +4,7 @@ import {Link, useLoaderData} from "@remix-run/react";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
-import {ProfileVisibility, Post as _Post, Follow, Prisma, User} from "@prisma/client";
+import {ProfileVisibility, Follow, Prisma, User} from "@prisma/client";
 import NotFound from "@/routes/$";
 import Post from "@components/post/Post";
 import {Fragment, useState} from "react";
@@ -12,6 +12,8 @@ import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
+import {getUserPosts} from '@prisma/client/sql';
+import {PostWithUser} from "@/utils/types";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -33,22 +35,6 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
         const user = await context.prisma.user.findUnique({
             select: {
                 ...stdProps,
-                posts: {
-                    where: {
-                        replyTo: null,
-                    },
-                    include: {
-                        replies: {
-                            include: {
-                                user: {
-                                    select: {
-                                        ...stdProps,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
                 following: {
                     include: {
                         following: true,
@@ -64,6 +50,8 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
                 userName: params.username,
             },
         });
+
+        user.posts = await context.prisma.$queryRawTyped(getUserPosts(user.id, context.user.id));
 
         if (!user) {
             return json({ error: 'User not found', self: context.user });
@@ -181,7 +169,7 @@ export default function UserRoute() {
                 {
                     isOwnPage ? (
                         //this Link's classes make it match the look of a button.
-                        <Link to="/settings" className="flex flex-row gap-1   w-fit   items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
+                        <Link to="/settings" className="flex flex-row gap-1 w-fit items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
                             Edit Profile
                         </Link>
                     ) : ( 
@@ -205,7 +193,7 @@ export default function UserRoute() {
                 <Separator />
                 <TabsContent className="flex flex-col gap-2" value="posts">
                     {
-                        posts?.map((post: _Post) =>
+                        posts?.map((post: PostWithUser) =>
                             <Fragment key={post.id}>
                                 <Post post={{...post, user}} viewer={self}/>
                                 <Separator/>
