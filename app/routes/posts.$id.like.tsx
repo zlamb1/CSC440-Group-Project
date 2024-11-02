@@ -1,10 +1,11 @@
 import {ActionFunctionArgs, json} from "@remix-run/node";
 import NotFound from "@/routes/$";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
         if (!params.id) {
-            return json({ error: 'Post ID is required' });
+            return json({ error: 'Post ID is required.' });
         }
 
         if (!context.user.loggedIn) {
@@ -26,7 +27,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
                 }),
             ]);
 
-            return json({ success: 'Deleted liked' });
+            return json({ success: 'Deleted post like.' });
         }
 
         const liked = likedString === 'true';
@@ -51,10 +52,19 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             }),
         ]);
 
-        return json({ success: 'Created post like' });
+        return json({ success: 'Created post like.' });
     } catch (err) {
+        if (err instanceof PrismaClientKnownRequestError) {
+            switch (err.code) {
+                case 'P2002':
+                    return json({ error: 'That post like already exists.' });
+                case 'P2025':
+                    return json({ error: 'That post like does not exist.' });
+            }
+        }
+
         console.error(err);
-        return json({ error: 'Unknown error' });
+        return json({ error: 'Unknown error.' });
     }
 }
 

@@ -7,7 +7,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             return json({ error: 'Post ID is required' });
         }
 
-        const replies = await context.prisma.$queryRawTyped(getReplies(params.id));
+        const replies = await context.prisma.$queryRawTyped(getReplies(params.id, context.user.id));
 
         return json({ replies });
     } catch (err) {

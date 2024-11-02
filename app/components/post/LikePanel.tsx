@@ -30,8 +30,8 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
 export default function LikePanel({ className, post, viewer }: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn }) {
     const fetcher = useFetcher();
 
-    const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.postLike?.liked;
-    const likeCount = fetcher.formData ? getLikeCount(post.likeCount ?? 0, post?.postLike?.liked, fetcher.formData.get('liked')) : post.likeCount;
+    const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.liked;
+    const likeCount = fetcher.formData ? getLikeCount(post.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : post.likeCount;
 
     return (
         <div className={cn("flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900", className)}>
