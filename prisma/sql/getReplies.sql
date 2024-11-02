@@ -2,7 +2,10 @@ SELECT
     p."id", p."postedAt", p."content", p."replyTo", p."lastEdited", p."userId",
     (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
     COALESCE(COUNT(DISTINCT r."id"), 0)::INTEGER AS "replyCount",
-    pl."liked" AS liked,
+    CASE
+        WHEN COUNT(CASE WHEN l."userId" = $1::UUID THEN 1 END) = 0 THEN NULL
+        WHEN COUNT(CASE WHEN l."userId" = $1::UUID AND l."liked" THEN 1 END) > 0 THEN TRUE ELSE FALSE
+    END AS liked,
     JSONB_BUILD_OBJECT(
         'id',           u."id",
         'userName',     u."userName",
@@ -38,7 +41,10 @@ LEFT JOIN LATERAL (
         r."id", r."postedAt", r."content", r."replyTo", r."lastEdited", r."userId",
         (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
         COALESCE(COUNT(DISTINCT rr."id"), 0)::INTEGER AS "replyCount",
-        pl."liked" AS liked,
+        CASE
+            WHEN COUNT(CASE WHEN l."userId" = $1::UUID THEN 1 END) = 0 THEN NULL
+            WHEN COUNT(CASE WHEN l."userId" = $1::UUID AND l."liked" THEN 1 END) > 0 THEN TRUE ELSE FALSE
+        END AS liked,
         JSONB_BUILD_OBJECT(
             'id',           u."id",
             'userName',     u."userName",
@@ -53,11 +59,10 @@ LEFT JOIN LATERAL (
     INNER JOIN "User" AS u ON u."id" = r."userId"
     LEFT JOIN "Post" AS rr ON rr."replyTo" = r."id"
     LEFT JOIN "PostLike" AS l ON l."postId" = r."id"
-    LEFT JOIN "PostLike" pl ON l."postId" = p."id" AND l."userId" = $2::UUID
     WHERE r."replyTo" = p."id"
-    GROUP BY r."id", u."id", pl."liked"
+    GROUP BY r."id", u."id"
     ORDER BY r."postedAt" DESC
 ) r ON TRUE
 WHERE p."replyTo" = $1::UUID
-GROUP BY p."id", u."id", pl."liked"
+GROUP BY p."id", u."id"
 ORDER BY p."postedAt" DESC
