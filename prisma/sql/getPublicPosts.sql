@@ -29,7 +29,7 @@ SELECT
         '[]'::jsonb
     ) as replies
 FROM "Post" p
-INNER JOIN "User" u ON u."id" = p."userId" AND (u."visibility" = 'PUBLIC' OR u."id" = $1)
+INNER JOIN "User" u ON u."id" = p."userId" AND (u."visibility" = 'PUBLIC' OR u."id" = $1::UUID)
 LEFT JOIN "PostLike" l ON l."postId" = p."id"
 LEFT JOIN LATERAL (
     SELECT
