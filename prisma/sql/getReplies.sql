@@ -3,8 +3,8 @@ SELECT
     (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
     COALESCE(COUNT(DISTINCT r."id"), 0)::INTEGER AS "replyCount",
     CASE
-        WHEN COUNT(CASE WHEN l."userId" = $1::UUID THEN 1 END) = 0 THEN NULL
-        WHEN COUNT(CASE WHEN l."userId" = $1::UUID AND l."liked" THEN 1 END) > 0 THEN TRUE ELSE FALSE
+        WHEN COUNT(CASE WHEN l."userId" = $2::UUID THEN 1 END) = 0 THEN NULL
+        WHEN COUNT(CASE WHEN l."userId" = $2::UUID AND l."liked" THEN 1 END) > 0 THEN TRUE ELSE FALSE
     END AS liked,
     JSONB_BUILD_OBJECT(
         'id',           u."id",
@@ -42,8 +42,8 @@ LEFT JOIN LATERAL (
         (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
         COALESCE(COUNT(DISTINCT rr."id"), 0)::INTEGER AS "replyCount",
         CASE
-            WHEN COUNT(CASE WHEN l."userId" = $1::UUID THEN 1 END) = 0 THEN NULL
-            WHEN COUNT(CASE WHEN l."userId" = $1::UUID AND l."liked" THEN 1 END) > 0 THEN TRUE ELSE FALSE
+            WHEN COUNT(CASE WHEN l."userId" = $2::UUID THEN 1 END) = 0 THEN NULL
+            WHEN COUNT(CASE WHEN l."userId" = $2::UUID AND l."liked" THEN 1 END) > 0 THEN TRUE ELSE FALSE
         END AS liked,
         JSONB_BUILD_OBJECT(
             'id',           u."id",
