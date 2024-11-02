@@ -15,27 +15,8 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         const formData = await request.formData();
         const likedString = String(formData.get('liked'));
 
-        const oldLike: PostLike = await context.prisma.postLike.findUnique({
-            where: {
-                postId_userId: {
-                    postId: params.id,
-                    userId: context.user.id,
-                },
-            }
-        });
-
         if (likedString === 'null') {
             await context.prisma.$transaction([
-                context.prisma.post.update({
-                    data: {
-                        likeCount: {
-                            increment: oldLike ? (oldLike.liked ? -1 : 1) : 0,
-                        },
-                    },
-                    where: {
-                        id: params.id,
-                    },
-                }),
                 context.prisma.postLike.delete({
                     where: {
                         postId_userId: {
@@ -50,10 +31,6 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         }
 
         const liked = likedString === 'true';
-
-        if (oldLike && oldLike.liked === liked) {
-            return json({ error: 'Post like state has not changed' });
-        }
 
         await context.prisma.$transaction([
             context.prisma.postLike.upsert({
@@ -70,16 +47,6 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
                 create: {
                     postId: params.id,
                     userId: context.user.id,
-                },
-            }),
-            context.prisma.post.update({
-                data: {
-                    likeCount: {
-                        increment: (liked ? 1 : -1) * (oldLike ? 2 : 1),
-                    }
-                },
-                where: {
-                    id: params.id,
                 },
             }),
         ]);

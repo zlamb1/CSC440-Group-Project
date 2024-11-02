@@ -1,4 +1,5 @@
 import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {getReplies} from '@prisma/client/sql';
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -6,19 +7,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             return json({ error: 'Post ID is required' });
         }
 
-        return json({ replies: [] });
-
-        const replies = await context.prisma.post.findMany({
-            orderBy: {
-                postedAt: 'desc',
-            },
-            include: {
-                user: true,
-            },
-            where: {
-                replyTo: params.id,
-            },
-        });
+        const replies = await context.prisma.$queryRawTyped(getReplies(params.id));
 
         return json({ replies });
     } catch (err) {
