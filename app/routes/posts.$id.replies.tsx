@@ -6,6 +6,8 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             return json({ error: 'Post ID is required' });
         }
 
+        return json({ replies: [] });
+
         const replies = await context.prisma.post.findMany({
             orderBy: {
                 postedAt: 'desc',

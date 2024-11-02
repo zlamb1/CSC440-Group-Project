@@ -1,52 +1,55 @@
-SELECT p."id", p."postedAt", p."content", p."replyTo", p."lastEdited", p."userId",
-COALESCE(SUM(CASE WHEN l."liked" THEN 1 ELSE 0 END), 0)::INTEGER AS likes,
-COALESCE(SUM(CASE WHEN l."liked" THEN 0 ELSE 1 END), 0)::INTEGER AS dislikes,
-JSON_BUILD_OBJECT(
-    'id', u."id",
-    'userName', u."userName",
-    'joinedAt', u."joinedAt",
-    'avatarPath', u."avatarPath",
-    'role', u."role",
-    'visibility', u."visibility",
-    'displayName', u."displayName",
-    'bio', u."bio"
-) AS user,
-JSON_AGG(
-    JSON_BUILD_OBJECT(
-        'id', r."id",
-        'postedAt', r."postedAt",
-        'content', r."content",
-        'replyTo', r."replyTo",
-        'likeCount', r."likeCount",
-        'lastEdited', r."lastEdited",
-        'userId', r."userId",
-        'user', JSON_BUILD_OBJECT(
-            'id', r."userId",
-            'userName', r."userName",
-            'joinedAt', r."joinedAt",
-            'avatarPath', r."avatarPath",
-            'role', r."role",
-            'visibility', r."visibility",
-            'displayName', r."displayName",
-            'bio', r."bio"
-        )
-    )
-) AS replies
-FROM "Post" AS p
-CROSS JOIN LATERAL (
-    SELECT *
-    FROM "User" as u
-    WHERE u."id" = p."userId"
-) AS u
-CROSS JOIN LATERAL (
-    SELECT r.*, u."userName", u."joinedAt", u."avatarPath", u."role", u."visibility", u."displayName", u."bio"
-    FROM "Post" AS r
+SELECT
+    p."id", p."postedAt", p."content", p."replyTo", p."lastEdited", p."userId",
+    (COALESCE(SUM(CASE WHEN l."liked" THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN l."liked" THEN 0 ELSE 1 END), 0))::INTEGER as "likeCount",
+    COALESCE(COUNT(DISTINCT r."id"), 0)::INTEGER AS "replyCount",
+    JSONB_BUILD_OBJECT(
+        'id',           u."id",
+        'userName',     u."userName",
+        'joinedAt',     u."joinedAt",
+        'avatarPath',   u."avatarPath",
+        'role',         u."role",
+        'visibility',   u."visibility",
+        'displayName',  u."displayName",
+        'bio',          u."bio"
+    ) AS user,
+    COALESCE(
+        JSONB_AGG(
+            DISTINCT JSONB_BUILD_OBJECT(
+                'id',          r."id",
+                'content',     r."content",
+                'likeCount',   r."likeCount",
+                'replyCount',  r."replyCount",
+                'user',        r."user"
+            )
+        ) FILTER (WHERE r."id" IS NOT NULL),
+        '[]'::jsonb
+    ) as replies
+FROM "Post" p
+INNER JOIN "User" u ON u."id" = p."userId" AND (u."visibility" = 'PUBLIC' OR u."id" = $1)
+LEFT JOIN "PostLike" l ON l."postId" = p."id"
+LEFT JOIN LATERAL (
+    SELECT
+        r."id", r."postedAt", r."content", r."replyTo", r."lastEdited", r."userId",
+        (COALESCE(SUM(CASE WHEN l."liked" THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN l."liked" THEN 0 ELSE 1 END), 0))::INTEGER as "likeCount",
+        COALESCE(COUNT(DISTINCT rr."id"), 0)::INTEGER AS "replyCount",
+        JSONB_BUILD_OBJECT(
+            'id',           u."id",
+            'userName',     u."userName",
+            'joinedAt',     u."joinedAt",
+            'avatarPath',   u."avatarPath",
+            'role',         u."role",
+            'visibility',   u."visibility",
+            'displayName',  u."displayName",
+            'bio',          u."bio"
+        ) AS user
+    FROM "Post" r
     INNER JOIN "User" AS u ON u."id" = r."userId"
+    LEFT JOIN "Post" AS rr ON rr."replyTo" = r."id"
+    LEFT JOIN "PostLike" AS l ON l."postId" = r."id"
     WHERE r."replyTo" = p."id"
-) AS r
-CROSS JOIN LATERAL (
-    SELECT * FROM "PostLike" AS l
-    WHERE l."postId" = p."id"
-) AS l
-GROUP BY p."id", u."id", u."userName", u."joinedAt", u."avatarPath", u."role", u."visibility", u."displayName", u."bio"
-ORDER BY p."postedAt" DESC;
+    GROUP BY r."id", u."id"
+    ORDER BY r."postedAt" DESC
+) r ON TRUE
+WHERE p."replyTo" IS NULL
+GROUP BY p."id", u."id"
+ORDER BY p."postedAt" DESC
