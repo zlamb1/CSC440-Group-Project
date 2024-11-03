@@ -1,6 +1,6 @@
 import {Input} from "@ui/input";
 import React, {useEffect, useState} from "react";
-import {Link, useFetcher} from "@remix-run/react";
+import {Form, Link, useFetcher} from "@remix-run/react";
 import {LockKeyhole, Search, X} from "lucide-react";
 import {ProfileVisibility, User} from "@prisma/client";
 import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
@@ -10,10 +10,7 @@ import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {UserWithLoggedIn} from "@/utils/types";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@ui/tooltip";
-
-function ToolTip() {
-    return null;
-}
+import FollowButton from "@components/FollowButton";
 
 export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
     const [ term, setTerm ] = useState('');
@@ -47,8 +44,8 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
         }
     }
 
-    function isPrivate(user: User) {
-        return user.visibility !== ProfileVisibility.PUBLIC;
+    function isPrivate(user: User, following?: boolean) {
+        return user.visibility !== ProfileVisibility.PUBLIC && !following;
     }
 
     function isFollowing(id: string) {
@@ -80,7 +77,8 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
                         (
                             !users || !users.length ? <span className="select-none font-bold text-sm">No Users Found</span> :
                             users?.map((user: User) => {
-                                const isDisabled = isPrivate(user);
+                                const following = isFollowing(user.id);
+                                const isDisabled = isPrivate(user, following);
                                 return (
                                     <Link className={
                                           cn("w-full flex justify-between items-center gap-2 p-2 hover:bg-accent hover:text-accent-foreground",
@@ -90,7 +88,6 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
                                           key={user.userName}
                                           onClick={isDisabled ? (evt) => evt.preventDefault() : undefined}
                                     >
-
                                         <TooltipProvider>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
@@ -105,12 +102,7 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
-
-                                        <Button className="w-[80px]" onClick={onFollow}>
-                                            {
-                                                isFollowing(user.id) ? 'Unfollow' : 'Follow'
-                                            }
-                                        </Button>
+                                        <FollowButton user={user} isFollowing={following} />
                                     </Link>
                                 )
                             }

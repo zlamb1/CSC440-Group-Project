@@ -6,6 +6,10 @@ import {User} from "@prisma/client";
 export default function FollowButton({ user, isFollowing }: { user: User, isFollowing: boolean }) {
     const fetcher = useFetcher();
 
+    function onFollow() {
+
+    }
+
     return (
         <fetcher.Form method="POST" action={`/users/${user.id}/follow`}>
             <input className="hidden" value={!isFollowing + ''} name="follow" readOnly/>
