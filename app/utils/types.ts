@@ -2,9 +2,15 @@ import {PostLike, Prisma} from "@prisma/client";
 
 export type UserWithLoggedIn = Prisma.UserGetPayload<{
    include: {
-       following: true,
+       following: {
+           include: {
+               following: true,
+           },
+       },
    },
 }> & { loggedIn: boolean }
+
+export type FollowWithFollowing = Prisma.FollowGetPayload<{ include: { following: true } }>;
 
 export type PostWithUser = Prisma.PostGetPayload<{
     include: {

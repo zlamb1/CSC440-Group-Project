@@ -2,10 +2,9 @@ import {Card} from "@ui/card";
 import {Button} from "@ui/button";
 import {ChevronUp, ChevronDown} from "lucide-react";
 import {Separator} from "@ui/separator";
-import {Prisma} from "@prisma/client";
 import UserAvatar from "@components/user/UserAvatar";
 import React, {useState} from "react";
-import {UserWithLoggedIn} from "@/utils/types";
+import {FollowWithFollowing, UserWithLoggedIn} from "@/utils/types";
 import {cn} from "@/lib/utils";
 
 export default function FollowingPanel({ className, user }: { className?: string, user: UserWithLoggedIn, }) {
@@ -16,8 +15,6 @@ export default function FollowingPanel({ className, user }: { className?: string
     const following = user?.following;
 
     const [showContent, setShowContent] = useState(true);
-
-    let visButton;
 
     const toggleContent = () => {
         setShowContent(!showContent);
@@ -38,7 +35,7 @@ export default function FollowingPanel({ className, user }: { className?: string
             </div>
             <Separator />
             {
-                showContent && following?.map((follow: Prisma.FollowGetPayload<{ include: { following: true } }>) => {
+                showContent && following?.map((follow: FollowWithFollowing) => {
                     const following = follow.following;
                     return (
                         <Button containerClass="w-full" className="w-full flex justify-between rounded-none" key={following.id}  variant="ghost">
