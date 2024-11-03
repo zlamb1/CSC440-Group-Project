@@ -11,6 +11,7 @@ export type UserWithLoggedIn = Prisma.UserGetPayload<{
 }> & { loggedIn: boolean }
 
 export type FollowWithFollowing = Prisma.FollowGetPayload<{ include: { following: true } }>;
+export type FollowWithRelations = Prisma.FollowGetPayload<{ include: { following: true, follower: true } }>;
 
 export type PostWithUser = Prisma.PostGetPayload<{
     include: {

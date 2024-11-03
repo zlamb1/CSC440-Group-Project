@@ -1,4 +1,4 @@
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import {Link, useLoaderData} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
@@ -12,8 +12,8 @@ import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
-import {getUserPosts} from '@prisma/client/sql';
-import {PostWithUser} from "@/utils/types";
+import {getUserPosts, getLikedPosts} from '@prisma/client/sql';
+import {FollowWithRelations, PostWithRelations, PostWithUser} from "@/utils/types";
 import EndpointResponse from "@/api/EndpointResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
@@ -56,6 +56,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
         });
 
         user.posts = await context.prisma.$queryRawTyped(getUserPosts(user.id, context.user.id));
+        user.likedPosts = await context.prisma.$queryRawTyped(getLikedPosts(user.id, context.user.id));
 
         if (!user) {
             return ExplicitResourceNotFoundResponse('User');
@@ -119,6 +120,7 @@ export default function UserRoute() {
     const self = data?.self;
     const user = data?.user;
     const posts = user?.posts;
+    const likedPosts = user?.likedPosts;
     const following = user?.following;
     const followers = user?.followers;
 
@@ -173,9 +175,7 @@ export default function UserRoute() {
                         <Link to="/settings" className="flex flex-row gap-1 w-fit items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
                             Edit Profile
                         </Link>
-                    ) : (
-                        <FollowButton user={user} isFollowing={isFollowing()} />
-                    )
+                    ) : <FollowButton user={user} isFollowing={isFollowing()} />
                 }
             </div>
             <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
@@ -204,7 +204,7 @@ export default function UserRoute() {
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="following">
                     {
-                        !following || !following.length || following.length === 0 ?
+                        !following || !following.length ?
                             <div className="font-bold select-none text-center mt-8">
                                 <span className="text-primary">@{user?.userName}</span> is not following anyone ¯\_(ツ)_/¯
                             </div> : null
@@ -217,14 +217,27 @@ export default function UserRoute() {
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="followers">
                     {
-                        !followers || !followers.length || followers.length === 0 ?
+                        !followers || !followers.length ?
                             <div className="font-bold select-none text-center mt-8">
                                 <span className="text-primary">@{user?.userName}</span> is not followed by anyone ¯\_(ツ)_/¯
                             </div> : null
                     }
                     {
-                        followers?.map((follow: Prisma.FollowGetPayload<{ include: { follower: true } }>) =>
+                        followers?.map((follow: FollowWithRelations) =>
                             <FollowRow key={follow.followerId} follow={follow} user={follow.follower} />
+                        )
+                    }
+                </TabsContent>
+                <TabsContent className="flex flex-col gap-2" value="liked">
+                    {
+                        !likedPosts || !likedPosts.length ?
+                            <div className="font-bold select-none text-center mt-8">
+                                <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
+                            </div> : null
+                    }
+                    {
+                        likedPosts?.map((post: PostWithRelations) =>
+                            <Post post={post} viewer={self} key={post.id} />
                         )
                     }
                 </TabsContent>

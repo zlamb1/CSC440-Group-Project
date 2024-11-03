@@ -63,6 +63,6 @@ LEFT JOIN LATERAL (
     GROUP BY r."id", u."id"
     ORDER BY r."postedAt" DESC
 ) r ON TRUE
-WHERE p."replyTo" IS NULL AND p."userId" = $1::UUID
+WHERE p."replyTo" IS NULL
 GROUP BY p."id", u."id"
 ORDER BY p."postedAt" DESC
