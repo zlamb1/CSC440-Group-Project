@@ -32,17 +32,9 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
 
         await context.prisma.post.create({
             data: {
-                user: {
-                    connect: {
-                        id: context.user.id,
-                    },
-                },
+                userId: context.user.id,
                 content: sanitizedContent,
-                post: {
-                    connect: {
-                        id: params.id,
-                    },
-                },
+                replyTo: params.id,
             },
         });
 

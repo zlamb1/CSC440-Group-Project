@@ -12,8 +12,4 @@ export type PostWithUser = Prisma.PostGetPayload<{
     },
 }> & { liked: boolean, likeCount: number, replyCount: number };
 
-export type PostWithRelations = Prisma.PostGetPayload<{
-    include: {
-        user: true,
-    },
-}> & { replies: PostWithUser[] };
+export type PostWithRelations = PostWithUser & { replies: PostWithUser[] };
