@@ -25,33 +25,21 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             return json({ error: msg });
         }
 
-        await context.prisma.$transaction([
-            context.prisma.post.create({
-                data: {
-                    user: {
-                        connect: {
-                            id: context.user.id,
-                        },
-                    },
-                    content: sanitizedContent,
-                    post: {
-                        connect: {
-                            id: params.id,
-                        },
+        await context.prisma.post.create({
+            data: {
+                user: {
+                    connect: {
+                        id: context.user.id,
                     },
                 },
-            }),
-            context.prisma.post.update({
-                data: {
-                    replyCount: {
-                        increment: 1
+                content: sanitizedContent,
+                post: {
+                    connect: {
+                        id: params.id,
                     },
                 },
-                where: {
-                    id: params.id,
-                },
-            }),
-        ]);
+            },
+        });
 
         return json({ success: 'Created reply' });
     } catch (err) {
