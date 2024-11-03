@@ -11,14 +11,12 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import useIsSSR from "@/utils/useIsSSR";
 import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
+import EndpointResponse from "@/api/EndpointResponse";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id));
 
-    return json({
-        user: context.user,
-        posts,
-    });
+    return EndpointResponse({ user: context.user, posts });
 }
 
 export default function Index() {

@@ -102,7 +102,7 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
-                                        <FollowButton user={user} isFollowing={following} />
+                                        <FollowButton user={user} isFollowing={following} onClick={ evt => evt.preventDefault() } />
                                     </Link>
                                 )
                             }

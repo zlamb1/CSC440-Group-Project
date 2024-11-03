@@ -48,7 +48,7 @@ export default function ReplyEditor({ post, isReplying = true }: { post: PostWit
                                         isActive={isEditorActive}
                                         focus={setEditorActive}
                                         editable={fetcher.state === 'idle'}
-                                        editorProps={{attributes: {class: 'focus-visible:outline-none'}}}
+                                        editorProps={{attributes: {class: 'break-all focus-visible:outline-none'}}}
                                         append={
                                             <motion.div initial={{opacity: 0, height: 0}}
                                                         animate={{opacity: 1, height: 'auto'}}
