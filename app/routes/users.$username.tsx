@@ -1,10 +1,10 @@
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import {Link, useLoaderData} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
-import {ProfileVisibility, Post as _Post, Follow, Prisma, User} from "@prisma/client";
+import {ProfileVisibility, Follow, Prisma, User} from "@prisma/client";
 import NotFound from "@/routes/$";
 import Post from "@components/post/Post";
 import {Fragment, useState} from "react";
@@ -12,31 +12,33 @@ import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
+import {getUserPosts} from '@prisma/client/sql';
+import {PostWithUser} from "@/utils/types";
+import EndpointResponse from "@/api/EndpointResponse";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
         if (!params.username) {
-            return json({ error: 'Username is required', self: context.user });
+            return RequiredFieldResponse('Username');
+        }
+
+        const stdProps = {
+            id: true,
+            userName: true,
+            joinedAt: true,
+            avatarPath: true,
+            role: true,
+            visibility: true,
+            displayName: true,
+            bio: true,
         }
 
         const user = await context.prisma.user.findUnique({
-            include: {
-                posts: {
-                    where: {
-                        replyTo: null,
-                    },
-                    include: {
-                        replies: {
-                            include: {
-                                user: {
-                                    where: {
-                                        visibility: ProfileVisibility.PUBLIC,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+            select: {
+                ...stdProps,
                 following: {
                     include: {
                         following: true,
@@ -53,31 +55,32 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             },
         });
 
+        user.posts = await context.prisma.$queryRawTyped(getUserPosts(user.id, context.user.id));
+
         if (!user) {
-            return json({ error: 'User not found', self: context.user });
+            return ExplicitResourceNotFoundResponse('User');
         }
 
         if (user.visibility !== ProfileVisibility.PUBLIC) {
             if (context.user.loggedIn && context.user.id === user.id) {
-                return json({ user, self: context.user });
+                return EndpointResponse({ user, self: context.user });
             } else {
-                return json({ error: 'User not found', self: context.user });
+                return ExplicitResourceNotFoundResponse('User');
             }
         }
 
-        return json({ user, self: context.user });
+        return EndpointResponse({ user, self: context.user });
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error', self: context.user });
+        return UnknownErrorResponse(err);
     }
 }
 
 function getFormattedDate(joinedAt: Date) {
     if (!joinedAt) {
         return null;
-    } else {
-        joinedAt = new Date(joinedAt);
     }
+
+    joinedAt = new Date(joinedAt);
 
     const months = [
         "January", "February", "March", "April", "May", "June", "July", "August",
@@ -85,7 +88,7 @@ function getFormattedDate(joinedAt: Date) {
     ]
 
     return (
-        months[joinedAt.getMonth()] + ", " + joinedAt.getFullYear()
+        months[joinedAt.getMonth()] + " " + joinedAt.getDate() + ", " + joinedAt.getFullYear()
     );
 }
 
@@ -109,11 +112,8 @@ export default function UserRoute() {
     const data = useLoaderData<typeof loader>();
     const [tab, setTab] = useState('posts');
 
-    if (data?.error) {
-        if (data.error === 'User not found') {
-            return NotFound;
-        }
-        // TODO: throw error boundary
+    if (data?.error && data.error === ExplicitResourceNotFoundResponse('User').error) {
+        return <NotFound />;
     }
 
     const self = data?.self;
@@ -125,7 +125,7 @@ export default function UserRoute() {
     const isOwnPage = self?.id === user?.id;
 
     function isFollowing() {
-        return self?.following.some((follow: Follow) => follow.followingId === user?.id);
+        return self?.following?.some((follow: Follow) => follow.followingId === user?.id);
     }
 
     const tabs = [
@@ -168,10 +168,14 @@ export default function UserRoute() {
                     }
                 </div>
                 {
-                    isOwnPage ?
-                        <Button containerClass="w-fit" variant="edit">
+                    isOwnPage ? (
+                        //this Link's classes make it match the look of a button.
+                        <Link to="/settings" className="flex flex-row gap-1 w-fit items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
                             Edit Profile
-                        </Button> : <FollowButton user={user} isFollowing={isFollowing()} />
+                        </Link>
+                    ) : ( 
+                        <FollowButton user={user} isFollowing={isFollowing()} /> 
+                    )
                 }
             </div>
             <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
@@ -190,7 +194,7 @@ export default function UserRoute() {
                 <Separator />
                 <TabsContent className="flex flex-col gap-2" value="posts">
                     {
-                        posts?.map((post: _Post) =>
+                        posts?.map((post: PostWithUser) =>
                             <Fragment key={post.id}>
                                 <Post post={{...post, user}} viewer={self}/>
                                 <Separator/>

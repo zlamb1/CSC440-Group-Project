@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["typedSql"]
 }
 
 datasource db {
@@ -36,13 +37,11 @@ model Post {
   postedAt    DateTime     @default(now()) @db.Timestamptz(6)
   content     String
   replyTo     String?      @db.Uuid
-  likeCount   Int?         @default(0)
-  replyCount  Int?         @default(0)
   lastEdited  DateTime     @default(now()) @db.Timestamptz(6)
   userId      String?      @db.Uuid
   postLikes   PostLike[]
   user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post        Post?        @relation("postsToposts", fields: [replyTo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  post        Post?        @relation("postsToposts", fields: [replyTo], references: [id], onDelete: Cascade, onUpdate: NoAction)
   replies     Post[]       @relation("postsToposts")
 }
 
@@ -70,10 +69,6 @@ model User {
   sessions        Session[]
   following       Follow[]           @relation("follower")
   followers       Follow[]           @relation("following")
-  friends         User[]             @relation("friends")
-  friendsWith     User[]             @relation("friends")
-  sentRequests    FriendRequest[]    @relation("requestor")
-  friendRequests  FriendRequest[]    @relation("requested")
 }
 
 model Follow {
@@ -84,22 +79,6 @@ model Follow {
   follower     User      @relation("follower", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   following    User      @relation("following", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   @@id([followerId, followingId])
-}
-
-model FriendRequest {
-  requestorId  String         @db.Uuid
-  requestedId  String         @db.Uuid
-  requestedAt  DateTime       @default(now())
-  status       RequestStatus  @default(REQUESTED)
-
-  requestor    User           @relation("requestor", fields: [requestorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  requested    User           @relation("requested", fields: [requestedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  @@id([requestorId, requestedId])
-}
-
-enum RequestStatus {
-  REQUESTED
-  ACCEPTED
 }
 
 enum ProfileVisibility {

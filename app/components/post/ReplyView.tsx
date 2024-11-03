@@ -32,6 +32,10 @@ export default function ReplyView({ post, user, depth, showReplies = true, onLoa
         }
     }, [showReplies]);
 
+    useEffect(() => {
+        setReplies(hasReplies ? post.replies : []);
+    }, [post]);
+
     if (post.replyCount === 0) {
         return null;
     }

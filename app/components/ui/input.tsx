@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import {cn} from "@/lib/utils"
-import {createRef, forwardRef, ReactNode, useRef} from "react";
+import {forwardRef, ReactNode, useRef} from "react";
 
 export interface InputProps
     extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -20,6 +20,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, type, ...pr
         }
     }
 
+    const { inputClasses, ...propsOmitInputClasses } = props;
+
     return (
         <div
             className={cn("w-full flex gap-1 items-center py-1 px-2 h-9 border border-input bg-transparent cursor-text " +
@@ -33,11 +35,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, type, ...pr
             <input
                 type={type}
                 className={cn(
-                    "flex-grow bg-transparent rounded-md file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none",
+                    "flex-grow bg-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none",
                     props?.inputClasses
                 )}
                 ref={inputRef}
-                {...props}
+                {...propsOmitInputClasses}
             />
             {
                 props?.append ? props.append : null

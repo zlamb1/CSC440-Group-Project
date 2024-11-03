@@ -9,50 +9,11 @@ import ProgressCircle from "@components/ProgressCircle";
 import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import useIsSSR from "@/utils/useIsSSR";
-import {Prisma, ProfileVisibility} from "@prisma/client";
+import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    let posts = await context.prisma.post.findMany({
-        orderBy: {
-            postedAt: 'desc'
-        },
-        where: {
-            replyTo: null,
-        },
-        include: {
-            user: {
-                where: {
-                    visibility: ProfileVisibility.PUBLIC
-                }
-            },
-            postLikes: {
-                where: {
-                    userId: context.user.id
-                },
-            },
-            replies: {
-                include: {
-                    user: {
-                        where: {
-                            visibility: ProfileVisibility.PUBLIC,
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    posts = posts.map((post: Prisma.PostGetPayload<{ include: { postLikes: true } }>) => {
-        if (post?.postLikes && post.postLikes.length > 0) {
-            return {
-                ...post,
-                postLike: post.postLikes[0],
-            }
-        }
-
-        return post;
-    });
+    const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id));
 
     return json({
         user: context.user,

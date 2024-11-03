@@ -1,4 +1,7 @@
 import {ActionFunctionArgs, json, redirect} from "@remix-run/node";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function loader() {
     return json({});
@@ -11,19 +14,19 @@ export async function action({ context, request }: ActionFunctionArgs) {
         const passWord = String(formData.get("password"));
 
         if (!userName) {
-            return json({ username: 'Username is required' });
+            return RequiredFieldResponse('Username', true);
         }
 
         if (userName.length < 4 || userName.length > 25) {
-            return json({ username: 'Username must be between four and twenty-five characters' })
+            return EndpointResponse({ username: 'Username must be between four and twenty-five characters' }, ResponseType.BadRequest);
         }
 
         if (!passWord) {
-            return json({ password: 'Password is required' });
+            return RequiredFieldResponse('Password', true);
         }
 
         if (passWord.length < 6 || passWord.length > 50) {
-            return json({ password: 'Password must be between six and fifty characters' })
+            return EndpointResponse({ password: 'Password must be between six and fifty characters' }, ResponseType.BadRequest);
         }
 
         const search = await context.prisma.user.findUnique({
@@ -33,7 +36,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
         });
 
         if (search) {
-            return json({ username: 'Username is unavailable' });
+            return EndpointResponse({ username: 'Username is unavailable' }, ResponseType.Forbidden);
         }
 
         const session = await context.session.getSession();
@@ -52,9 +55,6 @@ export async function action({ context, request }: ActionFunctionArgs) {
             }
         });
     } catch (err) {
-        console.error(err);
-        return json({
-            error: 'Unknown error'
-        });
+        return UnknownErrorResponse(err);
     }
 }

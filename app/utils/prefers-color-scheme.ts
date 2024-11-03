@@ -1,5 +1,7 @@
 import {startTransition, useEffect, useState} from "react";
 
+export const cookiePreferenceStorageName = 'client-cookie-preference';
+
 export const themeStorageName = 'client-hint-prefers-theme';
 export const colorSchemeStorageName = 'client-hint-prefers-color-scheme';
 export const defaultColorScheme = 'dark';

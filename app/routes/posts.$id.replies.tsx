@@ -1,26 +1,18 @@
 import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {getReplies} from '@prisma/client/sql';
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
         if (!params.id) {
-            return json({ error: 'Post ID is required' });
+            return RequiredFieldResponse('Post ID');
         }
 
-        const replies = await context.prisma.post.findMany({
-            orderBy: {
-                postedAt: 'desc',
-            },
-            include: {
-                user: true,
-            },
-            where: {
-                replyTo: params.id,
-            },
-        });
+        const replies = await context.prisma.$queryRawTyped(getReplies(params.id, context.user.id));
 
         return json({ replies });
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }

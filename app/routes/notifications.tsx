@@ -1,9 +1,11 @@
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (!context.user.loggedIn) {
-        return json({ error: 'You must be logged in to get notifications' });
+        return UnauthorizedResponse();
     }
 
     try {
@@ -16,8 +18,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
             },
         });
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }
 

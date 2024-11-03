@@ -1,5 +1,5 @@
 import {PostWithUser} from "@/utils/types";
-import React, {FormEvent, useRef, useState} from "react";
+import React, {FormEvent, useEffect, useRef, useState} from "react";
 import {useFetcher} from "@remix-run/react";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {AnimatePresence, motion} from "framer-motion";
@@ -10,6 +10,12 @@ export default function ReplyEditor({ post, isReplying = true }: { post: PostWit
     const [isEditorActive, setEditorActive] = useState(false);
     const fetcher = useFetcher();
     const ref = useRef<PostEditorElement>();
+
+    useEffect(() => {
+        if (fetcher.state === 'idle' && ref.current) {
+            ref.current.clearEditor();
+        }
+    }, [fetcher]);
 
     const onReply = (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
@@ -25,6 +31,9 @@ export default function ReplyEditor({ post, isReplying = true }: { post: PostWit
 
     function handleCancel(evt: React.MouseEvent) {
         evt.stopPropagation();
+        if (ref.current) {
+            ref.current.clearEditor();
+        }
         setEditorActive(false);
     }
 

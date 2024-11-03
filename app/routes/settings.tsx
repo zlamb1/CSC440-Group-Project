@@ -1,6 +1,6 @@
 import {Separator} from "@ui/separator";
 import {Input} from "@ui/input";
-import {Form, useFetcher, useLoaderData} from "@remix-run/react";
+import {useFetcher, useLoaderData} from "@remix-run/react";
 import {Label} from "@ui/label";
 import {Textarea} from "@ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@ui/select";
@@ -20,10 +20,12 @@ import {
     IMAGE_API_V1, IMAGE_CDN_URL, IMAGE_DEV_CDN_URL,
     removeAvatar
 } from "@/utils/image-uploader";
-import {tryDatabaseAction} from "@/utils/database-error";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import Fade from "@ui/fade";
 import {ProfileVisibility} from "@prisma/client";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -53,8 +55,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
         if (!isProduction) {
             if (!process.env.CDN_API_KEY) {
-                console.error('Cannot upload images without CDN API key.');
-                return json({ error: 'Server error.' });
+                return UnknownErrorResponse('Cannot upload images without CDN API key.');
             }
 
             const CDN_UPLOAD_URL = 'https://cdn.zlamb1.com/images/upload/';
@@ -69,8 +70,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
                     body: formData,
                 });
             } catch (err) {
-                console.error('Failed to upload image', err);
-                return json({ error: 'Unknown error' });
+                return UnknownErrorResponse(err);
             } finally {
                 if (file.remove) {
                     file.remove();
@@ -91,9 +91,8 @@ export async function action({ context, request }: ActionFunctionArgs) {
             });
 
             if (!user) {
-                return json({ error: 'User not found' });
+                return ExplicitResourceNotFoundResponse('User');
             }
-
         }
 
         if (isProduction) {
@@ -109,10 +108,9 @@ export async function action({ context, request }: ActionFunctionArgs) {
             },
         });
 
-        return json({ success: 'Updated user' });
+        return ExplicitUpdateResponse('User');
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }
 

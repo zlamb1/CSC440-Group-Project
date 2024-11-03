@@ -1,41 +1,29 @@
-import {ActionFunctionArgs, json} from "@remix-run/node";
+import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
-import {PostLike} from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
+import {ExplicitDeleteResponse} from "@/api/DeleteResponse";
+import {ExplicitCreateResponse} from "@/api/CreateResponse";
+import ResourceNotFoundResponse from "@/api/ResourceNotFoundResponse";
+import {AlreadyExistsResponse} from "@/api/ForbiddenResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
         if (!params.id) {
-            return json({ error: 'Post ID is required' });
+            return RequiredFieldResponse('Post ID');
         }
 
         if (!context.user.loggedIn) {
-            return json({ error: 'You must be logged in to react to a post' });
+            return UnauthorizedResponse();
         }
 
         const formData = await request.formData();
         const likedString = String(formData.get('liked'));
 
-        const oldLike: PostLike = await context.prisma.postLike.findUnique({
-            where: {
-                postId_userId: {
-                    postId: params.id,
-                    userId: context.user.id,
-                },
-            }
-        });
-
         if (likedString === 'null') {
             await context.prisma.$transaction([
-                context.prisma.post.update({
-                    data: {
-                        likeCount: {
-                            increment: oldLike ? (oldLike.liked ? -1 : 1) : 0,
-                        },
-                    },
-                    where: {
-                        id: params.id,
-                    },
-                }),
                 context.prisma.postLike.delete({
                     where: {
                         postId_userId: {
@@ -46,14 +34,10 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
                 }),
             ]);
 
-            return json({ success: 'Deleted liked' });
+            return ExplicitDeleteResponse('Post Like');
         }
 
         const liked = likedString === 'true';
-
-        if (oldLike && oldLike.liked === liked) {
-            return json({ error: 'Post like state has not changed' });
-        }
 
         await context.prisma.$transaction([
             context.prisma.postLike.upsert({
@@ -70,24 +54,23 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
                 create: {
                     postId: params.id,
                     userId: context.user.id,
-                },
-            }),
-            context.prisma.post.update({
-                data: {
-                    likeCount: {
-                        increment: (liked ? 1 : -1) * (oldLike ? 2 : 1),
-                    }
-                },
-                where: {
-                    id: params.id,
+                    liked
                 },
             }),
         ]);
 
-        return json({ success: 'Created post like' });
+        return ExplicitCreateResponse('Post Like');
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        if (err instanceof PrismaClientKnownRequestError) {
+            switch (err.code) {
+                case 'P2002':
+                    return AlreadyExistsResponse('Post Like');
+                case 'P2025':
+                    return ResourceNotFoundResponse();
+            }
+        }
+
+        return UnknownErrorResponse(err);
     }
 }
 

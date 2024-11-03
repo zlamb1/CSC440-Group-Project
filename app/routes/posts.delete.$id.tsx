@@ -1,45 +1,41 @@
-import {ActionFunctionArgs, json} from "@remix-run/node";
+import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {ExplicitDeleteResponse} from "@/api/DeleteResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export async function action({ context, params }: ActionFunctionArgs) {
     try {
         if (!context.user.loggedIn) {
-            return json({ error: 'You must be logged in to delete a post' });
+            return UnauthorizedResponse();
         }
 
         if (!params.id) {
-            return json({ error: 'Post ID required' });
+            return RequiredFieldResponse('Post ID');
         }
 
-        const [_, post] = await context.prisma.$transaction([
-            context.prisma.post.update({
-                data: {
-                    postLikes: {
-                        deleteMany: {},
-                    },
-                    replies: {
-                        deleteMany: {},
-                    },
-                },
-                where: {
-                    id: params.id,
-                },
-            }),
-            context.prisma.post.delete({
-                where: {
-                    id: params.id,
-                },
-            }),
-        ]);
+        const post = await context.prisma.post.delete({
+            where: {
+                id: params.id,
+            },
+        });
 
         if (!post) {
-            return json({ error: 'Post not found' });
+            return ExplicitResourceNotFoundResponse('Post');
         }
 
-        return json({ success: 'Deleted post' });
+        return ExplicitDeleteResponse('Post');
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        if (err instanceof PrismaClientKnownRequestError) {
+            if (err.code === 'P2025') {
+                return ExplicitResourceNotFoundResponse('Post');
+            }
+        }
+
+        return UnknownErrorResponse(err);
     }
 }
 

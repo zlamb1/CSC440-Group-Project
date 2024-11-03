@@ -1,16 +1,19 @@
-import {ActionFunctionArgs, redirect, json, LoaderFunctionArgs} from "@remix-run/node";
+import {ActionFunctionArgs, redirect, LoaderFunctionArgs} from "@remix-run/node";
 import {useSession} from "@/sessions.server";
 import LoginForm from "@components/LoginForm";
 import {Key, Lock} from "lucide-react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
-import {LayoutGroup, motion} from "framer-motion";
+import {LayoutGroup} from "framer-motion";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (context.user.loggedIn) {
         return redirect('/');
-    } else {
-        return null;
     }
+
+    return null;
 }
 
 export async function action({ context, request } : ActionFunctionArgs) {
@@ -20,15 +23,11 @@ export async function action({ context, request } : ActionFunctionArgs) {
         const passWord = String(formData.get("password"));
 
         if (!userName) {
-            return json({
-                username: 'Username is required'
-            });
+            return RequiredFieldResponse('Username', true);
         }
 
         if (!passWord) {
-            return json({
-                password: 'Password is required'
-            });
+            return RequiredFieldResponse('Password', true);
         }
 
         const user = await context.prisma.user.findUnique({
@@ -38,7 +37,7 @@ export async function action({ context, request } : ActionFunctionArgs) {
         });
 
         if (!user) {
-            return json({ password: 'Invalid credentials' });
+            return EndpointResponse({ password: 'Invalid Credentials' }, ResponseType.BadRequest);
         }
 
         if (await context.bcrypt.compare(passWord, user.passwordHash)) {
@@ -50,13 +49,10 @@ export async function action({ context, request } : ActionFunctionArgs) {
                 }
             })
         } else {
-            return json({ password: 'Invalid credentials' });
+            return EndpointResponse({ password: 'Invalid Credentials' }, ResponseType.BadRequest);
         }
     } catch (err) {
-        console.error(err);
-        return json({
-            error: 'Unknown error'
-        })
+        return UnknownErrorResponse(err);
     }
 }
 
