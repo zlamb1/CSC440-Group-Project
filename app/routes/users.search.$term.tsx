@@ -12,9 +12,11 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
 
         const users = await context.prisma.user.findMany({
             select: {
+                id: true,
                 userName: true,
                 avatarPath: true,
                 displayName: true,
+                visibility: true,
             },
             where: {
                 userName: {

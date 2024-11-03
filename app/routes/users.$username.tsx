@@ -1,4 +1,4 @@
-import {LoaderFunctionArgs} from "@remix-run/node";
+import {json, LoaderFunctionArgs} from "@remix-run/node";
 import {Link, useLoaderData} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
@@ -112,7 +112,7 @@ export default function UserRoute() {
     const data = useLoaderData<typeof loader>();
     const [tab, setTab] = useState('posts');
 
-    if (data?.error && data.error === ExplicitResourceNotFoundResponse('User').error) {
+    if (data?.error && data.error === 'User Not Found') {
         return <NotFound />;
     }
 
@@ -173,8 +173,8 @@ export default function UserRoute() {
                         <Link to="/settings" className="flex flex-row gap-1 w-fit items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
                             Edit Profile
                         </Link>
-                    ) : ( 
-                        <FollowButton user={user} isFollowing={isFollowing()} /> 
+                    ) : (
+                        <FollowButton user={user} isFollowing={isFollowing()} />
                     )
                 }
             </div>
