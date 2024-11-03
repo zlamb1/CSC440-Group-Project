@@ -14,6 +14,7 @@ import Fade from "@ui/fade";
 import {ErrorContext} from "@components/error/ErrorContext";
 import {Button} from "@ui/button";
 import {cn} from "@/lib/utils";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 function UserDeletionForm({ user, onCancel }: { user: User, onCancel?: () => void }) {
     const fetcher = useFetcher();
@@ -39,7 +40,9 @@ function UserDeletionForm({ user, onCancel }: { user: User, onCancel?: () => voi
                 </Label>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
-                    <Button type="submit">Submit</Button>
+                    <Button className="min-w-[80px]" type="submit">
+                        { fetcher.state === 'idle' ? 'Submit' : <LoadingSpinner /> }
+                    </Button>
                 </AlertDialogFooter>
             </fetcher.Form>
         </>
