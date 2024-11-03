@@ -2,7 +2,7 @@ import {Input} from "@ui/input";
 import React, {useEffect, useState} from "react";
 import {Link, useFetcher} from "@remix-run/react";
 import {LockKeyhole, Search, X} from "lucide-react";
-import {User} from "@prisma/client";
+import {ProfileVisibility, User} from "@prisma/client";
 import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
 import {Button} from "@ui/button";
 import UserAvatar from "@components/user/UserAvatar";
@@ -45,7 +45,7 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
     }
 
     function isPrivate(user: User, following?: boolean) {
-        return user.visibility !== 'PUBLIC' && !following;
+        return user.visibility !== ProfileVisibility.PUBLIC && !following;
     }
 
     function isFollowing(id: string) {
