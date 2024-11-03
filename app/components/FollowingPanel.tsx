@@ -6,6 +6,7 @@ import UserAvatar from "@components/user/UserAvatar";
 import React, {useState} from "react";
 import {FollowWithFollowing, UserWithLoggedIn} from "@/utils/types";
 import {cn} from "@/lib/utils";
+import {Link} from "@remix-run/react";
 
 export default function FollowingPanel({ className, user }: { className?: string, user: UserWithLoggedIn, }) {
     if (!user?.loggedIn) {
@@ -39,10 +40,10 @@ export default function FollowingPanel({ className, user }: { className?: string
                     const following = follow.following;
                     return (
                         <Button containerClass="w-full" className="w-full flex justify-between rounded-none" key={following.id}  variant="ghost">
-                            <div className="flex items-center gap-2">
+                            <Link to={`/users/${follow.following.userName}`} className="flex items-center gap-2">
                                 <UserAvatar avatar={following.avatarPath} userName={following.userName}/>
-                                @{ following.userName }
-                            </div>
+                                @{following.userName}
+                            </Link>
                         </Button>
                     );
                 })
