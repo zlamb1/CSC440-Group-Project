@@ -1,15 +1,22 @@
-import {ActionFunctionArgs, json} from "@remix-run/node";
+import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
+import {ExplicitDeleteResponse} from "@/api/DeleteResponse";
+import {ExplicitCreateResponse} from "@/api/CreateResponse";
+import ResourceNotFoundResponse from "@/api/ResourceNotFoundResponse";
+import {AlreadyExistsResponse} from "@/api/ForbiddenResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
         if (!params.id) {
-            return json({ error: 'Post ID is required.' });
+            return RequiredFieldResponse('Post ID');
         }
 
         if (!context.user.loggedIn) {
-            return json({ error: 'You must be logged in to react to a post' });
+            return UnauthorizedResponse();
         }
 
         const formData = await request.formData();
@@ -27,7 +34,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
                 }),
             ]);
 
-            return json({ success: 'Deleted post like.' });
+            return ExplicitDeleteResponse('Post Like');
         }
 
         const liked = likedString === 'true';
@@ -52,19 +59,18 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             }),
         ]);
 
-        return json({ success: 'Created post like.' });
+        return ExplicitCreateResponse('Post Like');
     } catch (err) {
         if (err instanceof PrismaClientKnownRequestError) {
             switch (err.code) {
                 case 'P2002':
-                    return json({ error: 'That post like already exists.' });
+                    return AlreadyExistsResponse('Post Like');
                 case 'P2025':
-                    return json({ error: 'That post like does not exist.' });
+                    return ResourceNotFoundResponse();
             }
         }
 
-        console.error(err);
-        return json({ error: 'Unknown error.' });
+        return UnknownErrorResponse(err);
     }
 }
 

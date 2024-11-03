@@ -1,28 +1,33 @@
-import {ActionFunctionArgs, json} from "@remix-run/node";
+import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
 import {ensureContentLength, sanitizeContent} from "@/utils/post-validation";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitCreateResponse} from "@/api/CreateResponse";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
+import EndpointResponse from "@/api/EndpointResponse";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
+        if (!context.user.loggedIn) {
+            return UnauthorizedResponse();
+        }
+
         const formData = await request.formData();
         const content = String(formData.get('content'));
 
         if (!params.id) {
-            return json({ error: 'Post ID is required' });
-        }
-
-        if (!context.user.loggedIn) {
-            return json({ error: 'You must be logged in to reply to a post' });
+            return RequiredFieldResponse('Post ID');
         }
 
         if (!content) {
-            return json({ error: 'Post content is required' });
+            return RequiredFieldResponse('Post Content');
         }
 
         const sanitizedContent = sanitizeContent(content);
         const msg = ensureContentLength(sanitizedContent);
         if (msg) {
-            return json({ error: msg });
+            return EndpointResponse(msg, 400);
         }
 
         await context.prisma.post.create({
@@ -41,10 +46,9 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             },
         });
 
-        return json({ success: 'Created reply' });
+        return ExplicitCreateResponse('Reply');
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }
 

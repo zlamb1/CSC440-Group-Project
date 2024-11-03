@@ -1,10 +1,13 @@
 import NotFound from "@/routes/$";
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import EndpointResponse from "@/api/EndpointResponse";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
         if (!params.term) {
-            return json({ error: 'Search term is required.' });
+            return RequiredFieldResponse('Search Term');
         }
 
         const users = await context.prisma.user.findMany({
@@ -21,10 +24,9 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             }
         });
 
-        return json({ users });
+        return EndpointResponse({ users });
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error.' });
+        return UnknownErrorResponse(err);
     }
 }
 

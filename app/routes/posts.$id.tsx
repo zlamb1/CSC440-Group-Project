@@ -1,12 +1,14 @@
-import {json, LoaderFunctionArgs} from "@remix-run/node";
-import {tryDatabaseAction} from "@/utils/database-error";
-import post from "@components/post/Post";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import {ProfileVisibility} from "@prisma/client";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import EndpointResponse from "@/api/EndpointResponse";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
         if (!params.id) {
-            return json({ error: 'Post ID is required' });
+            return RequiredFieldResponse('Post ID');
         }
 
         const post = await context.prisma.post.findUnique({
@@ -23,12 +25,11 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
         });
 
         if (!post) {
-            return json({ error: 'Post not found' });
+            return ExplicitResourceNotFoundResponse('Post');
         }
 
-        return json({ post });
+        return EndpointResponse({ post });
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }

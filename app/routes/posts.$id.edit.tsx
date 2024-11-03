@@ -1,6 +1,11 @@
-import {ActionFunctionArgs, json} from "@remix-run/node";
+import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
 import {ensureContentLength, sanitizeContent} from "@/utils/post-validation";
+import BadRequestResponse, {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
@@ -8,21 +13,21 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         const content = String(formData.get('content'));
 
         if (!params.id) {
-            return json({ error: 'Post is required' });
-        }
-
-        if (!context.user.loggedIn) {
-            return json({ error: 'You must be logged in to edit a post' });
+            return RequiredFieldResponse('Post');
         }
 
         if (!content) {
-            return json({ error: 'Post content is required' });
+            return RequiredFieldResponse('Post Content');
+        }
+
+        if (!context.user.loggedIn) {
+            return UnauthorizedResponse();
         }
 
         const sanitizedContent = sanitizeContent(content);
         const msg = ensureContentLength(sanitizedContent);
         if (msg) {
-            return json({ error: msg });
+            return BadRequestResponse(msg);
         }
 
         const post = await context.prisma.post.update({
@@ -37,13 +42,12 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         });
 
         if (!post) {
-            return json({ error: 'Post not found' });
+            return ExplicitResourceNotFoundResponse('Post');
         }
-
-        return json({ success: 'Updated post' });
+        
+        return ExplicitUpdateResponse('Post');
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }
 

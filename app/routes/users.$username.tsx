@@ -1,4 +1,4 @@
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import {Link, useLoaderData} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
@@ -14,11 +14,15 @@ import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
 import {getUserPosts} from '@prisma/client/sql';
 import {PostWithUser} from "@/utils/types";
+import EndpointResponse from "@/api/EndpointResponse";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
         if (!params.username) {
-            return json({ error: 'Username is required', self: context.user });
+            return RequiredFieldResponse('Username');
         }
 
         const stdProps = {
@@ -54,21 +58,20 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
         user.posts = await context.prisma.$queryRawTyped(getUserPosts(user.id, context.user.id));
 
         if (!user) {
-            return json({ error: 'User not found', self: context.user });
+            return ExplicitResourceNotFoundResponse('User');
         }
 
         if (user.visibility !== ProfileVisibility.PUBLIC) {
             if (context.user.loggedIn && context.user.id === user.id) {
-                return json({ user, self: context.user });
+                return EndpointResponse({ user, self: context.user });
             } else {
-                return json({ error: 'User not found', self: context.user });
+                return ExplicitResourceNotFoundResponse('User');
             }
         }
 
-        return json({ user, self: context.user });
+        return EndpointResponse({ user, self: context.user });
     } catch (err) {
-        console.error(err);
-        return json({ error: 'Unknown error', self: context.user });
+        return UnknownErrorResponse(err);
     }
 }
 
@@ -109,10 +112,8 @@ export default function UserRoute() {
     const data = useLoaderData<typeof loader>();
     const [tab, setTab] = useState('posts');
 
-    if (data?.error) {
-        if (data.error === 'User not found') {
-            return <NotFound />;
-        }
+    if (data?.error && data.error === ExplicitResourceNotFoundResponse('User').error) {
+        return <NotFound />;
     }
 
     const self = data?.self;

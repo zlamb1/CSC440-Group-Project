@@ -1,18 +1,23 @@
 import NotFound from "@/routes/$";
 import { Prisma } from "@prisma/client";
-import {ActionFunctionArgs, json} from "@remix-run/node";
+import {ActionFunctionArgs} from "@remix-run/node";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
+import {RequiredFieldResponse} from "@/api/BadRequestResponse";
+import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
+import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 
 export async function action({ context, request, params }: ActionFunctionArgs) {
     try {
+        if (!context.user.loggedIn) {
+            return UnauthorizedResponse();
+        }
+
         const formData = await request.formData();
         const follow = String(formData.get('follow')) === 'true';
 
         if (!params.id) {
-            return json({ error: 'User ID is required' });
-        }
-
-        if (!context.user.loggedIn) {
-            return json({ error: 'You must be logged in to follow a user' });
+            return RequiredFieldResponse('User ID');
         }
 
         if (follow) {
@@ -33,16 +38,15 @@ export async function action({ context, request, params }: ActionFunctionArgs) {
             });
         }
 
-        return json({ success: 'Updated follow' });
+        return ExplicitUpdateResponse('Follow');
     } catch (err) {
         if (err instanceof Prisma.PrismaClientKnownRequestError) {
             if (err.code === 'P2025') {
-                return json({ error: 'Follow not found' });
+                return ExplicitResourceNotFoundResponse('Follow');
             }
         }
 
-        console.error(err);
-        return json({ error: 'Unknown error' });
+        return UnknownErrorResponse(err);
     }
 }
 
