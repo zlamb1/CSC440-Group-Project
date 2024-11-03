@@ -48,9 +48,9 @@ export async function action({ context, request } : ActionFunctionArgs) {
                     'Set-Cookie': await context.session.commitSession(session)
                 }
             })
-        } else {
-            return EndpointResponse({ password: 'Invalid Credentials' }, ResponseType.BadRequest);
         }
+
+        return EndpointResponse({ password: 'Invalid Credentials' }, ResponseType.BadRequest);
     } catch (err) {
         return UnknownErrorResponse(err);
     }

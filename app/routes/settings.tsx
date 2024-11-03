@@ -26,6 +26,7 @@ import {ProfileVisibility} from "@prisma/client";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
+import UserDeletionDialog from "@components/user/UserDeletionDialog";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -222,9 +223,11 @@ export default function SettingsRoute() {
                     <Button variant="edit" type="submit">
                         Update Settings
                     </Button>
-                    <Button containerClass="w-fit" variant="destructive">
-                        Delete Account
-                    </Button>
+                    <UserDeletionDialog user={data}>
+                        <Button containerClass="w-fit" variant="destructive">
+                            Delete Account
+                        </Button>
+                    </UserDeletionDialog>
                 </div>
             </fetcher.Form>
         </div>
