@@ -14,6 +14,47 @@ import UserHoverCard from "@components/hover/UserHoverCard";
 import LikePanel from "@components/post/LikePanel";
 import ReplyEditor from "@components/post/ReplyEditor";
 
+function isPlural(unit: number) {
+    if (unit !== 1) return 's';
+    return '';
+}
+
+function formatPastDate(date: string | Date, suffix?: string) {
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+
+    if (!suffix) {
+        suffix = 'ago';
+    }
+
+    const now = new Date();
+    const epochDiff = now.getTime() - date.getTime();
+
+    const msSecond = 1000;
+    const msMinute = msSecond * 60;
+    const msHour = msMinute * 60;
+    const msDay = msHour * 24;
+
+    if (epochDiff < msMinute) {
+        const seconds = Math.floor(epochDiff / msSecond);
+        return `${seconds} second${isPlural(seconds)} ${suffix}`;
+    }
+
+    if (epochDiff < msHour) {
+        const minutes = Math.floor(epochDiff / msMinute);
+        return `${minutes} minute${isPlural(minutes)} ${suffix}`;
+    }
+
+    if (epochDiff < msDay) {
+        const hours = Math.floor(epochDiff / msHour);
+        return `${hours} hour${isPlural(hours)} ${suffix}`;
+    }
+
+    const days = Math.floor(epochDiff / msDay);
+    return `${days} day${isPlural(days)} ${suffix}`;
+}
+
 function Post({className, post, viewer, depth = 1, autoReply = true}: {
     className?: string,
     post: PostWithUser,
@@ -33,7 +74,10 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
                         <UserHoverCard viewer={viewer} user={post.user}>
                             <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
                                 <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName}/>
-                                {post.user?.userName}
+                                <div className="flex items-center gap-1">
+                                    {post.user?.userName}
+                                    <span className="text-sm text-gray-400">• {formatPastDate(post.postedAt)}</span>
+                                </div>
                             </Link>
                         </UserHoverCard>
                     </div>
