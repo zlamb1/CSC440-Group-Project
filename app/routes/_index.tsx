@@ -19,7 +19,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     return EndpointResponse({ user: context.user, posts });
 }
 
-async function fetchPosts({ data, setData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
+async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
     const cursor = data && data.length ?
         data[data.length - 1].postedAt : new Date();
     const limit = 10;
@@ -33,8 +33,8 @@ async function fetchPosts({ data, setData, doUpdate, setHasMoreData }: FetchPara
 
     setHasMoreData(json?.posts?.length === limit);
 
-    if (doUpdate) {
-        setData(prev => (prev ? prev.concat(json?.posts) : json?.posts));
+    if (doUpdate && json?.posts?.length) {
+        updateData(json.posts);
     }
 }
 
@@ -44,13 +44,17 @@ export default function Index() {
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
 
-    const [ posts, setPosts, isLoading, onLoad, updatePosts ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetchPosts });
+    const [ posts, setPosts, isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({
+        fetchData: fetchPosts, cmpFn: (a: PostWithRelations, b: PostWithRelations) => a.id == b.id
+    });
 
     const createFetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
 
     useEffect(() => {
-        updatePosts(posts, (a: PostWithRelations, b: PostWithRelations) => a.id === b.id);
+        if (data?.posts) {
+            setPosts(data?.posts);
+        }
     }, [data]);
 
     useEffect(() => {

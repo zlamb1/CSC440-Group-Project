@@ -6,7 +6,7 @@ import useResizeObserver from "@/utils/useResizeObserver";
 
 export type FetchParams<S> = { 
     data: S[], 
-    setData: Dispatch<SetStateAction<S[]>>, 
+    updateData: (newData: S[]) => void,
     isLoading: boolean,
     setIsLoading: Dispatch<SetStateAction<boolean>>,
     hasMoreData: boolean,
@@ -16,13 +16,12 @@ export type FetchParams<S> = {
 
 export type InfiniteScrollReturn<S> = [
     S[],
-    Dispatch<SetStateAction<S[]>>,
+    (newData: S[]) => void,
     boolean,
     () => void,
-    (newData: S[], cmp: (a: S, b: S) => boolean) => void,
 ];
 
-export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchParams<S>) => Promise<void> }): InfiniteScrollReturn<S> {
+export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false }: { fetchData: (params: FetchParams<S>) => Promise<void>, cmpFn?: (a: S, b: S) => boolean }): InfiniteScrollReturn<S> {
     const [ data, setData ] = useState<S[]>([]);
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
@@ -30,7 +29,7 @@ export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchP
     useEffect(() => {
         if (isLoading) {
             let doUpdate = true;
-            fetchData({ data, setData, isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
+            fetchData({ data, updateData, isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
                 .then(() => {
                     if (doUpdate) {
                         setIsLoading(false);
@@ -42,7 +41,13 @@ export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchP
         }
     }, [isLoading]);
 
-    function updateData(newData: S[], cmp: (a: S, b: S) => boolean): void {
+    function loadData() {
+        if (!isLoading && hasMoreData) {
+            setIsLoading(true);
+        }
+    }
+
+    function updateData(newData: S[]): void {
         setData(prev => {
             if (!prev || !prev.length) {
                 return newData;
@@ -53,25 +58,20 @@ export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchP
             for (const element of newData) {
                 for (let i = 0; i < prev.length; i++) {
                     const d = prev[i];
-                    if (cmp(d, element)) {
+                    if (cmpFn(d, element)) {
                         prev[i] = element;
-                    } else {
-                        deduped.push(d);
+                        break;
+                    } else if (i === prev.length - 1) {
+                        deduped.push(element);
                     }
                 }
             }
 
-            return [...deduped, ...prev];
+            return [...prev, ...deduped];
         });
     }
 
-    function loadData() {
-        if (!isLoading && hasMoreData) {
-            setIsLoading(true);
-        }
-    }
-
-    return [ data, setData, isLoading, loadData, updateData ];
+    return [ data, updateData, isLoading, loadData ];
 }
 
 export interface MaxHeightProps {
@@ -92,20 +92,20 @@ export default function InfiniteScroll({ children, className, containerClass, lo
     const ref = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [ maxHeight, setMaxHeight ] = useState<string>('none');
-    const [ bodyDimensions ] = useResizeObserver();
 
     function calculateMaxHeight() {
         if (useMaxHeight && containerRef.current) {
             const y = containerRef.current.getBoundingClientRect().top;
-            setMaxHeight(`${bodyDimensions.height - y - maxHeightProps?.marginBottom}px`);
+            setMaxHeight(`${window.innerHeight - y - maxHeightProps?.marginBottom}px`);
         } else {
             setMaxHeight('none');
         }
     }
 
     useEffect(() => {
-        calculateMaxHeight();
-    }, [bodyDimensions]);
+        window.addEventListener('resize', calculateMaxHeight);
+        return () => window.removeEventListener('resize', calculateMaxHeight);
+    });
 
     useEffect(() => {
         calculateMaxHeight();
@@ -130,7 +130,7 @@ export default function InfiniteScroll({ children, className, containerClass, lo
 
     return (
         <ScrollArea className={cn('', className)} style={{maxHeight}} ref={containerRef}>
-            <div className={cn("flex flex-col pb-12", containerClass)}>
+            <div className={cn("flex flex-col pb-16", containerClass)}>
                 { children }
                 {
                     isLoading &&
