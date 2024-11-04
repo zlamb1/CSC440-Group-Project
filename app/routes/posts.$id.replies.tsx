@@ -5,8 +5,6 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
-        return json({ replies: [] });
-
         if (!params.id) {
             return RequiredFieldResponse('Post ID');
         }
