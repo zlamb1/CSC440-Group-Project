@@ -2,34 +2,36 @@ import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {createRef, Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react";
+import React, {createRef, FormEvent, useEffect, useState} from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
 import {PostWithRelations} from "@/utils/types";
 import {FetchParams, useInfiniteScroll} from "@components/InfiniteScroll";
+import {fetchPublicPosts} from "@/routes/posts.public";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id, new Date(), 1));
+    const posts = await fetchPublicPosts(context.prisma, context.user.id);
     return EndpointResponse({ user: context.user, posts });
 }
 
 async function fetchPosts({ data, setData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
     const cursor = data && data.length ?
         data[data.length - 1].postedAt : new Date();
+    const limit = 10;
 
     const params = new URLSearchParams();
     params.set('cursor', cursor.toString());
+    params.set('limit', limit.toString());
 
     const response = await fetch('/posts/public?' + params);
     const json = await response.json();
 
-    setHasMoreData(json?.posts && json.posts.length);
+    setHasMoreData(json?.posts?.length === limit);
 
     if (doUpdate) {
         setData(prev => (prev ? prev.concat(json?.posts) : json?.posts));
@@ -42,10 +44,14 @@ export default function Index() {
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
 
-    const [ posts, setPosts, isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetchPosts });
+    const [ posts, setPosts, isLoading, onLoad, updatePosts ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetchPosts });
 
     const createFetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
+
+    useEffect(() => {
+        updatePosts(posts, (a: PostWithRelations, b: PostWithRelations) => a.id === b.id);
+    }, [data]);
 
     useEffect(() => {
         if (ref?.current && createFetcher.state === 'idle') {

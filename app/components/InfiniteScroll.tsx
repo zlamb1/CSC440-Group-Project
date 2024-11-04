@@ -18,7 +18,8 @@ export type InfiniteScrollReturn<S> = [
     S[],
     Dispatch<SetStateAction<S[]>>,
     boolean,
-    () => void
+    () => void,
+    (newData: S[], cmp: (a: S, b: S) => boolean) => void,
 ];
 
 export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchParams<S>) => Promise<void> }): InfiniteScrollReturn<S> {
@@ -41,13 +42,36 @@ export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchP
         }
     }, [isLoading]);
 
+    function updateData(newData: S[], cmp: (a: S, b: S) => boolean): void {
+        setData(prev => {
+            if (!prev || !prev.length) {
+                return newData;
+            }
+
+            const deduped = [];
+            // TODO: currently O(n^2), potentially consider alternatives?
+            for (const element of newData) {
+                for (let i = 0; i < prev.length; i++) {
+                    const d = prev[i];
+                    if (cmp(d, element)) {
+                        prev[i] = element;
+                    } else {
+                        deduped.push(d);
+                    }
+                }
+            }
+
+            return [...deduped, ...prev];
+        });
+    }
+
     function loadData() {
         if (!isLoading && hasMoreData) {
             setIsLoading(true);
         }
     }
 
-    return [ data, setData, isLoading, loadData ];
+    return [ data, setData, isLoading, loadData, updateData ];
 }
 
 export interface MaxHeightProps {
@@ -83,11 +107,6 @@ export default function InfiniteScroll({ children, className, containerClass, lo
         calculateMaxHeight();
     }, [bodyDimensions]);
 
-    let pageHeight = 0;
-    if (typeof window !== 'undefined') {
-        pageHeight = window.innerHeight;
-    }
-
     useEffect(() => {
         calculateMaxHeight();
 
@@ -97,7 +116,6 @@ export default function InfiniteScroll({ children, className, containerClass, lo
             }
             const observer = new IntersectionObserver(entries => {
                 if (entries[0].intersectionRatio <= 0) return;
-                console.log(entries[0].intersectionRatio);
                 load();
             }, options);
 
