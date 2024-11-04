@@ -2,7 +2,7 @@ import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {createRef, FormEvent, useEffect, useState} from "react";
+import React, {createRef, Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {motion} from "framer-motion";
@@ -12,10 +12,28 @@ import Fade from "@ui/fade";
 import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
 import {PostWithRelations} from "@/utils/types";
+import {FetchParams, useInfiniteScroll} from "@components/InfiniteScroll";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id, new Date(), 1));
     return EndpointResponse({ user: context.user, posts });
+}
+
+async function fetchPosts({ data, setData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
+    const cursor = data && data.length ?
+        data[data.length - 1].postedAt : new Date();
+
+    const params = new URLSearchParams();
+    params.set('cursor', cursor.toString());
+
+    const response = await fetch('/posts/public?' + params);
+    const json = await response.json();
+
+    setHasMoreData(json?.posts && json.posts.length);
+
+    if (doUpdate) {
+        setData(prev => (prev ? prev.concat(json?.posts) : json?.posts));
+    }
 }
 
 export default function Index() {
@@ -23,46 +41,11 @@ export default function Index() {
 
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
-    const [ posts, setPosts ] = useState<PostWithRelations[]>(data?.posts);
 
-    const [ isLoading, setIsLoading ] = useState<boolean>(false);
-    const [ hasData, setHasData ] = useState<boolean>(true);
+    const [ posts, setPosts, isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetchPosts });
 
     const createFetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
-
-    useEffect(() => {
-        if (isLoading) {
-            let doUpdate = true;
-
-            const fetchPosts = async () => {
-                const cursor = posts && posts.length ?
-                    posts[posts.length - 1].postedAt : new Date();
-
-                const params = new URLSearchParams();
-                params.set('cursor', cursor.toString());
-
-                const response = await fetch('/posts/public?' + params);
-                const json = await response.json();
-
-                setHasData(json?.posts && json.posts.length);
-
-                if (doUpdate)
-                    setPosts(prev => (prev ? prev.concat(json?.posts) : json?.posts));
-            }
-
-            fetchPosts()
-                .then(() => {
-                    if (doUpdate) {
-                        setIsLoading(false);
-                    }
-                })
-                .catch(err => console.error(err));
-            return () => {
-                doUpdate = false;
-            };
-        }
-    }, [isLoading]);
 
     useEffect(() => {
         if (ref?.current && createFetcher.state === 'idle') {
@@ -80,12 +63,6 @@ export default function Index() {
                 action: '/posts/create',
                 method: 'POST',
             });
-        }
-    }
-
-    function onLoad() {
-        if (hasData) {
-            setIsLoading(true);
         }
     }
 

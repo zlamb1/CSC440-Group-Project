@@ -1,7 +1,53 @@
 import {ScrollArea} from "@ui/scroll-area";
-import {ReactNode, useEffect, useRef} from "react";
+import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+
+export type FetchParams<S> = { 
+    data: S[], 
+    setData: Dispatch<SetStateAction<S[]>>, 
+    isLoading: boolean,
+    setIsLoading: Dispatch<SetStateAction<boolean>>,
+    hasMoreData: boolean,
+    setHasMoreData: Dispatch<SetStateAction<boolean>>,
+    doUpdate: boolean,
+};
+
+export type InfiniteScrollReturn<S> = [
+    S[],
+    Dispatch<SetStateAction<S[]>>,
+    boolean,
+    () => void
+];
+
+export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchParams<S>) => Promise<void> }): InfiniteScrollReturn<S> {
+    const [ data, setData ] = useState<S[]>([]);
+    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (isLoading) {
+            let doUpdate = true;
+            fetchData({ data, setData, isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
+                .then(() => {
+                    if (doUpdate) {
+                        setIsLoading(false);
+                    }
+                });
+            return () => {
+                doUpdate = false;
+            };
+        }
+    }, [isLoading]);
+
+    function loadData() {
+        if (!isLoading && hasMoreData) {
+            setIsLoading(true);
+        }
+    }
+
+    return [ data, setData, isLoading, loadData ];
+}
 
 export interface InfiniteScrollProps {
     children: ReactNode;
