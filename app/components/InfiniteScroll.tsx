@@ -2,6 +2,7 @@ import {ScrollArea} from "@ui/scroll-area";
 import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import useResizeObserver from "@/utils/useResizeObserver";
 
 export type FetchParams<S> = { 
     data: S[], 
@@ -49,23 +50,56 @@ export function useInfiniteScroll<S>({ fetchData }: { fetchData: (params: FetchP
     return [ data, setData, isLoading, loadData ];
 }
 
+export interface MaxHeightProps {
+    marginBottom: number;
+}
+
 export interface InfiniteScrollProps {
     children: ReactNode;
     className?: string;
     containerClass?: string;
     load?: () => void;
     isLoading?: boolean;
+    useMaxHeight?: boolean;
+    maxHeightProps?: MaxHeightProps;
 }
 
-export default function InfiniteScroll({ children, className, containerClass, load, isLoading = false }: InfiniteScrollProps) {
+export default function InfiniteScroll({ children, className, containerClass, load, isLoading = false, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
     const ref = useRef(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [ maxHeight, setMaxHeight ] = useState<string>('none');
+    const [ bodyDimensions ] = useResizeObserver();
+
+    function calculateMaxHeight() {
+        if (useMaxHeight && containerRef.current) {
+            const y = containerRef.current.getBoundingClientRect().top;
+            setMaxHeight(`${bodyDimensions.height - y - maxHeightProps?.marginBottom}px`);
+        } else {
+            setMaxHeight('none');
+        }
+    }
 
     useEffect(() => {
-        if (load) {
+        calculateMaxHeight();
+    }, [bodyDimensions]);
+
+    let pageHeight = 0;
+    if (typeof window !== 'undefined') {
+        pageHeight = window.innerHeight;
+    }
+
+    useEffect(() => {
+        calculateMaxHeight();
+
+        if (load && containerRef.current) {
+            const options = {
+                root: containerRef.current,
+            }
             const observer = new IntersectionObserver(entries => {
                 if (entries[0].intersectionRatio <= 0) return;
+                console.log(entries[0].intersectionRatio);
                 load();
-            });
+            }, options);
 
             if (ref.current) {
                 observer.observe(ref.current);
@@ -74,11 +108,11 @@ export default function InfiniteScroll({ children, className, containerClass, lo
                 }
             }
         }
-    }, [ref, children, load]);
+    }, [ref, containerRef, children, load]);
 
     return (
-        <ScrollArea className={cn('relative', className)}>
-            <div className={cn("flex flex-col", containerClass)}>
+        <ScrollArea className={cn('', className)} style={{maxHeight}} ref={containerRef}>
+            <div className={cn("flex flex-col pb-32", containerClass)}>
                 { children }
                 {
                     isLoading &&
@@ -87,7 +121,7 @@ export default function InfiniteScroll({ children, className, containerClass, lo
                     </div>
                 }
             </div>
-            <div className="absolute bottom-0" ref={ref} />
+            <div className="w-0 h-0" ref={ref} />
         </ScrollArea>
     )
 }
