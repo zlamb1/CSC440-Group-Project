@@ -112,7 +112,7 @@ export default function InfiniteScroll({ children, className, containerClass, lo
 
     return (
         <ScrollArea className={cn('', className)} style={{maxHeight}} ref={containerRef}>
-            <div className={cn("flex flex-col pb-32", containerClass)}>
+            <div className={cn("flex flex-col pb-12", containerClass)}>
                 { children }
                 {
                     isLoading &&

@@ -10,7 +10,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
         const limit = url.searchParams.get("limit");
 
         const posts = await context.prisma.$queryRawTyped(
-            getPublicPosts(context.user.id, cursor ? new Date(cursor) : new Date(), limit ? Number(limit) : 1)
+            getPublicPosts(context.user.id, cursor ? new Date(cursor) : new Date(), limit ? Number(limit) : 5)
         );
 
         return EndpointResponse({ posts });
