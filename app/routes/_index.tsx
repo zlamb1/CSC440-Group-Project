@@ -1,31 +1,68 @@
 import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {createRef, FormEvent, Fragment, useEffect, useState} from "react";
-import Post from "@components/post/Post";
+import React, {createRef, FormEvent, useEffect, useState} from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
-import {AnimatePresence, motion} from "framer-motion";
+import {motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import useIsSSR from "@/utils/useIsSSR";
 import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 import EndpointResponse from "@/api/EndpointResponse";
+import PostScroller from "@components/post/PostScroller";
+import {PostWithRelations} from "@/utils/types";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id));
-
+    const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id, new Date(), 1));
     return EndpointResponse({ user: context.user, posts });
 }
 
 export default function Index() {
+    const data = useLoaderData<typeof loader>();
+
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
-    const isSSR = useIsSSR(); 
-    const data = useLoaderData<typeof loader>();
+    const [ posts, setPosts ] = useState<PostWithRelations[]>(data?.posts);
+
+    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    const [ hasData, setHasData ] = useState<boolean>(true);
+
     const createFetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
+
+    useEffect(() => {
+        if (isLoading) {
+            let doUpdate = true;
+
+            const fetchPosts = async () => {
+                const cursor = posts && posts.length ?
+                    posts[posts.length - 1].postedAt : new Date();
+
+                const params = new URLSearchParams();
+                params.set('cursor', cursor.toString());
+
+                const response = await fetch('/posts/public?' + params);
+                const json = await response.json();
+
+                setHasData(json?.posts && json.posts.length);
+
+                if (doUpdate)
+                    setPosts(prev => (prev ? prev.concat(json?.posts) : json?.posts));
+            }
+
+            fetchPosts()
+                .then(() => {
+                    if (doUpdate) {
+                        setIsLoading(false);
+                    }
+                })
+                .catch(err => console.error(err));
+            return () => {
+                doUpdate = false;
+            };
+        }
+    }, [isLoading]);
 
     useEffect(() => {
         if (ref?.current && createFetcher.state === 'idle') {
@@ -38,10 +75,17 @@ export default function Index() {
         if (ref.current) {
             const formData = new FormData();
             formData.set('content', ref.current.getContent());
+
             createFetcher.submit(formData, {
-                method: 'POST',
                 action: '/posts/create',
+                method: 'POST',
             });
+        }
+    }
+
+    function onLoad() {
+        if (hasData) {
+            setIsLoading(true);
         }
     }
 
@@ -86,21 +130,7 @@ export default function Index() {
                 </Form>
                 <hr/>
             </Fade>
-            <AnimatePresence initial={!isSSR}>
-                {
-                    data?.posts.map((post: any) =>
-                        <Fragment key={post.id}>
-                            <motion.div initial={{opacity: 0.25, transform: 'translateX(-10px)'}}
-                                        animate={{opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
-                                        exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
-                                        transition={{ duration: 0.2 }}>
-                                <Post className="p-3 px-5" post={post} viewer={data?.user} />
-                            </motion.div>
-                            <hr />
-                        </Fragment>
-                    )
-                }
-            </AnimatePresence>
+            <PostScroller posts={posts} user={data?.user} onLoad={onLoad} isLoading={isLoading} />
         </div>
     )
 }
