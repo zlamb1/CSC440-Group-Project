@@ -27,6 +27,7 @@ SELECT
                 'userId',      r."userId",
                 'likeCount',   r."likeCount",
                 'replyCount',  r."replyCount",
+                'liked',       r."liked",
                 'user',        r."user"
             )
         ) FILTER (WHERE r."id" IS NOT NULL),
