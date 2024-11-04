@@ -2,7 +2,6 @@ import {ScrollArea} from "@ui/scroll-area";
 import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import useResizeObserver from "@/utils/useResizeObserver";
 
 export type FetchParams<S> = { 
     data: S[], 
@@ -14,6 +13,12 @@ export type FetchParams<S> = {
     doUpdate: boolean,
 };
 
+export type UseInfiniteScrollProps<S> = {
+    fetchData: (params: FetchParams<S>) => Promise<void>,
+    cmpFn?: (a: S, b: S) => boolean,
+    sortFn?: (a: S, b: S) => number,
+}
+
 export type InfiniteScrollReturn<S> = [
     S[],
     (newData: S[]) => void,
@@ -21,7 +26,7 @@ export type InfiniteScrollReturn<S> = [
     () => void,
 ];
 
-export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false }: { fetchData: (params: FetchParams<S>) => Promise<void>, cmpFn?: (a: S, b: S) => boolean }): InfiniteScrollReturn<S> {
+export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false, sortFn }: UseInfiniteScrollProps<S>): InfiniteScrollReturn<S> {
     const [ data, setData ] = useState<S[]>([]);
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
@@ -67,7 +72,9 @@ export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false }: { fetch
                 }
             }
 
-            return [...prev, ...deduped];
+            const newArray = [...prev, ...deduped];
+            if (sortFn) return newArray.sort(sortFn);
+            return newArray;
         });
     }
 

@@ -12,11 +12,9 @@ import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
 import {PostWithRelations} from "@/utils/types";
 import {FetchParams, useInfiniteScroll} from "@components/InfiniteScroll";
-import {fetchPublicPosts} from "@/routes/posts.public";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    const posts = await fetchPublicPosts(context.prisma, context.user.id);
-    return EndpointResponse({ user: context.user, posts });
+    return EndpointResponse({ user: context.user });
 }
 
 async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
@@ -50,12 +48,6 @@ export default function Index() {
 
     const createFetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
-
-    useEffect(() => {
-        if (data?.posts) {
-            setPosts(data?.posts);
-        }
-    }, [data]);
 
     useEffect(() => {
         if (ref?.current && createFetcher.state === 'idle') {
