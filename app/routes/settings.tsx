@@ -179,7 +179,7 @@ export default function SettingsRoute() {
                                             whileHover={{ opacity: 1 }}
                                             className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
                                     <Edit2 className="text-white" size={20} />
-                                    <Input type="text" readOnly className="hidden" name="is-updating-avatar" value={'' + isAvatarUpdated} />
+                                    <Input type="text" className="hidden" name="is-updating-avatar" value={'' + isAvatarUpdated} readOnly />
                                     <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
                                 </motion.div>
                             </Button>
@@ -195,7 +195,7 @@ export default function SettingsRoute() {
                     </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
                         Username
-                        <Input placeholder={data?.user?.userName}/>
+                        <Input name="userName" placeholder={data?.user?.userName}/>
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">

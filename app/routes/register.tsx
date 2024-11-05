@@ -1,10 +1,37 @@
-import {ActionFunctionArgs, json, redirect} from "@remix-run/node";
+import {ActionFunctionArgs, redirect} from "@remix-run/node";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
-export async function loader() {
-    return json({});
+export async function validateUsername(context: any, userName: string) {
+    if (!userName) {
+        return RequiredFieldResponse('Username', true);
+    }
+
+    const length = userName?.length;
+    if (length < 4 || length > 20) {
+        return EndpointResponse({ username: 'Username must be between four and twenty characters long.' }, ResponseType.BadRequest);
+    }
+
+    const user = await context.prisma.user.findUnique({
+        where: {
+            userName
+        },
+    });
+
+    if (user) {
+        return EndpointResponse({ username: 'Username is unavailable' }, ResponseType.Forbidden);
+    }
+}
+
+export async function validatePassword(passWord: string) {
+    if (!passWord) {
+        return RequiredFieldResponse('Password', true);
+    }
+
+    if (passWord.length < 8 || passWord.length > 50) {
+        return EndpointResponse({ password: 'Password must be between eighty and fifty characters' }, ResponseType.BadRequest);
+    }
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
@@ -13,30 +40,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
         const userName = String(formData.get("username"));
         const passWord = String(formData.get("password"));
 
-        if (!userName) {
-            return RequiredFieldResponse('Username', true);
+        const userNameValidation = await validateUsername(context, userName);
+        if (userNameValidation) {
+            return userNameValidation;
         }
 
-        if (userName.length < 4 || userName.length > 25) {
-            return EndpointResponse({ username: 'Username must be between four and twenty-five characters' }, ResponseType.BadRequest);
-        }
-
-        if (!passWord) {
-            return RequiredFieldResponse('Password', true);
-        }
-
-        if (passWord.length < 6 || passWord.length > 50) {
-            return EndpointResponse({ password: 'Password must be between six and fifty characters' }, ResponseType.BadRequest);
-        }
-
-        const search = await context.prisma.user.findUnique({
-            where: {
-                userName
-            },
-        });
-
-        if (search) {
-            return EndpointResponse({ username: 'Username is unavailable' }, ResponseType.Forbidden);
+        const passWordValidation = await validatePassword(passWord);
+        if (passWordValidation) {
+            return passWordValidation;
         }
 
         const session = await context.session.getSession();
