@@ -30,7 +30,8 @@ async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchP
     const response = await fetch('/posts/public?' + params);
     const json = await response.json();
 
-    setHasMoreData(json?.posts?.length === limit);
+    // setHasMoreData(json?.posts?.length === limit);
+    setHasMoreData(false);
 
     if (doUpdate && json?.posts?.length) {
         updateData(json.posts);
