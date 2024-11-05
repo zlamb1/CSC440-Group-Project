@@ -9,15 +9,17 @@ import {Link} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
 import ReplyView from "@components/post/ReplyView";
-import {PostWithUser, UserWithLoggedIn} from "@/utils/types";
+import {UserWithLoggedIn} from "@/utils/types";
 import UserHoverCard from "@components/hover/UserHoverCard";
 import LikePanel from "@components/post/LikePanel";
 import ReplyEditor from "@components/post/ReplyEditor";
 import {formatPastDate} from "@/utils/time";
+import {usePostStore} from "@/utils/usePostStore";
+import {Card} from "@ui/card";
 
-function Post({className, post, viewer, depth = 1, autoReply = true}: {
+function Post({className, id, viewer, depth = 1, autoReply = true}: {
     className?: string,
-    post: PostWithUser,
+    id: string,
     viewer: UserWithLoggedIn,
     depth?: number,
     autoReply?: boolean
@@ -26,6 +28,8 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
     const [isReplying, setIsReplying] = useState<boolean>(viewer?.loggedIn && autoReply);
     const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
     const [formattedTime, setFormattedTime] = useState<string>('');
+
+    const post = usePostStore((state: any) => state[id]);
 
     useEffect(() => {
         const date = new Date(post?.postedAt);
@@ -37,8 +41,16 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
         }
     });
 
+    if (!post) {
+        return (
+            <Card className="my-3 p-3">
+                <span>Post not found</span>
+            </Card>
+        )
+    }
+
     return (
-        <div className={"flex gap-3 " + className} key={post.id}>
+        <div className={"flex gap-3 " + className}>
             <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">

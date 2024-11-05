@@ -3,10 +3,11 @@ import {useFetcher} from "@remix-run/react";
 import {Skeleton} from "@ui/skeleton";
 import {AnimatePresence, motion} from "framer-motion";
 import Post from "@components/post/Post";
-import {PostWithRelations, PostWithUser, UserWithLoggedIn} from "@/utils/types";
+import {PostWithRelations, PostWithReplies, PostWithUser, UserWithLoggedIn} from "@/utils/types";
+import {usePostStore} from "@/utils/usePostStore";
 
 export interface ReplyViewProps {
-    post: PostWithRelations | PostWithUser;
+    post: PostWithReplies;
     user: UserWithLoggedIn;
     depth: number;
     showReplies?: boolean;
@@ -14,49 +15,11 @@ export interface ReplyViewProps {
 }
 
 export default function ReplyView({ post, user, depth, showReplies = true, onLoad = () => {} }: ReplyViewProps) {
-    const hasReplies = 'replies' in post;
-
-    const [ replies, setReplies ] = useState<PostWithUser[]>(hasReplies ? post.replies : []);
-    const fetcher = useFetcher();
-
-    useEffect(() => {
-        if (fetcher.state === 'idle' && !hasReplies) {
-            setReplies(fetcher.data?.replies);
-            onLoad(replies);
-        }
-    }, [fetcher]);
-
-    useEffect(() => {
-        if (!hasReplies) {
-            getReplies();
-        }
-    }, [showReplies]);
-
-    useEffect(() => {
-        setReplies(hasReplies ? post.replies : []);
-    }, [post]);
-
-    if (post.replyCount === 0) {
+    if (!post?.replies || !post?.replies?.length) {
         return null;
     }
 
-    function getReplies() {
-        if (showReplies) {
-            fetcher.submit(null, {
-                action: `/posts/${post.id}/replies`,
-            });
-        }
-    }
-
-    function renderSkeletons() {
-        const skeletons = [];
-        for (let i = 0; i < (post.replyCount ?? 0) - (replies?.length ?? 0); i++) {
-            skeletons.push(
-                <Skeleton key={i} className="w-full h-[60px]" />
-            )
-        }
-        return skeletons;
-    }
+    const replies = post.replies;
 
     return (
         <AnimatePresence initial={false}>
@@ -65,16 +28,10 @@ export default function ReplyView({ post, user, depth, showReplies = true, onLoa
                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-2 overflow-hidden">
                         {
                             replies?.map(reply =>
-                                <Post key={reply.id} post={reply} viewer={user} depth={depth - 1} autoReply={false} />
+                                <Post key={reply} id={reply} viewer={user} depth={depth - 1} autoReply={false} />
                             )
                         }
-                        {
-                            fetcher.state !== 'idle' || replies?.length !== post?.replyCount ? renderSkeletons() : null
-                        }
                     </motion.div> : null
-            }
-            {
-                fetcher.state !== 'idle' ? null : null
             }
         </AnimatePresence>
     );

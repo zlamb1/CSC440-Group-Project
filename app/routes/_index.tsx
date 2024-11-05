@@ -13,29 +13,12 @@ import PostScroller from "@components/post/PostScroller";
 import {PostWithRelations} from "@/utils/types";
 import {FetchParams, useInfiniteScroll} from "@components/InfiniteScroll";
 import usePostMutations from "@/utils/usePostMutations";
+import {usePostStore} from "@/utils/usePostStore";
+import {usePublicPostsStore} from "@/utils/usePublicPostsStore";
+import {useShallow} from "zustand/react/shallow";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     return EndpointResponse({ user: context.user });
-}
-
-async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
-    const cursor = data && data.length ?
-        data[data.length - 1].postedAt : new Date();
-    const limit = 1;
-
-    const params = new URLSearchParams();
-    params.set('cursor', cursor.toString());
-    params.set('limit', limit.toString());
-
-    const response = await fetch('/posts/public?' + params);
-    const json = await response.json();
-
-    // setHasMoreData(json?.posts?.length === limit);
-    setHasMoreData(false);
-
-    if (doUpdate && json?.posts?.length) {
-        updateData(json.posts);
-    }
 }
 
 export default function Index() {
@@ -43,6 +26,30 @@ export default function Index() {
 
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
+
+    const state = usePostStore();
+    const { add, _posts } = usePublicPostsStore(useShallow((state: any) => ({add: state.add, _posts: state.posts})));
+
+    async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
+        const cursor = data && data.length ?
+            data[data.length - 1].postedAt : new Date();
+        const limit = 1;
+
+        const params = new URLSearchParams();
+        params.set('cursor', cursor.toString());
+        params.set('limit', limit.toString());
+
+        const response = await fetch('/posts/public?' + params);
+        const json = await response.json();
+
+        // setHasMoreData(json?.posts?.length === limit);
+        setHasMoreData(false);
+
+        if (doUpdate && json?.posts?.length) {
+            state.add(json.posts);
+            add(json.posts);
+        }
+    }
 
     function sortFn(a: PostWithRelations, b: PostWithRelations) {
         if (a.postedAt > b.postedAt) {
@@ -127,7 +134,7 @@ export default function Index() {
                 </Form>
                 <hr/>
             </Fade>
-            <PostScroller posts={posts} user={data?.user} onLoad={onLoad} isLoading={isLoading} />
+            <PostScroller posts={_posts} user={data?.user} onLoad={onLoad} isLoading={isLoading} />
         </div>
     )
 }
