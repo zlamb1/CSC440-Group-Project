@@ -1,6 +1,6 @@
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     MessageCircle,
     Pencil,
@@ -20,6 +20,8 @@ function isPlural(unit: number) {
 }
 
 function formatPastDate(date: string | Date, suffix?: string) {
+    if (!date) return '';
+
     if (typeof date === 'string') {
         date = new Date(date);
     }
@@ -65,6 +67,17 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
     const [isEditing, setEditing] = useState<boolean>(false);
     const [isReplying, setIsReplying] = useState<boolean>(viewer?.loggedIn && autoReply);
     const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
+    const [formattedTime, setFormattedTime] = useState<string>('');
+
+    useEffect(() => {
+        const date = new Date(post?.postedAt);
+        const diff = new Date().getTime() - date.getTime();
+
+        if ((post?.postedAt && !formattedTime) || diff < 1000 * 60) {
+            const id = setInterval(() => setFormattedTime(formatPastDate(post?.postedAt)));
+            return () => clearInterval(id);
+        }
+    });
 
     return (
         <div className={"flex gap-3 " + className} key={post.id}>
@@ -76,7 +89,7 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
                                 <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName}/>
                                 <div className="flex items-center gap-1">
                                     {post.user?.userName}
-                                    <span className="text-sm text-gray-400">• {formatPastDate(post.postedAt)}</span>
+                                    <span className="text-sm text-gray-400">• {formattedTime}</span>
                                 </div>
                             </Link>
                         </UserHoverCard>
