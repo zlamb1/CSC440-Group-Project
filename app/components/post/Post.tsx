@@ -63,7 +63,7 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
     autoReply?: boolean
 }) {
     const [isEditing, setEditing] = useState<boolean>(false);
-    const [isReplying, setIsReplying] = useState<boolean>(viewer.loggedIn && autoReply);
+    const [isReplying, setIsReplying] = useState<boolean>(viewer?.loggedIn && autoReply);
     const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
 
     return (
@@ -97,7 +97,7 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
                                         className="h-[25px] flex gap-1 items-center rounded-full"
                                         size="icon"
                                         variant={isReplying ? undefined : 'ghost'}
-                                        disabled={!viewer.loggedIn}
+                                        disabled={!viewer?.loggedIn}
                                         onClick={() => setIsReplying(!isReplying)}>
                                     <Pencil size={16}/>
                                 </Button>

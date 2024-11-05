@@ -41,7 +41,7 @@ export default function LikePanel({ className, post, viewer }: { className?: str
                         variant="ghost"
                         size="icon"
                         type="submit"
-                        disabled={!viewer.loggedIn}>
+                        disabled={!viewer?.loggedIn}>
                     <input className="hidden" name="liked"
                            value={isLiked === true ? 'null' : 'true'}
                            readOnly/>
@@ -55,7 +55,7 @@ export default function LikePanel({ className, post, viewer }: { className?: str
                         variant="ghost"
                         size="icon"
                         type="submit"
-                        disabled={!viewer.loggedIn}>
+                        disabled={!viewer?.loggedIn}>
                     <input className="hidden" name="liked"
                            value={isLiked === false ? 'null' : 'false'}
                            readOnly/>

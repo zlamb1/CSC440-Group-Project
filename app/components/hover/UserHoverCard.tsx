@@ -54,7 +54,7 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                                     </div> : <span className="font-bold">@{user.userName}</span>
                             }
                         </Link>
-                        <Fade show={viewer.loggedIn && !isSelf}>
+                        <Fade show={viewer?.loggedIn && !isSelf}>
                             <FollowButton user={user} isFollowing={isFollowing} />
                         </Fade>
                     </div>
