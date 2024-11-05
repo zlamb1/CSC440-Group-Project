@@ -17,6 +17,7 @@ import {colorSchemeStorageName, cookiePreferenceStorageName, defaultColorScheme}
 import FollowingPanel from "@components/FollowingPanel";
 import CookieToast from "@components/toast/CookieToast";
 import * as Toast from "@radix-ui/react-toast";
+import {StoreInvalidator} from "@/StoreInvalidator";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: twStylesheet },
@@ -49,38 +50,39 @@ export function Layout({children}: {children: React.ReactNode}) {
     
     return (
         <html lang="en" suppressHydrationWarning>
-        <Toast.Provider>
-            <head>
-                <ThemeScript/>
-                <link
-                    rel="icon"
-                    href="data:image/x-icon;base64,AA"
-                />
-                <meta charSet="utf-8"/>
-                <meta
-                    name="viewport"
-                    content="width=device-width, initial-scale=1"
-                />
-                <Meta/>
-                <Links/>
-                <title>Stories</title>
-            </head>
-            <body>
-                <CookieToast initial={data?.cookiePreference}/>
-                <div className="flex flex-col bg-background min-h-[100vh] p-3">
-                    <NavBar {...data} className="w-100 text-lg h-fit sm:px-16 md:px-32 lg:px-64 xl:px-96"/>
-                    <div className="flex-grow flex gap-3 w-full">
-                        <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user}/>
-                        <div className="border-0 bg-background flex-grow flex justify-center">
-                            {children}
+            <StoreInvalidator />
+            <Toast.Provider>
+                <head>
+                    <ThemeScript/>
+                    <link
+                        rel="icon"
+                        href="data:image/x-icon;base64,AA"
+                    />
+                    <meta charSet="utf-8"/>
+                    <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1"
+                    />
+                    <Meta/>
+                    <Links/>
+                    <title>Stories</title>
+                </head>
+                <body>
+                    <CookieToast initial={data?.cookiePreference}/>
+                    <div className="flex flex-col bg-background min-h-[100vh] p-3">
+                        <NavBar {...data} className="w-100 text-lg h-fit sm:px-16 md:px-32 lg:px-64 xl:px-96"/>
+                        <div className="flex-grow flex gap-3 w-full">
+                            <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user}/>
+                            <div className="border-0 bg-background flex-grow flex justify-center">
+                                {children}
+                            </div>
+                            <div className="lg:w-[15%] xl:w-[20%] flex-shrink-0"></div>
                         </div>
-                        <div className="lg:w-[15%] xl:w-[20%] flex-shrink-0"></div>
                     </div>
-                </div>
-                <Scripts />
-                <Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-[10px] m-1" style={{ zIndex: 2147483647 }} />
-            </body>
-        </Toast.Provider>
+                    <Scripts />
+                    <Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-[10px] m-1" style={{ zIndex: 2147483647 }} />
+                </body>
+            </Toast.Provider>
         </html>
     )
 }

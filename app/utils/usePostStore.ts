@@ -9,6 +9,7 @@ export const usePostStore = create((set, get: any) => ({
         post.replies = [];
         return set((state: any) => ({...state, [post.id]: post}));
     },
+
     reply(parentId: string, replyId: string) {
         return set((state: any) => {
             const parent = {...state[parentId]};
@@ -25,11 +26,15 @@ export const usePostStore = create((set, get: any) => ({
             return state;
         });
     },
-    add(posts: (PostWithRelations | PostWithReplies)[]) {
+
+    add(posts: (string | PostWithRelations | PostWithReplies)[]) {
         return set((state: any) => {
             if (posts && posts?.length) {
                 const _state = {...state};
                 for (const post of posts) {
+                    if (typeof post === 'string')
+                        continue;
+
                     if (post?.id) {
                         // zero initialize aggregate fields
                         post.liked = post.liked ?? null;
@@ -38,8 +43,7 @@ export const usePostStore = create((set, get: any) => ({
 
                         // add replies to state
                         if (post?.replies && post?.replies?.length) {
-                            const replies = post.replies.filter(post => typeof post !== 'string');
-                            if (replies && replies.length) get().add(replies);
+                            get().add(post.replies);
                             // @ts-ignore
                             post.replies = post.replies.map(post => post?.id || post);
                         } else {
@@ -64,5 +68,9 @@ export const usePostStore = create((set, get: any) => ({
 
             return state;
         });
+    },
+
+    reset() {
+        return set({});
     }
 }));
