@@ -3,9 +3,7 @@ import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 
-export type FetchParams<S> = { 
-    data: S[], 
-    updateData: (newData: S[]) => void,
+export type FetchParams<S> = {
     isLoading: boolean,
     setIsLoading: Dispatch<SetStateAction<boolean>>,
     hasMoreData: boolean,
@@ -15,27 +13,21 @@ export type FetchParams<S> = {
 
 export type UseInfiniteScrollProps<S> = {
     fetchData: (params: FetchParams<S>) => Promise<void>,
-    cmpFn?: (a: S, b: S) => boolean,
-    sortFn?: (a: S, b: S) => number,
 }
 
 export type InfiniteScrollReturn<S> = [
-    S[],
-    Dispatch<SetStateAction<S[]>>,
-    (newData: S[]) => void,
     boolean,
     () => void,
 ];
 
-export function useInfiniteScroll<S>({ fetchData, sortFn }: UseInfiniteScrollProps<S>): InfiniteScrollReturn<S> {
-    const [ data, setData ] = useState<S[]>([]);
+export function useInfiniteScroll<S>({ fetchData }: UseInfiniteScrollProps<S>): InfiniteScrollReturn<S> {
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
 
     useEffect(() => {
         if (isLoading) {
             let doUpdate = true;
-            fetchData({ data, updateData, isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
+            fetchData({ isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
                 .then(() => {
                     if (doUpdate) {
                         setIsLoading(false);
@@ -53,19 +45,7 @@ export function useInfiniteScroll<S>({ fetchData, sortFn }: UseInfiniteScrollPro
         }
     }
 
-    function updateData(newData: S[]): void {
-        setData(prev => {
-            if (!prev || !prev.length) {
-                return newData;
-            }
-
-            const newArray = [...new Set([...prev, ...newData])];
-            if (sortFn) return newArray.sort(sortFn);
-            return newArray;
-        });
-    }
-
-    return [ data, setData, updateData, isLoading, loadData ];
+    return [ isLoading, loadData ];
 }
 
 export interface MaxHeightProps {

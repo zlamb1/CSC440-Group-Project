@@ -6,7 +6,8 @@ import {Post} from "@prisma/client";
 export const emitter = mitt();
 
 export enum PostEvent {
-    DELETE = 'post-delete'
+    CREATE = 'post-create',
+    DELETE = 'post-delete',
 }
 
 export const usePostStore = create((set, get: any) => ({
@@ -15,6 +16,7 @@ export const usePostStore = create((set, get: any) => ({
         post.likeCount = 0;
         post.replyCount = 0;
         post.replies = [];
+        emitter.emit(PostEvent.CREATE, post);
         return set((state: any) => ({...state, [post.id]: post}));
     },
 
