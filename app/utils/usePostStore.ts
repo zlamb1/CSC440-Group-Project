@@ -1,5 +1,13 @@
 import {create} from "zustand/react";
+import mitt from 'mitt';
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
+import {Post} from "@prisma/client";
+
+export const emitter = mitt();
+
+export enum PostEvent {
+    DELETE = 'post-delete'
+}
 
 export const usePostStore = create((set, get: any) => ({
     create(post: PostWithRelations) {
@@ -67,6 +75,41 @@ export const usePostStore = create((set, get: any) => ({
             }
 
             return state;
+        });
+    },
+
+    delete(post: string | Post | PostWithReplies | PostWithRelations) {
+        return set((state: any) => {
+            const isString = typeof post === 'string';
+            const id = isString ? post : post.id;
+
+            if (!id) {
+                return state;
+            }
+
+            const _state = { [id]: undefined };
+
+            // remove from parent replies
+            if (!isString && post.replyTo) {
+                const parent = {...state[post.replyTo]};
+                if (parent) {
+                    const indexOf = parent.replies?.indexOf?.(id);
+                    if (indexOf > -1) {
+                        parent.replies.splice(indexOf, 1);
+                        _state[post.replyTo] = parent;
+                    }
+                }
+            }
+
+            // delete replies
+            if (!isString && 'replies' in post && post.replies.length) {
+                for (const reply of post.replies) {
+                    get().delete(reply);
+                }
+            }
+
+            emitter.emit(PostEvent.DELETE, id);
+            return {...state, ..._state};
         });
     },
 
