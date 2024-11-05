@@ -21,6 +21,7 @@ export type UseInfiniteScrollProps<S> = {
 
 export type InfiniteScrollReturn<S> = [
     S[],
+    Dispatch<SetStateAction<S[]>>,
     (newData: S[]) => void,
     boolean,
     () => void,
@@ -78,7 +79,7 @@ export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false, sortFn }:
         });
     }
 
-    return [ data, updateData, isLoading, loadData ];
+    return [ data, setData, updateData, isLoading, loadData ];
 }
 
 export interface MaxHeightProps {

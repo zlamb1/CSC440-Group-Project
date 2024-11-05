@@ -26,14 +26,14 @@ export async function action({ context, request} : ActionFunctionArgs) {
             return EndpointResponse(msg, 400);
         }
 
-        await context.prisma.post.create({
+        const post = await context.prisma.post.create({
             data: {
                 userId: context.user.id,
                 content: sanitizedContent,
             }
         });
 
-        return ExplicitCreateResponse('Post');
+        return ExplicitCreateResponse('Post', { post });
     } catch (err) {
         return UnknownErrorResponse(err);
     }

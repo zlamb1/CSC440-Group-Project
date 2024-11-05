@@ -12,6 +12,7 @@ import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
 import {PostWithRelations} from "@/utils/types";
 import {FetchParams, useInfiniteScroll} from "@components/InfiniteScroll";
+import usePostMutations from "@/utils/usePostMutations";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     return EndpointResponse({ user: context.user });
@@ -20,7 +21,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
     const cursor = data && data.length ?
         data[data.length - 1].postedAt : new Date();
-    const limit = 10;
+    const limit = 3;
 
     const params = new URLSearchParams();
     params.set('cursor', cursor.toString());
@@ -42,14 +43,32 @@ export default function Index() {
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
 
-    const [ posts, setPosts, isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({
-        fetchData: fetchPosts, cmpFn: (a: PostWithRelations, b: PostWithRelations) => a.id == b.id
+    function sortFn(a: PostWithRelations, b: PostWithRelations) {
+        if (a.postedAt > b.postedAt) {
+            return -1;
+        } else if (a.postedAt < b.postedAt) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    const [ posts, setPosts, updatePosts, isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({
+        fetchData: fetchPosts,
+        cmpFn: (a: PostWithRelations, b: PostWithRelations) => a.id == b.id,
+        sortFn
     });
+
+    const {createPost} = usePostMutations({ setPosts, updatePosts, });
 
     const createFetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
 
     useEffect(() => {
+        if (createFetcher.state === 'idle' && createFetcher.data?.post) {
+            createPost(createFetcher.data.post);
+        }
+
         if (ref?.current && createFetcher.state === 'idle') {
             ref.current.clearEditor();
         }

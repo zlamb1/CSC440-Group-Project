@@ -1,27 +1,44 @@
 import {useFetcher} from "@remix-run/react";
 import {useIsPresent} from "framer-motion";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
 import {Edit2, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Post} from "@prisma/client";
 import {UserWithLoggedIn} from "@/utils/types";
+import usePostMutations from "@/utils/usePostMutations";
 
 export default function ContextMenu({ post, user, onEdit }: { post: Post, user: UserWithLoggedIn, onEdit?: () => void }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
+    const [ isSubmitting, setIsSubmitting ] = useState(false);
+    const { deletePost } = usePostMutations({});
+
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
+
+    useEffect(() => {
+        if (fetcher.state === 'idle' && isSubmitting) {
+            deletePost(post.id);
+        }
+
+        if (fetcher.state === 'submitting') {
+            setIsSubmitting(true);
+        }
+    }, [fetcher]);
+
     if (post.userId !== user?.id) {
         return null;
     }
+
     function onClickEdit() {
         setOpen(false);
         if (onEdit) {
             onEdit();
         }
     }
+
     return (
         <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)}  modal={false}>
             <DropdownMenuTrigger className={post.userId !== user?.id ? 'hidden' : ''} asChild>
