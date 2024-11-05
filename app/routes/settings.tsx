@@ -27,6 +27,8 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 import UserDeletionDialog from "@components/user/UserDeletionDialog";
+import {validateUsername} from "@/routes/register";
+import {ErrorContext} from "@components/error/ErrorContext";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -42,6 +44,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
             request,
             uploadHandler
         );
+
+        const userName = String(formData.get('userName'));
+        if (userName && userName !== context.user.userName) {
+            const userNameValidation = await validateUsername(context, userName);
+            if (userNameValidation) {
+                return userNameValidation;
+            }
+        }
 
         const isUpdatingAvatar = formData.get("is-updating-avatar") === 'true';
         const file = formData.get("avatar");
@@ -81,33 +91,26 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
         const oldAvatar = context.user.avatarPath;
 
-        if (isUpdatingAvatar) {
-            const user = await context.prisma.user.update({
-                data: {
-                    avatarPath: avatar,
-                },
-                where: {
-                    id: context.user.id,
-                },
-            });
-
-            if (!user) {
-                return ExplicitResourceNotFoundResponse('User');
-            }
-        }
-
-        if (isProduction) {
+        if (isUpdatingAvatar && isProduction) {
             removeAvatar(oldAvatar);
         }
 
-        await context.prisma.user.update({
+        const user = await context.prisma.user.update({
             data: {
-                displayName, bio, visibility,
+                userName: userName || undefined,
+                avatarPath: isUpdatingAvatar ? avatar : undefined,
+                displayName,
+                bio,
+                visibility,
             },
             where: {
                 id: context.user.id,
             },
         });
+
+        if (!user) {
+            return ExplicitResourceNotFoundResponse('User');
+        }
 
         return ExplicitUpdateResponse('User');
     } catch (err) {
@@ -195,7 +198,8 @@ export default function SettingsRoute() {
                     </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
                         Username
-                        <Input name="userName" placeholder={data?.user?.userName}/>
+                        <Input name="userName" placeholder={data?.user?.userName} />
+                        <ErrorContext msg={fetcher?.data?.username} />
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">

@@ -1,11 +1,10 @@
 import {ActionFunctionArgs, redirect} from "@remix-run/node";
-import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
 export async function validateUsername(context: any, userName: string) {
     if (!userName) {
-        return RequiredFieldResponse('Username', true);
+        return EndpointResponse({ username: 'Username is required.' }, ResponseType.BadRequest);
     }
 
     const length = userName?.length;
@@ -26,7 +25,7 @@ export async function validateUsername(context: any, userName: string) {
 
 export async function validatePassword(passWord: string) {
     if (!passWord) {
-        return RequiredFieldResponse('Password', true);
+        return EndpointResponse({ password: 'Password is required.' }, ResponseType.BadRequest);
     }
 
     if (passWord.length < 8 || passWord.length > 50) {
