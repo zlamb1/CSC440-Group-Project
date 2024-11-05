@@ -6,6 +6,8 @@ import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import EndpointResponse from "@/api/EndpointResponse";
 import {ExplicitCreateResponse} from "@/api/CreateResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {getPostByID} from '@prisma/client/sql';
 
 export async function action({ context, request} : ActionFunctionArgs) {
     try {
@@ -32,6 +34,16 @@ export async function action({ context, request} : ActionFunctionArgs) {
                 content: sanitizedContent,
             }
         });
+
+        if (!post) {
+            return ExplicitResourceNotFoundResponse('Post');
+        }
+
+        // manually set SQL-aggregated fields
+        post.replyCount = 0;
+        post.likeCount = 0;
+        post.liked = null;
+        post.user = context.user;
 
         return ExplicitCreateResponse('Post', { post });
     } catch (err) {

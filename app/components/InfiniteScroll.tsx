@@ -27,7 +27,7 @@ export type InfiniteScrollReturn<S> = [
     () => void,
 ];
 
-export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false, sortFn }: UseInfiniteScrollProps<S>): InfiniteScrollReturn<S> {
+export function useInfiniteScroll<S>({ fetchData, sortFn }: UseInfiniteScrollProps<S>): InfiniteScrollReturn<S> {
     const [ data, setData ] = useState<S[]>([]);
     const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
@@ -59,21 +59,7 @@ export function useInfiniteScroll<S>({ fetchData, cmpFn = () => false, sortFn }:
                 return newData;
             }
 
-            const deduped = [];
-            // TODO: currently O(n^2), potentially consider alternatives?
-            for (const element of newData) {
-                for (let i = 0; i < prev.length; i++) {
-                    const d = prev[i];
-                    if (cmpFn(d, element)) {
-                        prev[i] = element;
-                        break;
-                    } else if (i === prev.length - 1) {
-                        deduped.push(element);
-                    }
-                }
-            }
-
-            const newArray = [...prev, ...deduped];
+            const newArray = [...new Set([...prev, ...newData])];
             if (sortFn) return newArray.sort(sortFn);
             return newArray;
         });

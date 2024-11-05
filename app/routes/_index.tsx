@@ -21,7 +21,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 async function fetchPosts({ data, updateData, doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
     const cursor = data && data.length ?
         data[data.length - 1].postedAt : new Date();
-    const limit = 3;
+    const limit = 1;
 
     const params = new URLSearchParams();
     params.set('cursor', cursor.toString());
@@ -54,9 +54,7 @@ export default function Index() {
     }
 
     const [ posts, setPosts, updatePosts, isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({
-        fetchData: fetchPosts,
-        cmpFn: (a: PostWithRelations, b: PostWithRelations) => a.id == b.id,
-        sortFn
+        fetchData: fetchPosts, sortFn
     });
 
     const {createPost} = usePostMutations({ setPosts, updatePosts, });
