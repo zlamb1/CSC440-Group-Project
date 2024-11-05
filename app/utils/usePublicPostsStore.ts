@@ -4,27 +4,33 @@ import {Post} from "@prisma/client";
 import {emitter, PostEvent, usePostStore} from "@/utils/usePostStore";
 import {FetchParams} from "@components/InfiniteScroll";
 
-function cmp(a: Date, b: Date) {
-    if (a > b) {
-        return 1;
-    } else if (a < b) {
+type PostWithDate = {
+    id: string;
+    date: Date;
+}
+
+function cmp(a: PostWithDate, b: PostWithDate) {
+    if (a.date > b.date) {
         return -1;
+    } else if (a.date < b.date) {
+        return 1;
     }
 
     return 0;
 }
 
 const initialState = {
+    postsWithDate: [],
     posts: [],
-    oldestDate: null
+    limit: 1,
 };
 
 export const usePublicPostsStore = create((set, get: any) => ({
     ...initialState,
 
-    async fetch({ doUpdate, setHasMoreData }: FetchParams<PostWithRelations>) {
-        const cursor = get().oldestDate ?? new Date();
-        const limit = 1;
+    async fetch({ setHasMoreData }: FetchParams<PostWithRelations>) {
+        const cursor = get().postsWithDate?.[get().postsWithDate?.length - 1]?.date ?? new Date();
+        const limit = get().limit ?? 10;
 
         const params = new URLSearchParams();
         params.set('cursor', cursor.toString());
@@ -34,14 +40,15 @@ export const usePublicPostsStore = create((set, get: any) => ({
         const json = await response.json();
         const posts = json?.posts;
 
-        // setHasMoreData(json?.posts?.length === limit);
-        setHasMoreData(false);
+        setHasMoreData(posts?.length === limit);
 
         const postStore: any = usePostStore.getState();
-        if (doUpdate && posts?.length && postStore) {
-            postStore?.add?.(posts);
-            get()?.add?.(posts);
+        if (posts?.length) {
+            postStore.add(posts);
+            get().add(posts);
         }
+
+        return set((state: any) => state);
     },
 
     add(posts: (Post | PostWithRelations | PostWithReplies)[]) {
@@ -50,26 +57,30 @@ export const usePublicPostsStore = create((set, get: any) => ({
                 return state;
             }
 
-            let _posts = [...state.posts];
+            let postsWithDate = [...state.postsWithDate];
 
             for (const post of posts) {
                 // TODO: implement sorted array
-                if (!post?.id) {
-                    console.error('[usePublicPostsStore] attempted to add post with null ID');
+                if (!post?.id || !post?.postedAt) {
+                    console.error('[usePublicPostsStore] attempted to add post with null ID or postedAt');
                     continue;
                 }
 
-                _posts.push(post.id);
+                postsWithDate.push({id: post.id, date: post.postedAt});
             }
 
-            _posts = [...new Set(_posts)].sort(cmp);
+            postsWithDate = [...new Set(postsWithDate)].sort(cmp);
 
-            return {...state, posts: _posts, oldestDate: _posts.length ? _posts[_posts.length - 1] : null};
+            return {...state, postsWithDate, posts: postsWithDate.map(post => post.id)};
         });
     },
 
-    delete(post: string) {
-        return set((state: any) => ({...state, posts: state.posts.filter((_post: string) => _post !== post) }))
+    delete(id: string) {
+        return set((state: any) => ({
+            ...state,
+            postsWithDate: state.postsWithDate.filter((postWithDate: PostWithDate) => postWithDate.id !== id),
+            posts: state.posts.filter((post: string) => post !== id)
+        }));
     },
 
     reset() {
