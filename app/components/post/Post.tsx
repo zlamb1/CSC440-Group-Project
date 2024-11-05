@@ -13,49 +13,7 @@ import {PostWithUser, UserWithLoggedIn} from "@/utils/types";
 import UserHoverCard from "@components/hover/UserHoverCard";
 import LikePanel from "@components/post/LikePanel";
 import ReplyEditor from "@components/post/ReplyEditor";
-
-function isPlural(unit: number) {
-    if (unit !== 1) return 's';
-    return '';
-}
-
-function formatPastDate(date: string | Date, suffix?: string) {
-    if (!date) return '';
-
-    if (typeof date === 'string') {
-        date = new Date(date);
-    }
-
-    if (!suffix) {
-        suffix = 'ago';
-    }
-
-    const now = new Date();
-    const epochDiff = now.getTime() - date.getTime();
-
-    const msSecond = 1000;
-    const msMinute = msSecond * 60;
-    const msHour = msMinute * 60;
-    const msDay = msHour * 24;
-
-    if (epochDiff < msMinute) {
-        const seconds = Math.floor(epochDiff / msSecond);
-        return `${seconds} second${isPlural(seconds)} ${suffix}`;
-    }
-
-    if (epochDiff < msHour) {
-        const minutes = Math.floor(epochDiff / msMinute);
-        return `${minutes} minute${isPlural(minutes)} ${suffix}`;
-    }
-
-    if (epochDiff < msDay) {
-        const hours = Math.floor(epochDiff / msHour);
-        return `${hours} hour${isPlural(hours)} ${suffix}`;
-    }
-
-    const days = Math.floor(epochDiff / msDay);
-    return `${days} day${isPlural(days)} ${suffix}`;
-}
+import {formatPastDate} from "@/utils/time";
 
 function Post({className, post, viewer, depth = 1, autoReply = true}: {
     className?: string,
