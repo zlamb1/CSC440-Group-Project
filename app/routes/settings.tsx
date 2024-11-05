@@ -31,7 +31,7 @@ import UserDeletionDialog from "@components/user/UserDeletionDialog";
 const isProduction = process.env.NODE_ENV === "production";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    return json(context.user);
+    return json({ user: context.user });
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
@@ -122,13 +122,13 @@ function formatKey(key: string) {
 export default function SettingsRoute() {
     const data = useLoaderData<typeof loader>();
     const fetcher = useFetcher();
-    const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.avatarPath);
+    const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.user?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (fetcher.state === 'idle') {
-            setUserAvatar(data?.avatarPath);
+            setUserAvatar(data?.user?.avatarPath);
             setIsAvatarUpdated(false)
         }
     }, [fetcher]);
@@ -154,12 +154,12 @@ export default function SettingsRoute() {
 
     function clearAvatar() {
         if (fileInputRef.current) {
-            if (userAvatar === data?.avatarPath) {
+            if (userAvatar === data?.user?.avatarPath) {
                 setUserAvatar(undefined);
                 setIsAvatarUpdated(true);
                 fileInputRef.current.value = '';
             } else {
-                setUserAvatar(data?.avatarPath);
+                setUserAvatar(data?.user?.avatarPath);
                 setIsAvatarUpdated(false);
             }
         }
@@ -174,7 +174,7 @@ export default function SettingsRoute() {
                     <HoverCard>
                         <HoverCardTrigger asChild>
                             <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon" type="button" onClick={ onClick }>
-                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.userName} />
+                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.user?.userName} />
                                 <motion.div animate={{ opacity: 0 }}
                                             whileHover={{ opacity: 1 }}
                                             className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
@@ -185,7 +185,7 @@ export default function SettingsRoute() {
                             </Button>
                         </HoverCardTrigger>
                         <HoverCardContent className="rounded-full border-0 w-fit h-fit p-0">
-                            <Fade initial={false} show={userAvatar || data?.avatarPath}>
+                            <Fade initial={false} show={userAvatar || data?.user?.avatarPath}>
                                 <Button className="w-[25px] h-[25px] rounded-full" size="icon" variant="destructive" type="button"
                                         onClick={clearAvatar}>
                                     <X size={16} />
@@ -195,20 +195,20 @@ export default function SettingsRoute() {
                     </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
                         Username
-                        <Input placeholder={data?.userName}/>
+                        <Input placeholder={data?.user?.userName}/>
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">
                     Display Name
-                    <Input defaultValue={data?.displayName} name="displayName" />
+                    <Input defaultValue={data?.user?.displayName} name="displayName" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Bio
-                    <Textarea defaultValue={data?.bio} name="bio" />
+                    <Textarea defaultValue={data?.user?.bio} name="bio" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Profile Visibility
-                    <Select name="visibility" defaultValue={data?.visibility}>
+                    <Select name="visibility" defaultValue={data?.user?.visibility}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Public" />
                         </SelectTrigger>
@@ -223,7 +223,7 @@ export default function SettingsRoute() {
                     <Button variant="edit" type="submit">
                         Update Settings
                     </Button>
-                    <UserDeletionDialog user={data}>
+                    <UserDeletionDialog user={data?.user}>
                         <Button containerClass="w-fit" variant="destructive">
                             Delete Account
                         </Button>
