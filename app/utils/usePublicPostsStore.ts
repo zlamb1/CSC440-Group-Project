@@ -1,7 +1,6 @@
 import {create} from "zustand/react";
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
 import {Post} from "@prisma/client";
-import {usePostStore} from "@/utils/usePostStore";
 
 function cmp(a: Date, b: Date) {
     if (a > b) {
