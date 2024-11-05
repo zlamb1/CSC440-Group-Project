@@ -9,24 +9,47 @@ export default function usePostMutations({ setPosts, updatePosts }: { setPosts?:
 
     async function onMutatePosts(value: any, id: number) {
         setID(id + 1);
-        if (value?.type === 'create' && value?.post && updatePosts) {
-            updatePosts([ value.post ]);
-        }
-        if (value?.type === 'reply' && value?.post) {
-
-
-        }
-        if (value?.type === 'delete' && value?.id && setPosts) {
-            setPosts(prev => {
-                const indexOf = prev?.findIndex(post => post.id === value.id);
-                if (indexOf > -1) {
-                    const newArray = [...prev];
-                    newArray.splice(indexOf, 1);
-                    return newArray;
+        switch (value?.type) {
+            case 'create':
+                if (value?.post && updatePosts) {
+                    updatePosts([ value.post ]);
                 }
+                break;
+            case 'edit':
+                if (value?.post && setPosts) {
+                    setPosts(prev => {
+                        const indexOf = prev?.findIndex(post => post.id === value.post.id);
+                        if (indexOf > -1) {
+                            const newArray = [...prev];
+                            newArray[indexOf] = value.post;
+                            return newArray;
+                        }
 
-                return prev;
-            });
+                        return prev;
+                    });
+                }
+                break;
+            case 'reply':
+                if (value?.post && setPosts) {
+                    setPosts(prev => {
+                        return prev;
+                    });
+                }
+                break;
+            case 'delete':
+                if (value?.id && setPosts) {
+                    setPosts(prev => {
+                        const indexOf = prev?.findIndex(post => post.id === value.id);
+                        if (indexOf > -1) {
+                            const newArray = [...prev];
+                            newArray.splice(indexOf, 1);
+                            return newArray;
+                        }
+
+                        return prev;
+                    });
+                }
+                break;
         }
     }
 
@@ -41,11 +64,23 @@ export default function usePostMutations({ setPosts, updatePosts }: { setPosts?:
         });
     }
 
+    function editPost(post: PostWithRelations) {
+        setStore(postStoreName, {
+            type: 'edit', post
+        });
+    }
+
+    function createReply(post: PostWithRelations) {
+        setStore(postStoreName, {
+            type: 'reply', post
+        });
+    }
+
     function deletePost(id: string) {
         setStore(postStoreName, {
             type: 'delete', id
         });
     }
 
-    return { createPost, deletePost };
+    return { createPost, editPost, createReply, deletePost };
 }

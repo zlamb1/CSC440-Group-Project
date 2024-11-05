@@ -5,10 +5,22 @@ import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@ui/button";
 import RawPost from "@components/post/RawPost";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import usePostMutations from "@/utils/usePostMutations";
 
 export default function PostView({ post, isEditing = false, onIsEditingChange = () => {} }: { post: any, isEditing?: boolean, onIsEditingChange?: (isEditing: boolean) => void }) {
     const fetcher = useFetcher();
     const ref = useRef<PostEditorElement>();
+
+    const { editPost } = usePostMutations({});
+
+    useEffect(() => {
+        if (fetcher.state === 'idle') {
+            onIsEditingChange(false);
+            if (fetcher?.data?.post) {
+                editPost(fetcher.data.post);
+            }
+        }
+    }, [fetcher]);
 
     function onEdit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();
@@ -21,12 +33,6 @@ export default function PostView({ post, isEditing = false, onIsEditingChange = 
             });
         }
     }
-
-    useEffect(() => {
-        if (fetcher.state === 'idle') {
-            onIsEditingChange(false);
-        }
-    }, [fetcher]);
 
     return (
         <div className="flex flex-col gap-3">

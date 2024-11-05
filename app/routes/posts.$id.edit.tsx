@@ -6,6 +6,7 @@ import UnauthorizedResponse from "@/api/UnauthorizedError";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
+import {getPostByID} from "@prisma/client/sql";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
@@ -44,8 +45,13 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         if (!post) {
             return ExplicitResourceNotFoundResponse('Post');
         }
-        
-        return ExplicitUpdateResponse('Post');
+
+        const sqlPost = await context.prisma.$queryRawTyped(getPostByID(post.id, context.user.id));
+        if (!sqlPost?.length) {
+            return UnknownErrorResponse(sqlPost);
+        }
+
+        return ExplicitUpdateResponse('Post', { post: sqlPost[0] });
     } catch (err) {
         return UnknownErrorResponse(err);
     }

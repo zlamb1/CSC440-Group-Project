@@ -5,15 +5,25 @@ import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@ui/button";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import usePostMutations from "@/utils/usePostMutations";
 
 export default function ReplyEditor({ post, isReplying = true }: { post: PostWithUser, isReplying?: boolean }) {
     const [isEditorActive, setEditorActive] = useState(false);
     const fetcher = useFetcher();
     const ref = useRef<PostEditorElement>();
 
+    const { createPost } = usePostMutations({});
+
     useEffect(() => {
         if (fetcher.state === 'idle' && ref.current) {
-            ref.current.clearEditor();
+            if (fetcher?.data?.post) {
+                // TODO: fix this
+                // createPost(fetcher.data.post);
+            }
+
+            if (ref.current) {
+                ref.current.clearEditor();
+            }
         }
     }, [fetcher]);
 
