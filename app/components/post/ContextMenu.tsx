@@ -8,25 +8,21 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Post} from "@prisma/client";
 import {UserWithLoggedIn} from "@/utils/types";
 import {usePostStore} from "@/utils/usePostStore";
+import {useShallow} from "zustand/react/shallow";
 
 export default function ContextMenu({ post, user, onEdit }: { post: Post, user: UserWithLoggedIn, onEdit?: () => void }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
-    const [ isSubmitting, setIsSubmitting ] = useState(false);
-    const storeDelete = usePostStore((state: any) => state.delete);
+    const { deletePost } = usePostStore(useShallow((state: any) => ({ deletePost: state.delete })));
 
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
 
     useEffect(() => {
-        if (fetcher.state === 'idle' && isSubmitting) {
-            storeDelete(post);
+        if (fetcher?.data?.success) {
+            deletePost(post);
         }
-
-        if (fetcher.state === 'submitting') {
-            setIsSubmitting(true);
-        }
-    }, [fetcher]);
+    }, [fetcher.data]);
 
     if (post.userId !== user?.id) {
         return null;

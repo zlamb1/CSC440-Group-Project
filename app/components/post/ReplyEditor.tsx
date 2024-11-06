@@ -1,63 +1,65 @@
 import {PostWithUser} from "@/utils/types";
-import React, {FormEvent, useEffect, useRef, useState} from "react";
-import {useFetcher} from "@remix-run/react";
+import React, {FormEvent, useRef, useState} from "react";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@ui/button";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import usePostMutations from "@/utils/usePostMutations";
+import {usePostStore} from "@/utils/usePostStore";
+import {useShallow} from "zustand/react/shallow";
+import {Form} from "@remix-run/react";
 
 export default function ReplyEditor({ post, isReplying = true }: { post: PostWithUser, isReplying?: boolean }) {
     const [isEditorActive, setEditorActive] = useState(false);
-    const fetcher = useFetcher();
+    const [isPending, setIsPending] = useState(false);
     const ref = useRef<PostEditorElement>();
 
-    const { createPost } = usePostMutations({});
-
-    useEffect(() => {
-        if (fetcher.state === 'idle' && ref.current) {
-            if (fetcher?.data?.post) {
-                // TODO: fix this
-                // createPost(fetcher.data.post);
-            }
-
-            if (ref.current) {
-                ref.current.clearEditor();
-            }
-        }
-    }, [fetcher]);
+    const { create } = usePostStore(useShallow((state: any) => ({ create: state.create })));
 
     const onReply = (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault();
         if (ref.current) {
             const formData = new FormData();
             formData.set('content', ref.current.getContent());
-            fetcher.submit(formData, {
+
+            setIsPending(true);
+
+            fetch(`/posts/${post.id}/reply`, {
                 method: 'POST',
-                action: `/posts/${post.id}/reply`,
+                body: formData,
+            }).then(async res => {
+                if (ref.current) {
+                    ref.current.clearEditor();
+                }
+
+                const data = await res.json();
+                if (data?.post) {
+                    create(data.post);
+                }
+            }).finally(() => {
+                setIsPending(false);
             });
         }
     }
 
     function handleCancel(evt: React.MouseEvent) {
         evt.stopPropagation();
+        setEditorActive(false);
         if (ref.current) {
             ref.current.clearEditor();
         }
-        setEditorActive(false);
     }
 
     return (
         <AnimatePresence mode="wait" initial={false}>
             {
                 isReplying ?
-                    <fetcher.Form onSubmit={onReply}>
+                    <Form navigate={false} onSubmit={onReply}>
                         <motion.div className="overflow-y-hidden" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}>
                             <PostEditor placeholder="Write a reply..."
                                         ref={ref}
                                         isActive={isEditorActive}
                                         focus={setEditorActive}
-                                        editable={fetcher.state === 'idle'}
+                                        editable={!isPending}
                                         editorProps={{attributes: {class: 'break-all focus-visible:outline-none'}}}
                                         append={
                                             <motion.div initial={{opacity: 0, height: 0}}
@@ -68,17 +70,16 @@ export default function ReplyEditor({ post, isReplying = true }: { post: PostWit
                                                     Cancel
                                                 </Button>
                                                 <Button type="submit"
-                                                        disabled={fetcher.state !== 'idle'}>
+                                                        disabled={isPending}>
                                                     {
-                                                        fetcher.state === 'idle' ?
-                                                            'Reply' : <LoadingSpinner/>
+                                                        isPending ? <LoadingSpinner /> : 'Reply'
                                                     }
                                                 </Button>
                                             </motion.div>
                                         }
                             />
                         </motion.div>
-                    </fetcher.Form>
+                    </Form>
                     : null
             }
         </AnimatePresence>

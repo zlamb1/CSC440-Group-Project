@@ -77,6 +77,8 @@ export const usePublicPostsStore = create((set, get: any) => ({
             let postsWithDate = [...state.postsWithDate];
 
             for (const post of posts) {
+                if (post.replyTo) continue;
+
                 if (!post?.id || !post?.postedAt) {
                     console.error('[usePublicPostsStore] attempted to add post with null ID or postedAt');
                     continue;

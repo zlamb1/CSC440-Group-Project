@@ -30,7 +30,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             return EndpointResponse(msg, 400);
         }
 
-        await context.prisma.post.create({
+        const post = await context.prisma.post.create({
             data: {
                 userId: context.user.id,
                 content: sanitizedContent,
@@ -38,10 +38,10 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             },
         });
 
-        return ExplicitCreateResponse('Reply');
+        post.user = context.user;
+
+        return ExplicitCreateResponse('Reply', { post });
     } catch (err) {
         return UnknownErrorResponse(err);
     }
 }
-
-export default NotFound;

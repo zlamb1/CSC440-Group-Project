@@ -14,10 +14,16 @@ export enum PostEvent {
 export const usePostStore = create((set, get: any) => ({
     create(post: PostWithRelations, emit?: boolean) {
         if (emit == null) emit = true;
+
         post.liked = null;
         post.likeCount = 0;
         post.replyCount = 0;
         post.replies = [];
+
+        if (post.replyTo) {
+            console.log('here');
+            get().reply(post.replyTo, post.id);
+        }
 
         if (emit) {
             emitter.emit(PostEvent.CREATE, { post });
@@ -40,12 +46,19 @@ export const usePostStore = create((set, get: any) => ({
         return set((state: any) => {
             const parent = {...state[parentId]};
             if (parent) {
-                if (!parent.replies) {
+                if (!parent.replies || !parent.replies.length) {
                     parent.replies = [];
                 }
 
+                const len = parent.replies.length;
                 // add replyId to parent replies if it isn't already there
-                parent.replies = [...new Set([parent.replies, ...replyId])];
+                parent.replies = [...new Set([...parent.replies, replyId])];
+
+                const newLen = parent.replies.length;
+                if (newLen > len) {
+                    parent.replyCount = parent.replyCount ? Math.max(parent.replyCount + 1, newLen) : newLen;
+                }
+
                 return {...state, [parent.id]: parent};
             }
 
@@ -116,6 +129,7 @@ export const usePostStore = create((set, get: any) => ({
                     const indexOf = parent.replies?.indexOf?.(id);
                     if (indexOf > -1) {
                         parent.replies.splice(indexOf, 1);
+                        parent.replyCount = Math.max(parent.replyCount - 1, parent.replies.length);
                         _state[post.replyTo] = parent;
                     }
                 }

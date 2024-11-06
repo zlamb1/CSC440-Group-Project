@@ -5,7 +5,7 @@ import {
     MessageCircle,
     Pencil,
 } from "lucide-react";
-import {Link} from "@remix-run/react";
+import {Link, useFetcher} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
 import ReplyView from "@components/post/ReplyView";
@@ -16,6 +16,7 @@ import ReplyEditor from "@components/post/ReplyEditor";
 import {formatPastDate} from "@/utils/time";
 import {usePostStore} from "@/utils/usePostStore";
 import {Card} from "@ui/card";
+import {useShallow} from "zustand/react/shallow";
 
 function Post({className, id, viewer, depth = 1, autoReply = true}: {
     className?: string,
@@ -29,7 +30,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
     const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
     const [formattedTime, setFormattedTime] = useState<string>('');
 
-    const post = usePostStore((state: any) => state[id]);
+    const { post } = usePostStore(useShallow((state: any) => ({ post: state[id] })));
 
     useEffect(() => {
         const date = new Date(post?.postedAt);
@@ -64,7 +65,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
                             </Link>
                         </UserHoverCard>
                     </div>
-                    <ContextMenu post={post} user={viewer} onEdit={() => setEditing(true) } />
+                    <ContextMenu post={post} user={viewer} onEdit={() => setEditing(true)}/>
                 </div>
                 <div className="ml-10 flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
@@ -74,7 +75,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
                             />
                         </div>
                         <div className="flex gap-2">
-                            <LikePanel post={post} viewer={viewer} />
+                            <LikePanel post={post} viewer={viewer}/>
                             <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
                                 <Button containerClass="flex"
                                         className="h-[25px] flex gap-1 items-center rounded-full"
@@ -102,7 +103,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
                                showReplies={showReplies}
                                depth={depth}
                     />
-                    <ReplyEditor post={post} isReplying={isReplying} />
+                    <ReplyEditor post={post} isReplying={isReplying}/>
                 </div>
             </div>
         </div>
