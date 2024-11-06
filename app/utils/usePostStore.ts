@@ -7,6 +7,7 @@ export const emitter = mitt();
 
 export enum PostEvent {
     CREATE = 'post-create',
+    UPDATE = 'post-update',
     DELETE = 'post-delete',
 }
 
@@ -20,6 +21,16 @@ export const usePostStore = create((set, get: any) => ({
 
         if (emit) {
             emitter.emit(PostEvent.CREATE, { post });
+        }
+
+        return set((state: any) => ({...state, [post.id]: post}));
+    },
+
+    update(post: PostWithRelations, emit?: boolean) {
+        if (emit == null) emit = true;
+
+        if (emit) {
+            emitter.emit(PostEvent.UPDATE, { post });
         }
 
         return set((state: any) => ({...state, [post.id]: post}));
@@ -137,14 +148,21 @@ if (typeof document !== 'undefined') {
         const data = evt.data;
         const state: any = usePostStore.getState();
         switch (data.type) {
-            case PostEvent.CREATE:
-                const { post } = data.evt;
+            case PostEvent.CREATE: {
+                const {post} = data.evt;
                 state.create(post, false);
                 break;
-            case PostEvent.DELETE:
-                const { id } = data.evt;
+            }
+            case PostEvent.UPDATE: {
+                const {post} = data.evt;
+                state.update(post, false);
+                break;
+            }
+            case PostEvent.DELETE: {
+                const {id} = data.evt;
                 state.delete(id, false);
                 break;
+            }
         }
 
         emitter.emit(evt.data.type, { ...evt.data.evt, isBroadcast: true });

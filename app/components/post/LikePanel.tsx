@@ -3,7 +3,9 @@ import {useFetcher} from "@remix-run/react";
 import {cn} from "@/lib/utils";
 import {Button} from "@ui/button";
 import {ThumbsDown, ThumbsUp} from "lucide-react";
-import React from "react";
+import React, {useEffect} from "react";
+import {usePostStore} from "@/utils/usePostStore";
+import {useShallow} from "zustand/react/shallow";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -31,11 +33,23 @@ export default function LikePanel({ className, post, viewer }: { className?: str
     const fetcher = useFetcher();
 
     const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.liked;
-    const likeCount = fetcher.formData ? getLikeCount(post.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : post.likeCount;
+    const likeCount = fetcher.formData ? getLikeCount(post?.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : (post?.likeCount ?? 0);
+
+    const { update } = usePostStore(useShallow((state: any) => ({ update: state.update })));
+
+    useEffect(() => {
+        const liked = fetcher?.formData?.get('liked');
+        if (fetcher.state === 'loading' && !fetcher?.data?.error && liked) {
+            post.liked = isLiked;
+            post.likeCount = likeCount;
+            update(post);
+        }
+    }, [fetcher]);
 
     return (
         <div className={cn("flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900", className)}>
-            <fetcher.Form method="POST" action={`/posts/${post.id}/like`}
+            <fetcher.Form method="POST"
+                          action={`/posts/${post.id}/like`}
                           className="flex items-center">
                 <Button className="w-[24px] h-[24px] rounded-full"
                         variant="ghost"
@@ -44,9 +58,11 @@ export default function LikePanel({ className, post, viewer }: { className?: str
                         disabled={!viewer?.loggedIn}>
                     <input className="hidden" name="liked"
                            value={isLiked === true ? 'null' : 'true'}
-                           readOnly/>
+                           readOnly
+                    />
                     <ThumbsUp size={16}
-                              className={"stroke-current " + (isLiked === true ? 'fill-primary' : '')}/>
+                              className={"stroke-current " + (isLiked === true ? 'fill-primary' : '')}
+                    />
                 </Button>
             </fetcher.Form>
             <span className="select-none text-sm font-medium">{likeCount}</span>
@@ -58,9 +74,11 @@ export default function LikePanel({ className, post, viewer }: { className?: str
                         disabled={!viewer?.loggedIn}>
                     <input className="hidden" name="liked"
                            value={isLiked === false ? 'null' : 'false'}
-                           readOnly/>
+                           readOnly
+                    />
                     <ThumbsDown size={16}
-                                className={"stroke-current " + (isLiked === false ? 'fill-primary' : '')}/>
+                                className={"stroke-current " + (isLiked === false ? 'fill-primary' : '')}
+                    />
                 </Button>
             </fetcher.Form>
         </div>
