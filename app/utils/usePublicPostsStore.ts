@@ -39,7 +39,7 @@ function binarySearch(element: PostWithDate, array: PostWithDate[]) {
 const initialState = {
     postsWithDate: [],
     posts: [],
-    limit: 1,
+    limit: 5,
 };
 
 export const usePublicPostsStore = create((set, get: any) => ({
