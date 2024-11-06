@@ -100,7 +100,8 @@ export const usePublicPostsStore = create((set, get: any) => ({
         });
     },
 
-    delete(id: string) {
+    delete(post: string | Post | PostWithReplies | PostWithRelations) {
+        const id = typeof post === 'string' ? post : post.id;
         return set((state: any) => ({
             ...state,
             postsWithDate: state.postsWithDate.filter((postWithDate: PostWithDate) => postWithDate.id !== id),
@@ -120,9 +121,9 @@ emitter.on(PostEvent.CREATE, ({ post }: any) => {
     }
 });
 
-emitter.on(PostEvent.DELETE, ({ id }: any) => {
+emitter.on(PostEvent.DELETE, ({ post }: any) => {
     const state: any = usePublicPostsStore.getState();
     if (state?.delete) {
-        state.delete(id);
+        state.delete(post);
     }
 });

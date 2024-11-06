@@ -21,7 +21,6 @@ export const usePostStore = create((set, get: any) => ({
         post.replies = [];
 
         if (post.replyTo) {
-            console.log('here');
             get().reply(post.replyTo, post.id);
         }
 
@@ -143,7 +142,7 @@ export const usePostStore = create((set, get: any) => ({
             }
 
             if (emit) {
-                emitter.emit(PostEvent.DELETE, { id });
+                emitter.emit(PostEvent.DELETE, { post });
             }
 
             return {...state, ..._state};
@@ -173,8 +172,8 @@ if (typeof document !== 'undefined') {
                 break;
             }
             case PostEvent.DELETE: {
-                const {id} = data.evt;
-                state.delete(id, false);
+                const {post} = data.evt;
+                state.delete(post, false);
                 break;
             }
         }
