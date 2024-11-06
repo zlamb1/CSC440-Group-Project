@@ -19,6 +19,23 @@ function cmp(a: PostWithDate, b: PostWithDate) {
     return 0;
 }
 
+function binarySearch(element: PostWithDate, array: PostWithDate[]) {
+    let low = 0, high = array.length - 1, mid = -1;
+    while (low <= high) {
+        mid = low + Math.floor((high - low) / 2);
+        const _cmp = cmp(element, array[mid]);
+        if (_cmp > 0) {
+            low = mid + 1;
+        } else if (_cmp < 0) {
+            high = mid - 1;
+        } else {
+            return mid;
+        }
+    }
+
+    return -(low + 1);
+}
+
 const initialState = {
     postsWithDate: [],
     posts: [],
@@ -60,16 +77,22 @@ export const usePublicPostsStore = create((set, get: any) => ({
             let postsWithDate = [...state.postsWithDate];
 
             for (const post of posts) {
-                // TODO: implement sorted array
                 if (!post?.id || !post?.postedAt) {
                     console.error('[usePublicPostsStore] attempted to add post with null ID or postedAt');
                     continue;
                 }
 
-                postsWithDate.push({id: post.id, date: post.postedAt});
-            }
+                const postWithDate: PostWithDate = {
+                    id: post.id,
+                    date: post.postedAt
+                };
 
-            postsWithDate = [...new Set(postsWithDate)].sort(cmp);
+                // O(log(n))
+                const index = binarySearch(postWithDate, postsWithDate);
+                if (index < 0) {
+                    postsWithDate.splice(Math.abs(index + 1), 0, postWithDate);
+                }
+            }
 
             return {...state, postsWithDate, posts: postsWithDate.map(post => post.id)};
         });
@@ -88,16 +111,16 @@ export const usePublicPostsStore = create((set, get: any) => ({
     }
 }));
 
-emitter.on(PostEvent.CREATE, post => {
+emitter.on(PostEvent.CREATE, ({ post }: any) => {
     const state: any = usePublicPostsStore.getState();
     if (state?.add) {
         state.add([post]);
     }
 });
 
-emitter.on(PostEvent.DELETE, post => {
+emitter.on(PostEvent.DELETE, ({ id }: any) => {
     const state: any = usePublicPostsStore.getState();
     if (state?.delete) {
-        state.delete(post);
+        state.delete(id);
     }
 });

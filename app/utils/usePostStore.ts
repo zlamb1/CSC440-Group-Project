@@ -11,12 +11,17 @@ export enum PostEvent {
 }
 
 export const usePostStore = create((set, get: any) => ({
-    create(post: PostWithRelations) {
+    create(post: PostWithRelations, emit?: boolean) {
+        if (emit == null) emit = true;
         post.liked = null;
         post.likeCount = 0;
         post.replyCount = 0;
         post.replies = [];
-        emitter.emit(PostEvent.CREATE, post);
+
+        if (emit) {
+            emitter.emit(PostEvent.CREATE, { post });
+        }
+
         return set((state: any) => ({...state, [post.id]: post}));
     },
 
@@ -80,7 +85,9 @@ export const usePostStore = create((set, get: any) => ({
         });
     },
 
-    delete(post: string | Post | PostWithReplies | PostWithRelations) {
+    delete(post: string | Post | PostWithReplies | PostWithRelations, emit?: boolean) {
+        if (emit == null) emit = true;
+
         return set((state: any) => {
             const isString = typeof post === 'string';
             const id = isString ? post : post.id;
@@ -110,7 +117,10 @@ export const usePostStore = create((set, get: any) => ({
                 }
             }
 
-            emitter.emit(PostEvent.DELETE, id);
+            if (emit) {
+                emitter.emit(PostEvent.DELETE, { id });
+            }
+
             return {...state, ..._state};
         });
     },
@@ -119,3 +129,32 @@ export const usePostStore = create((set, get: any) => ({
         return set({});
     }
 }));
+
+if (typeof document !== 'undefined') {
+    const bc = new BroadcastChannel('');
+
+    bc.onmessage = (evt) => {
+        const data = evt.data;
+        const state: any = usePostStore.getState();
+        switch (data.type) {
+            case PostEvent.CREATE:
+                const { post } = data.evt;
+                state.create(post, false);
+                break;
+            case PostEvent.DELETE:
+                const { id } = data.evt;
+                state.delete(id, false);
+                break;
+        }
+
+        emitter.emit(evt.data.type, { ...evt.data.evt, isBroadcast: true });
+    }
+
+    emitter.on('*', (type, evt: any) => {
+        if (!evt?.isBroadcast) {
+            bc.postMessage({
+                type, evt
+            });
+        }
+    });
+}
