@@ -46,12 +46,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             return ExplicitResourceNotFoundResponse('Post');
         }
 
-        const sqlPost = await context.prisma.$queryRawTyped(getPostByID(post.id, context.user.id));
-        if (!sqlPost?.length) {
-            return UnknownErrorResponse(sqlPost);
-        }
-
-        return ExplicitUpdateResponse('Post', { post: sqlPost[0] });
+        return ExplicitUpdateResponse('Post', { content: post.content, lastEdited: post.lastEdited });
     } catch (err) {
         return UnknownErrorResponse(err);
     }

@@ -23,6 +23,40 @@ export const usePostStore = create((set, get: any) => ({
         return set((state: any) => ({...state, [post.id]: post}));
     },
 
+    edit(id: string, content: string, lastEdited: string | Date, emit?: boolean) {
+        if (emit == null) emit = true;
+
+        return set((state: any) => {
+            if (!id) {
+                console.error('[usePostStore] attempt to edit post with null ID');
+                return state;
+            }
+
+            if (!id) {
+                console.error('[usePostStore] attempt to edit post with null content');
+                return state;
+            }
+
+            const post = {...state[id]};
+
+            if (!post) {
+                console.error('[usePostStore] attempt to edit null post');
+                return state;
+            }
+
+            // update post content & lastEdited
+            post.content = content;
+            lastEdited = lastEdited ?? new Date();
+            post.lastEdited = typeof lastEdited === 'string' ? new Date(lastEdited) : lastEdited;
+
+            if (emit) {
+                emitter.emit(PostEvent.EDIT, { post: id, content, lastEdited });
+            }
+
+            return {...state, [id]: post};
+        });
+    },
+
     like(id: string, liked: boolean | null, emit?: boolean) {
         if (emit == null) emit = true;
 

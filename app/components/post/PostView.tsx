@@ -6,21 +6,22 @@ import {Button} from "@ui/button";
 import RawPost from "@components/post/RawPost";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import usePostMutations from "@/utils/usePostMutations";
+import {usePostStore} from "@/utils/usePostStore";
+import {useShallow} from "zustand/react/shallow";
+import useMountedEffect from "@/utils/useMountedEffect";
 
 export default function PostView({ post, isEditing = false, onIsEditingChange = () => {} }: { post: any, isEditing?: boolean, onIsEditingChange?: (isEditing: boolean) => void }) {
     const fetcher = useFetcher();
     const ref = useRef<PostEditorElement>();
 
-    const { editPost } = usePostMutations({});
+    const { edit } = usePostStore(useShallow((state: any) => ({ edit: state.edit })));
 
-    useEffect(() => {
-        if (fetcher.state === 'idle') {
-            onIsEditingChange(false);
-            if (fetcher?.data?.post) {
-                editPost(fetcher.data.post);
-            }
+    useMountedEffect(() => {
+        onIsEditingChange(false);
+        if (fetcher?.data?.success) {
+            edit(post.id, fetcher?.data?.content, fetcher?.data?.lastEdited);
         }
-    }, [fetcher]);
+    }, [fetcher.data]);
 
     function onEdit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();

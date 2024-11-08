@@ -33,6 +33,11 @@ function usePostSync() {
                 state.create(post, false);
                 break;
             }
+            case PostEvent.EDIT: {
+                const {post, content, lastEdited} = data.evt;
+                state.edit(post, content, lastEdited, false);
+                break;
+            }
             case PostEvent.LIKE: {
                 const {post, liked} = data.evt;
                 state.like(post, liked, false);
