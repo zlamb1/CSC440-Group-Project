@@ -1,8 +1,9 @@
 import {create} from "zustand/react";
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
 import {Post} from "@prisma/client";
-import {emitter, PostEvent, usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/usePostStore";
 import {FetchParams} from "@components/InfiniteScroll";
+import {emitter, PostEvent} from "@/utils/usePostEvents";
 
 type PostWithDate = {
     id: string;

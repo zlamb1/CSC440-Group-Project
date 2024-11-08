@@ -3,7 +3,7 @@ import {useFetcher} from "@remix-run/react";
 import {cn} from "@/lib/utils";
 import {Button} from "@ui/button";
 import {ThumbsDown, ThumbsUp} from "lucide-react";
-import React, {useEffect} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {usePostStore} from "@/utils/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 
@@ -29,22 +29,29 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
     return likeCount;
 }
 
+export function useMountedEffect(fn: () => (() => void) | void, dependencies?: any[]) {
+    const hasMounted = useRef<boolean>(false);
+
+    useEffect(() => {
+        if (hasMounted.current) {
+            return fn();
+        } else hasMounted.current = true;
+    }, dependencies);
+}
+
 export default function LikePanel({ className, post, viewer }: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn }) {
     const fetcher = useFetcher();
 
     const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.liked;
     const likeCount = fetcher.formData ? getLikeCount(post?.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : (post?.likeCount ?? 0);
 
-    const { update } = usePostStore(useShallow((state: any) => ({ update: state.update })));
+    const { like } = usePostStore(useShallow((state: any) => ({ like: state.like })));
 
-    useEffect(() => {
-        const liked = fetcher?.formData?.get('liked');
-        if (fetcher.state === 'loading' && !fetcher?.data?.error && liked) {
-            post.liked = isLiked;
-            post.likeCount = likeCount;
-            update(post);
+    useMountedEffect(() => {
+        if (fetcher?.data?.liked !== undefined) {
+            like(post.id, fetcher.data.liked);
         }
-    }, [fetcher]);
+    }, [fetcher.data]);
 
     return (
         <div className={cn("flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900", className)}>

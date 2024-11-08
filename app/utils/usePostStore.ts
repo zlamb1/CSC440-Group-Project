@@ -1,15 +1,7 @@
 import {create} from "zustand/react";
-import mitt from 'mitt';
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
 import {Post} from "@prisma/client";
-
-export const emitter = mitt();
-
-export enum PostEvent {
-    CREATE = 'post-create',
-    UPDATE = 'post-update',
-    DELETE = 'post-delete',
-}
+import {emitter, PostEvent} from "@/utils/usePostEvents";
 
 export const usePostStore = create((set, get: any) => ({
     create(post: PostWithRelations, emit?: boolean) {
@@ -31,14 +23,32 @@ export const usePostStore = create((set, get: any) => ({
         return set((state: any) => ({...state, [post.id]: post}));
     },
 
-    update(post: PostWithRelations, emit?: boolean) {
+    like(id: string, liked: boolean | null, emit?: boolean) {
         if (emit == null) emit = true;
 
-        if (emit) {
-            emitter.emit(PostEvent.UPDATE, { post });
-        }
+        return set((state: any) => {
+            const post = {...state[id]};
+            if (!post) {
+                console.error('[usePostStore] attempted to like null post: ' + id);
+                return state;
+            }
 
-        return set((state: any) => ({...state, [post.id]: post}));
+            if (liked !== post.liked) {
+                if (liked === null) {
+                    post.likeCount += (post.liked ? -1 : 1);
+                } else {
+                    post.likeCount += (liked ? 1 : -1) * (post.liked === null ? 1 : 2);
+                }
+            }
+
+            post.liked = liked;
+
+            if (emit) {
+                emitter.emit(PostEvent.LIKE, {post: id, liked});
+            }
+
+            return {...state, [id]: post};
+        });
     },
 
     reply(parentId: string, replyId: string) {
@@ -65,7 +75,13 @@ export const usePostStore = create((set, get: any) => ({
         });
     },
 
-    add(posts: (string | PostWithRelations | PostWithReplies)[]) {
+    set(post: PostWithReplies) {
+        return set((state: any) => ({ ...state, [post.id]: post }));
+    },
+
+    add(posts: (string | PostWithRelations | PostWithReplies)[], emit?: boolean) {
+        if (!emit) emit = true;
+
         return set((state: any) => {
             if (posts && posts?.length) {
                 const _state = {...state};
@@ -96,6 +112,7 @@ export const usePostStore = create((set, get: any) => ({
 
                         // add post to state
                         _state[post.id] = post;
+                        emitter.emit(PostEvent.LOAD, { post });
                     } else {
                         console.error('[usePostStore] attempted to store post with null id');
                     }
@@ -153,39 +170,3 @@ export const usePostStore = create((set, get: any) => ({
         return set({});
     }
 }));
-
-if (typeof document !== 'undefined') {
-    const bc = new BroadcastChannel('');
-
-    bc.onmessage = (evt) => {
-        const data = evt.data;
-        const state: any = usePostStore.getState();
-        switch (data.type) {
-            case PostEvent.CREATE: {
-                const {post} = data.evt;
-                state.create(post, false);
-                break;
-            }
-            case PostEvent.UPDATE: {
-                const {post} = data.evt;
-                state.update(post, false);
-                break;
-            }
-            case PostEvent.DELETE: {
-                const {post} = data.evt;
-                state.delete(post, false);
-                break;
-            }
-        }
-
-        emitter.emit(evt.data.type, { ...evt.data.evt, isBroadcast: true });
-    }
-
-    emitter.on('*', (type, evt: any) => {
-        if (!evt?.isBroadcast) {
-            bc.postMessage({
-                type, evt
-            });
-        }
-    });
-}
