@@ -6,6 +6,7 @@ import {ThumbsDown, ThumbsUp} from "lucide-react";
 import React, {useEffect, useRef, useState} from "react";
 import {usePostStore} from "@/utils/usePostStore";
 import {useShallow} from "zustand/react/shallow";
+import useMountedEffect from "@/utils/useMountedEffect";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -27,16 +28,6 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
         }
     }
     return likeCount;
-}
-
-export function useMountedEffect(fn: () => (() => void) | void, dependencies?: any[]) {
-    const hasMounted = useRef<boolean>(false);
-
-    useEffect(() => {
-        if (hasMounted.current) {
-            return fn();
-        } else hasMounted.current = true;
-    }, dependencies);
 }
 
 export default function LikePanel({ className, post, viewer }: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn }) {
