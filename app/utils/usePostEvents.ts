@@ -34,8 +34,8 @@ function usePostSync() {
                 break;
             }
             case PostEvent.LIKE: {
-                const {post} = data.evt;
-                state.like(post, false);
+                const {post, liked} = data.evt;
+                state.like(post, liked, false);
                 break;
             }
             case PostEvent.DELETE: {
