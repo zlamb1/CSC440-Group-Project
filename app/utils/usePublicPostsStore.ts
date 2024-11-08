@@ -5,15 +5,15 @@ import {usePostStore} from "@/utils/usePostStore";
 import {FetchParams} from "@components/InfiniteScroll";
 import {emitter, PostEvent} from "@/utils/usePostEvents";
 
-type PostWithDate = {
+export type PostWithDate = {
     id: string;
-    date: Date;
+    postedAt: Date;
 }
 
 function cmp(a: PostWithDate, b: PostWithDate) {
-    if (a.date > b.date) {
+    if (a.postedAt > b.postedAt) {
         return -1;
-    } else if (a.date < b.date) {
+    } else if (a.postedAt < b.postedAt) {
         return 1;
     }
 
@@ -38,7 +38,6 @@ function binarySearch(element: PostWithDate, array: PostWithDate[]) {
 }
 
 const initialState = {
-    postsWithDate: [],
     posts: [],
     limit: 5,
 };
@@ -47,7 +46,7 @@ export const usePublicPostsStore = create((set, get: any) => ({
     ...initialState,
 
     async fetch({ setHasMoreData }: FetchParams<PostWithRelations>) {
-        const cursor = get().postsWithDate?.[get().postsWithDate?.length - 1]?.date ?? new Date();
+        const cursor = get().posts?.[get().posts?.length - 1]?.postedAt ?? new Date();
         const limit = get().limit ?? 10;
 
         const params = new URLSearchParams();
@@ -75,29 +74,34 @@ export const usePublicPostsStore = create((set, get: any) => ({
                 return state;
             }
 
-            let postsWithDate = [...state.postsWithDate];
+            const _posts = [...state.posts];
 
             for (const post of posts) {
                 if (post.replyTo) continue;
 
-                if (!post?.id || !post?.postedAt) {
-                    console.error('[usePublicPostsStore] attempted to add post with null ID or postedAt');
+                if (!post?.id) {
+                    console.error('[usePublicPostsStore] attempted to add post with null ID');
+                    continue;
+                }
+
+                if (!post?.postedAt) {
+                    console.error('[usePublicPostsStore] attempted to add post with null postedAt');
                     continue;
                 }
 
                 const postWithDate: PostWithDate = {
                     id: post.id,
-                    date: post.postedAt
+                    postedAt: post.postedAt
                 };
 
                 // O(log(n))
-                const index = binarySearch(postWithDate, postsWithDate);
+                const index = binarySearch(postWithDate, _posts);
                 if (index < 0) {
-                    postsWithDate.splice(Math.abs(index + 1), 0, postWithDate);
+                    _posts.splice(Math.abs(index + 1), 0, postWithDate);
                 }
             }
 
-            return {...state, postsWithDate, posts: postsWithDate.map(post => post.id)};
+            return {...state, posts: _posts};
         });
     },
 
