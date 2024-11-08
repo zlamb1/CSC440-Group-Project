@@ -108,9 +108,7 @@ export const usePublicPostsStore = create((set, get: any) => ({
     delete(post: string | Post | PostWithReplies | PostWithRelations) {
         const id = typeof post === 'string' ? post : post.id;
         return set((state: any) => ({
-            ...state,
-            postsWithDate: state.postsWithDate.filter((postWithDate: PostWithDate) => postWithDate.id !== id),
-            posts: state.posts.filter((post: string) => post !== id)
+            ...state, posts: state.posts.filter((post: PostWithDate) => post.id !== id)
         }));
     },
 

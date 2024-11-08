@@ -15,6 +15,7 @@ import {useInfiniteScroll} from "@components/InfiniteScroll";
 import {usePostStore} from "@/utils/usePostStore";
 import {usePublicPostsStore} from "@/utils/usePublicPostsStore";
 import {useShallow} from "zustand/react/shallow";
+import useMountedEffect from "@/utils/useMountedEffect";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     return EndpointResponse({ user: context.user });
@@ -31,18 +32,18 @@ export default function Index() {
 
     const [ isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetch });
 
-    const createFetcher = useFetcher();
+    const fetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
-    
-    useEffect(() => {
-        if (createFetcher.state === 'idle' && createFetcher.data?.post) {
-            create(createFetcher.data.post);
-        }
 
-        if (ref?.current && createFetcher.state === 'idle') {
-            ref.current.clearEditor();
+    useMountedEffect(() => {
+        if (fetcher?.data?.post) {
+            create(fetcher.data.post);
+            if (ref.current) {
+                ref.current.clearEditor();
+            }
+
         }
-    }, [createFetcher]);
+    }, [fetcher.data]);
 
     function onSubmit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();
@@ -50,7 +51,7 @@ export default function Index() {
             const formData = new FormData();
             formData.set('content', ref.current.getContent());
 
-            createFetcher.submit(formData, {
+            fetcher.submit(formData, {
                 action: '/posts/create',
                 method: 'POST',
             });
@@ -73,7 +74,7 @@ export default function Index() {
                                     isActive={isEditorActive}
                                     placeholder="Write a post..."
                                     onTextUpdate={(progress: number) => setEditorProgress(progress)}
-                                    editable={ createFetcher.state === 'idle' }
+                                    editable={fetcher.state === 'idle'}
                                     editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
                                     containerProps={{className: 'flex-grow w-full text-md'}}
                                     append={
@@ -86,10 +87,8 @@ export default function Index() {
                                                 Cancel
                                             </Button>
                                             <Button className="font-bold" type="submit"
-                                                    disabled={createFetcher.state !== 'idle'}>
-                                                {
-                                                    createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner/>
-                                                }
+                                                    disabled={fetcher.state !== 'idle'}>
+                                                {fetcher.state === 'idle' ? 'Post' : <LoadingSpinner/>}
                                             </Button>
                                         </motion.div>
                                     }
