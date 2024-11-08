@@ -7,6 +7,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {usePostStore} from "@/utils/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/useMountedEffect";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -53,7 +54,7 @@ export default function LikePanel({ className, post, viewer }: { className?: str
                         variant="ghost"
                         size="icon"
                         type="submit"
-                        disabled={!viewer?.loggedIn}>
+                        disabled={!viewer?.loggedIn || fetcher.state !== 'idle'}>
                     <input className="hidden" name="liked"
                            value={isLiked === true ? 'null' : 'true'}
                            readOnly
@@ -63,13 +64,15 @@ export default function LikePanel({ className, post, viewer }: { className?: str
                     />
                 </Button>
             </fetcher.Form>
-            <span className="select-none text-sm font-medium">{likeCount}</span>
+            <span className="select-none text-sm text-center font-medium min-w-[14px]">
+                {fetcher.state === 'idle' ? `${likeCount}` : <LoadingSpinner size={14} />}
+            </span>
             <fetcher.Form method="POST" action={`/posts/${post.id}/like`}>
                 <Button className="w-[24px] h-[24px] rounded-full"
                         variant="ghost"
                         size="icon"
                         type="submit"
-                        disabled={!viewer?.loggedIn}>
+                        disabled={!viewer?.loggedIn || fetcher.state !== 'idle'}>
                     <input className="hidden" name="liked"
                            value={isLiked === false ? 'null' : 'false'}
                            readOnly

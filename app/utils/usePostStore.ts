@@ -28,19 +28,19 @@ export const usePostStore = create((set, get: any) => ({
 
         return set((state: any) => {
             if (!id) {
-                console.error('[usePostStore] attempt to edit post with null ID');
+                console.error('[usePostStore] attempted to edit post with null ID');
                 return state;
             }
 
             if (!id) {
-                console.error('[usePostStore] attempt to edit post with null content');
+                console.error('[usePostStore] attempted to edit post with null content');
                 return state;
             }
 
             const post = {...state[id]};
 
             if (!post) {
-                console.error('[usePostStore] attempt to edit null post');
+                console.error(`[usePostStore] attempted to edit null post: ${id}`);
                 return state;
             }
 
@@ -63,7 +63,7 @@ export const usePostStore = create((set, get: any) => ({
         return set((state: any) => {
             const post = {...state[id]};
             if (!post) {
-                console.error('[usePostStore] attempted to like null post: ' + id);
+                console.error(`[usePostStore] attempted to like null post: ${id}`);
                 return state;
             }
 
