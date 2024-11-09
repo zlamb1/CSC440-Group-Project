@@ -1,6 +1,6 @@
 import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
-import {ensureContentLength, sanitizeContent} from "@/utils/post-validation";
+import {ensureContentLength, sanitizeContent} from "@/utils/posts/post-validation";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import EndpointResponse from "@/api/EndpointResponse";

@@ -4,7 +4,7 @@ import React from "react";
 import Post from "@components/post/Post";
 import InfiniteScroll from "@components/InfiniteScroll";
 import useIsSSR from "@/utils/useIsSSR";
-import {PostWithDate} from "@/utils/usePublicPostsStore";
+import {PostWithDate} from "@/utils/posts/usePublicPostsStore";
 
 export interface PostScrollerProps {
     posts: PostWithDate[],

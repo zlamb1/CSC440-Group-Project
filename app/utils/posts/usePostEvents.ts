@@ -1,4 +1,4 @@
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import mitt from "mitt";
 
 export const emitter = mitt();

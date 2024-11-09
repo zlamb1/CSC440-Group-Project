@@ -4,7 +4,7 @@ import {cn} from "@/lib/utils";
 import {Button} from "@ui/button";
 import {ThumbsDown, ThumbsUp} from "lucide-react";
 import React, {useEffect, useRef, useState} from "react";
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/useMountedEffect";
 import {LoadingSpinner} from "@components/LoadingSpinner";

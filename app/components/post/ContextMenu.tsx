@@ -7,9 +7,9 @@ import {Edit2, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Post} from "@prisma/client";
 import {UserWithLoggedIn} from "@/utils/types";
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
-import {emitter, PostEvent} from "@/utils/usePostEvents";
+import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 
 export default function ContextMenu({ post, user, exitDuration, onEdit }: { post: Post, user: UserWithLoggedIn, exitDuration: number, onEdit?: () => void }) {
     const fetcher = useFetcher();

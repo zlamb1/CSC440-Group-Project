@@ -12,8 +12,8 @@ import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
 import {PostWithRelations} from "@/utils/types";
 import {useInfiniteScroll} from "@components/InfiniteScroll";
-import {usePostStore} from "@/utils/usePostStore";
-import {usePublicPostsStore} from "@/utils/usePublicPostsStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
+import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/useMountedEffect";
 

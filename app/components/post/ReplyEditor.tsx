@@ -4,7 +4,7 @@ import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@ui/button";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {Form} from "@remix-run/react";
 

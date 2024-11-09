@@ -3,9 +3,9 @@
  * This component invalidates the state on the server-side for Zustand so that client data is not inadvertently leaked.
  */
 
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {useRef} from "react";
-import {usePublicPostsStore} from "@/utils/usePublicPostsStore";
+import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
 
 export function StoreInvalidator() {
     const isReset = useRef<boolean>(false);

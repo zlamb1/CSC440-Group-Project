@@ -13,7 +13,7 @@ import UserHoverCard from "@components/hover/UserHoverCard";
 import LikePanel from "@components/post/LikePanel";
 import ReplyEditor from "@components/post/ReplyEditor";
 import {formatPastDate} from "@/utils/time";
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {Card} from "@ui/card";
 import {useShallow} from "zustand/react/shallow";
 import {cn} from "@/lib/utils";

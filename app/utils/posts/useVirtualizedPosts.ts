@@ -2,7 +2,7 @@ import {create} from "zustand/react";
 import {InfiniteFetcherParams} from "@components/InfiniteScroll";
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
 import {Post} from "@prisma/client";
-import {emitter, PostEvent} from "@/utils/usePostEvents";
+import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 
 const DEFAULT_LIMIT = 5;
 

@@ -1,6 +1,6 @@
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {InfiniteFetcherParams} from "@components/InfiniteScroll";
-import useVirtualizedPosts from "@/utils/useVirtualizedPosts";
+import useVirtualizedPosts from "@/utils/posts/useVirtualizedPosts";
 
 async function fetcher(set: any, get: any, { setHasMoreData }: InfiniteFetcherParams) {
     const cursor = get().posts?.[get().posts?.length - 1]?.postedAt ?? new Date();

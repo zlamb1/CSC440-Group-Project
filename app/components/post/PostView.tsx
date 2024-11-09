@@ -5,7 +5,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@ui/button";
 import RawPost from "@components/post/RawPost";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {usePostStore} from "@/utils/usePostStore";
+import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/useMountedEffect";
 

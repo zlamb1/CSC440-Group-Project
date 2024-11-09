@@ -1,7 +1,7 @@
 import {create} from "zustand/react";
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
 import {Post} from "@prisma/client";
-import {emitter, PostEvent} from "@/utils/usePostEvents";
+import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 
 export const usePostStore = create((set, get: any) => ({
     create(post: PostWithRelations, emit?: boolean) {
