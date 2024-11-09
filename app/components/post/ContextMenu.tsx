@@ -29,7 +29,7 @@ export default function ContextMenu({ post, user, exitDuration, onEdit }: { post
             setTimeout(() => {
                 // delete element from usePostStore following exit animation
                 deletePost({ post, deleteReply: false, emit: false });
-            }, exitDuration * 1000);
+            }, exitDuration * 1000 + 100);
         }
     }, [fetcher.data]);
 
