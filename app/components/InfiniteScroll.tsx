@@ -21,7 +21,7 @@ export type InfiniteScrollReturn<S> = [
 ];
 
 export function useInfiniteScroll<S>({ fetchData }: UseInfiniteScrollProps<S>): InfiniteScrollReturn<S> {
-    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+    const [ isLoading, setIsLoading ] = useState<boolean>(true);
     const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
 
     useEffect(() => {
