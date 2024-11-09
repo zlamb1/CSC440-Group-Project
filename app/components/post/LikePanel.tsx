@@ -6,7 +6,7 @@ import {ThumbsDown, ThumbsUp} from "lucide-react";
 import React, {useEffect, useRef, useState} from "react";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
-import useMountedEffect from "@/utils/useMountedEffect";
+import useMountedEffect from "@/utils/hooks/useMountedEffect";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 
 function getIsLiked(state: any) {

@@ -11,7 +11,7 @@ import {Button} from "@ui/button";
 import {AnimatePresence} from "framer-motion";
 import {Separator} from "@ui/separator";
 import {motion} from 'framer-motion';
-import useIsSSR from "@/utils/useIsSSR";
+import useIsSSR from "@/utils/hooks/useIsSSR";
 
 interface ThemeIcons {
     [index: string]: React.FunctionComponent

@@ -3,7 +3,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import React from "react";
 import Post from "@components/post/Post";
 import InfiniteScroll from "@components/InfiniteScroll";
-import useIsSSR from "@/utils/useIsSSR";
+import useIsSSR from "@/utils/hooks/useIsSSR";
 import {PostWithDate} from "@/utils/posts/usePublicPostsStore";
 
 export interface PostScrollerProps {

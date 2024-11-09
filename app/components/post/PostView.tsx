@@ -7,7 +7,7 @@ import RawPost from "@components/post/RawPost";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
-import useMountedEffect from "@/utils/useMountedEffect";
+import useMountedEffect from "@/utils/hooks/useMountedEffect";
 
 export default function PostView({ post, isEditing = false, onIsEditingChange = () => {} }: { post: any, isEditing?: boolean, onIsEditingChange?: (isEditing: boolean) => void }) {
     const fetcher = useFetcher();

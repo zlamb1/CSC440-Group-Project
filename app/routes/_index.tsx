@@ -15,7 +15,7 @@ import {useInfiniteScroll} from "@components/InfiniteScroll";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
 import {useShallow} from "zustand/react/shallow";
-import useMountedEffect from "@/utils/useMountedEffect";
+import useMountedEffect from "@/utils/hooks/useMountedEffect";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     return EndpointResponse({ user: context.user });
