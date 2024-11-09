@@ -63,7 +63,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
     }
 
     return (
-        <motion.div initial={{opacity: 0 }}
+        <motion.div initial={{opacity: 0, height: 0 }}
                     animate={{opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: exitDuration }}
