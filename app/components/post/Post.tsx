@@ -5,7 +5,7 @@ import {
     MessageCircle,
     Pencil,
 } from "lucide-react";
-import {Link, useFetcher} from "@remix-run/react";
+import {Link} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
 import ReplyView from "@components/post/ReplyView";
@@ -17,13 +17,16 @@ import {formatPastDate} from "@/utils/time";
 import {usePostStore} from "@/utils/usePostStore";
 import {Card} from "@ui/card";
 import {useShallow} from "zustand/react/shallow";
+import {cn} from "@/lib/utils";
+import { motion } from "framer-motion";
 
-function Post({className, id, viewer, depth = 1, autoReply = true}: {
+function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration = 0.5}: {
     className?: string,
     id: string,
     viewer: UserWithLoggedIn,
     depth?: number,
-    autoReply?: boolean
+    autoReply?: boolean,
+    exitDuration?: number,
 }) {
     const [isEditing, setEditing] = useState<boolean>(false);
     const [isReplying, setIsReplying] = useState<boolean>(viewer?.loggedIn && autoReply);
@@ -51,8 +54,13 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
     }
 
     return (
-        <div className={"flex gap-3 " + className}>
-            <div className="flex flex-col w-full">
+        <motion.div initial={{opacity: 0.25 }}
+                    animate={{opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0.25, height: 0 }}
+                    transition={{ duration: exitDuration }}
+                    className="overflow-y-hidden"
+        >
+            <div className={cn("flex flex-col w-full", className)}>
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
                         <UserHoverCard viewer={viewer} user={post.user}>
@@ -65,7 +73,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
                             </Link>
                         </UserHoverCard>
                     </div>
-                    <ContextMenu post={post} user={viewer} onEdit={() => setEditing(true)}/>
+                    <ContextMenu post={post} user={viewer} exitDuration={exitDuration} onEdit={() => setEditing(true)}/>
                 </div>
                 <div className="ml-10 flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
@@ -106,7 +114,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true}: {
                     <ReplyEditor post={post} isReplying={isReplying}/>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

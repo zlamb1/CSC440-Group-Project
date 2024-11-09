@@ -9,8 +9,9 @@ import {Post} from "@prisma/client";
 import {UserWithLoggedIn} from "@/utils/types";
 import {usePostStore} from "@/utils/usePostStore";
 import {useShallow} from "zustand/react/shallow";
+import {emitter, PostEvent} from "@/utils/usePostEvents";
 
-export default function ContextMenu({ post, user, onEdit }: { post: Post, user: UserWithLoggedIn, onEdit?: () => void }) {
+export default function ContextMenu({ post, user, exitDuration, onEdit }: { post: Post, user: UserWithLoggedIn, exitDuration: number, onEdit?: () => void }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
@@ -20,7 +21,12 @@ export default function ContextMenu({ post, user, onEdit }: { post: Post, user: 
 
     useEffect(() => {
         if (fetcher?.data?.success) {
-            deletePost(post);
+            // notify post stores to trigger exit animation
+            emitter.emit(PostEvent.DELETE, { post: post.id });
+            setTimeout(() => {
+                // delete element from usePostStore following exit animation
+                deletePost(post.id, false);
+            }, exitDuration * 1000);
         }
     }, [fetcher.data]);
 
