@@ -19,7 +19,7 @@ import {useShallow} from "zustand/react/shallow";
 import {cn} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
 
-function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration = 0.35}: {
+function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration = 0.25}: {
     className?: string,
     id: string,
     viewer: UserWithLoggedIn,
