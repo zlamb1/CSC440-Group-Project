@@ -26,9 +26,7 @@ export default function PostScroller({ posts, user, onLoad, isLoading }: PostScr
                 {
                     posts.map(post =>
                         <div className="flex flex-col" key={post.id}>
-                            <motion.div >
-                                <Post className="p-3 px-5" id={post.id} viewer={user} />
-                            </motion.div>
+                            <Post className="p-3 px-5" id={post.id} viewer={user} />
                             <hr />
                         </div>
                     )

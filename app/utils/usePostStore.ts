@@ -159,9 +159,7 @@ export const usePostStore = create((set, get: any) => ({
         });
     },
 
-    delete(post: string | Post | PostWithReplies | PostWithRelations, emit?: boolean) {
-        if (emit == null) emit = true;
-
+    delete({ post, deleteReply = true, emit = true }: { post: string | Post | PostWithReplies | PostWithRelations, deleteReply?: boolean, emit?: boolean }) {
         return set((state: any) => {
             const isString = typeof post === 'string';
             const id = isString ? post : post.id;
@@ -172,23 +170,15 @@ export const usePostStore = create((set, get: any) => ({
 
             const _state = { [id]: undefined };
 
-            // remove from parent replies
-            if (!isString && post.replyTo) {
-                const parent = {...state[post.replyTo]};
-                if (parent) {
-                    const indexOf = parent.replies?.indexOf?.(id);
-                    if (indexOf > -1) {
-                        parent.replies.splice(indexOf, 1);
-                        parent.replyCount = Math.max(parent.replyCount - 1, parent.replies.length);
-                        _state[post.replyTo] = parent;
-                    }
-                }
+            if (deleteReply && !isString && post.replyTo) {
+                // remove from parent replies
+                get().deleteReply({ id, replyTo: post.replyTo });
             }
 
             // delete replies
             if (!isString && 'replies' in post && post.replies.length) {
                 for (const reply of post.replies) {
-                    get().delete(reply);
+                    get().delete({ post: reply });
                 }
             }
 
@@ -197,6 +187,28 @@ export const usePostStore = create((set, get: any) => ({
             }
 
             return {...state, ..._state};
+        });
+    },
+
+    deleteReply({ id, replyTo }: { id: string, replyTo: string }) {
+        return set((state: any) => {
+            if (!id || !replyTo) {
+                console.error(`[usePostStore] attempted to delete reply with null ID or replyTo: [${id}, ${replyTo}]`);
+                return state;
+            }
+
+            const parent = {...state[replyTo]};
+            if (!parent) {
+                return state;
+            }
+
+            const indexOf = parent.replies?.indexOf?.(id);
+            if (indexOf > -1) {
+                parent.replies.splice(indexOf, 1);
+                parent.replyCount = Math.max(parent.replyCount - 1, parent.replies.length);
+            }
+
+            return {...state, [replyTo]: parent};
         });
     },
 

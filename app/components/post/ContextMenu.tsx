@@ -15,7 +15,7 @@ export default function ContextMenu({ post, user, exitDuration, onEdit }: { post
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
-    const { deletePost } = usePostStore(useShallow((state: any) => ({ deletePost: state.delete })));
+    const { deletePost, deleteReply } = usePostStore(useShallow((state: any) => ({ deletePost: state.delete, deleteReply: state.deleteReply })));
 
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
 
@@ -23,9 +23,12 @@ export default function ContextMenu({ post, user, exitDuration, onEdit }: { post
         if (fetcher?.data?.success) {
             // notify post stores to trigger exit animation
             emitter.emit(PostEvent.DELETE, { post: post.id });
+            if (post.replyTo) {
+                deleteReply({ id: post.id, replyTo: post.replyTo });
+            }
             setTimeout(() => {
                 // delete element from usePostStore following exit animation
-                deletePost(post.id, false);
+                deletePost({ post, deleteReply: false, emit: false });
             }, exitDuration * 1000);
         }
     }, [fetcher.data]);

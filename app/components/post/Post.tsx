@@ -8,7 +8,6 @@ import {
 import {Link} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
-import ReplyView from "@components/post/ReplyView";
 import {UserWithLoggedIn} from "@/utils/types";
 import UserHoverCard from "@components/hover/UserHoverCard";
 import LikePanel from "@components/post/LikePanel";
@@ -18,9 +17,9 @@ import {usePostStore} from "@/utils/usePostStore";
 import {Card} from "@ui/card";
 import {useShallow} from "zustand/react/shallow";
 import {cn} from "@/lib/utils";
-import { motion } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 
-function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration = 0.5}: {
+function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration = 0.35}: {
     className?: string,
     id: string,
     viewer: UserWithLoggedIn,
@@ -53,19 +52,30 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
         )
     }
 
+    function getReplyTree() {
+        return (
+            <AnimatePresence>
+                {
+                    post?.replies?.map((reply: string) => <Post key={reply} id={reply} viewer={viewer} depth={depth - 1} autoReply={false} />)
+                }
+            </AnimatePresence>
+        )
+    }
+
     return (
-        <motion.div initial={{opacity: 0.25 }}
+        <motion.div initial={{opacity: 0 }}
                     animate={{opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0.25, height: 0 }}
+                    exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: exitDuration }}
                     className="overflow-y-hidden"
+                    key={post.id}
         >
             <div className={cn("flex flex-col w-full", className)}>
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
                         <UserHoverCard viewer={viewer} user={post.user}>
                             <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
-                                <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName}/>
+                                <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
                                 <div className="flex items-center gap-1">
                                     {post.user?.userName}
                                     <span className="text-sm text-gray-400">• {formattedTime}</span>
@@ -73,7 +83,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                             </Link>
                         </UserHoverCard>
                     </div>
-                    <ContextMenu post={post} user={viewer} exitDuration={exitDuration} onEdit={() => setEditing(true)}/>
+                    <ContextMenu post={post} user={viewer} exitDuration={exitDuration} onEdit={() => setEditing(true)} />
                 </div>
                 <div className="ml-10 flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
@@ -83,7 +93,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                             />
                         </div>
                         <div className="flex gap-2">
-                            <LikePanel post={post} viewer={viewer}/>
+                            <LikePanel post={post} viewer={viewer} />
                             <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
                                 <Button containerClass="flex"
                                         className="h-[25px] flex gap-1 items-center rounded-full"
@@ -91,7 +101,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                                         variant={isReplying ? undefined : 'ghost'}
                                         disabled={!viewer?.loggedIn}
                                         onClick={() => setIsReplying(!isReplying)}>
-                                    <Pencil size={16}/>
+                                    <Pencil size={16} />
                                 </Button>
                             </div>
                             <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
@@ -106,12 +116,8 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                             </div>
                         </div>
                     </div>
-                    <ReplyView post={post}
-                               user={viewer}
-                               showReplies={showReplies}
-                               depth={depth}
-                    />
-                    <ReplyEditor post={post} isReplying={isReplying}/>
+                    { getReplyTree() }
+                    <ReplyEditor post={post} isReplying={isReplying} />
                 </div>
             </div>
         </motion.div>
