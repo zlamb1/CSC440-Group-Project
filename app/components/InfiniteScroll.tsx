@@ -3,7 +3,7 @@ import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 
-export type FetchParams<S> = {
+export type InfiniteFetcherParams = {
     isLoading: boolean,
     setIsLoading: Dispatch<SetStateAction<boolean>>,
     hasMoreData: boolean,
@@ -12,7 +12,7 @@ export type FetchParams<S> = {
 };
 
 export type UseInfiniteScrollProps<S> = {
-    fetchData: (params: FetchParams<S>) => Promise<void>,
+    fetchData: (params: InfiniteFetcherParams) => Promise<void>,
 }
 
 export type InfiniteScrollReturn<S> = [

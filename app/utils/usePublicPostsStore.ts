@@ -1,132 +1,28 @@
-import {create} from "zustand/react";
-import {PostWithRelations, PostWithReplies} from "@/utils/types";
-import {Post} from "@prisma/client";
 import {usePostStore} from "@/utils/usePostStore";
-import {FetchParams} from "@components/InfiniteScroll";
-import {emitter, PostEvent} from "@/utils/usePostEvents";
+import {InfiniteFetcherParams} from "@components/InfiniteScroll";
+import useVirtualizedPosts from "@/utils/useVirtualizedPosts";
 
-export type PostWithDate = {
-    id: string;
-    postedAt: Date;
+async function fetcher(set: any, get: any, { setHasMoreData }: InfiniteFetcherParams) {
+    const cursor = get().posts?.[get().posts?.length - 1]?.postedAt ?? new Date();
+    const limit = get().limit;
+
+    const params = new URLSearchParams();
+    params.set('cursor', cursor.toString());
+    params.set('limit', limit.toString());
+
+    const response = await fetch('/posts/public?' + params);
+    const json = await response.json();
+    const posts = json?.posts;
+
+    setHasMoreData(posts?.length === limit);
+
+    const postStore: any = usePostStore.getState();
+    if (posts?.length) {
+        postStore.add(posts);
+        get().add(posts);
+    }
+
+    return set((state: any) => state);
 }
 
-function cmp(a: PostWithDate, b: PostWithDate) {
-    if (a.postedAt > b.postedAt) {
-        return -1;
-    } else if (a.postedAt < b.postedAt) {
-        return 1;
-    }
-
-    return 0;
-}
-
-function binarySearch(element: PostWithDate, array: PostWithDate[]) {
-    let low = 0, high = array.length - 1, mid = -1;
-    while (low <= high) {
-        mid = low + Math.floor((high - low) / 2);
-        const _cmp = cmp(element, array[mid]);
-        if (_cmp > 0) {
-            low = mid + 1;
-        } else if (_cmp < 0) {
-            high = mid - 1;
-        } else {
-            return mid;
-        }
-    }
-
-    return -(low + 1);
-}
-
-const initialState = {
-    posts: [],
-    limit: 5,
-};
-
-export const usePublicPostsStore = create((set, get: any) => ({
-    ...initialState,
-
-    async fetch({ setHasMoreData }: FetchParams<PostWithRelations>) {
-        const cursor = get().posts?.[get().posts?.length - 1]?.postedAt ?? new Date();
-        const limit = get().limit ?? 10;
-
-        const params = new URLSearchParams();
-        params.set('cursor', cursor.toString());
-        params.set('limit', limit.toString());
-
-        const response = await fetch('/posts/public?' + params);
-        const json = await response.json();
-        const posts = json?.posts;
-
-        setHasMoreData(posts?.length === limit);
-
-        const postStore: any = usePostStore.getState();
-        if (posts?.length) {
-            postStore.add(posts);
-            get().add(posts);
-        }
-
-        return set((state: any) => state);
-    },
-
-    add(posts: (Post | PostWithRelations | PostWithReplies)[]) {
-        return set((state: any) => {
-            if (!posts || !posts.length) {
-                return state;
-            }
-
-            const _posts = [...state.posts];
-
-            for (const post of posts) {
-                if (post.replyTo) continue;
-
-                if (!post?.id) {
-                    console.error('[usePublicPostsStore] attempted to add post with null ID');
-                    continue;
-                }
-
-                if (!post?.postedAt) {
-                    console.error('[usePublicPostsStore] attempted to add post with null postedAt');
-                    continue;
-                }
-
-                const postWithDate: PostWithDate = {
-                    id: post.id,
-                    postedAt: post.postedAt
-                };
-
-                // O(log(n))
-                const index = binarySearch(postWithDate, _posts);
-                if (index < 0) {
-                    _posts.splice(Math.abs(index + 1), 0, postWithDate);
-                }
-            }
-
-            return {...state, posts: _posts};
-        });
-    },
-
-    delete(post: string | Post | PostWithReplies | PostWithRelations) {
-        const id = typeof post === 'string' ? post : post.id;
-        return set((state: any) => ({
-            ...state, posts: state.posts.filter((post: PostWithDate) => post.id !== id)
-        }));
-    },
-
-    reset() {
-        return set(initialState);
-    }
-}));
-
-emitter.on(PostEvent.CREATE, ({ post }: any) => {
-    const state: any = usePublicPostsStore.getState();
-    if (state?.add) {
-        state.add([post]);
-    }
-});
-
-emitter.on(PostEvent.DELETE, ({ post }: any) => {
-    const state: any = usePublicPostsStore.getState();
-    if (state?.delete) {
-        state.delete(post);
-    }
-});
+export const usePublicPostsStore = useVirtualizedPosts({ fetcher });
