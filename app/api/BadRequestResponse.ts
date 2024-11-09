@@ -6,7 +6,7 @@ export default function BadRequestResponse(message?: string | object, statusCode
 
 export function RequiredFieldResponse(field: string, useFieldAsProperty?: boolean) {
     if (useFieldAsProperty) {
-        return BadRequestResponse({ [field]: `${field} Is Required` });
+        return BadRequestResponse({ [field.toLowerCase()]: `${field} Is Required` });
     }
 
     return BadRequestResponse(`${field} Is Required`);

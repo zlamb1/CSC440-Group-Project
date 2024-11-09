@@ -15,7 +15,7 @@ export interface LoginFormProps {
 }
 
 export default function LoginForm({ header, submit, icon, action }: LoginFormProps) {
-    const fetcher = useFetcher<{ errors?: any }>();
+    const fetcher = useFetcher();
     return (
         <div className="flex flex-col gap-3 items-center">
             <div className="border-4 border-primary p-2 rounded-full">

@@ -1,13 +1,13 @@
 import {json} from "@remix-run/node";
 
-export enum ResponseType {
-    Success = 200,
-    Created = 201,
-    BadRequest = 400,
-    Unauthorized = 401,
-    Forbidden = 403,
-    ResourceNotFound = 404,
-    Unknown = 500,
+export const ResponseType = {
+    Success: 200,
+    Created: 201,
+    BadRequest: 400,
+    Unauthorized: 401,
+    Forbidden: 403,
+    ResourceNotFound: 404,
+    Unknown: 500,
 }
 
 export default function EndpointResponse(message: string | object, statusCode?: number) {
