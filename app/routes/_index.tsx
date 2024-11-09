@@ -1,46 +1,59 @@
 import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
-import {json, LoaderFunctionArgs} from "@remix-run/node";
+import {LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {createRef, FormEvent, Fragment, useEffect, useState} from "react";
-import Post from "@components/post/Post";
+import React, {createRef, FormEvent, useEffect, useState} from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
-import {AnimatePresence, motion} from "framer-motion";
+import {motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import useIsSSR from "@/utils/useIsSSR";
-import {getPublicPosts} from '@prisma/client/sql';
 import Fade from "@ui/fade";
 import EndpointResponse from "@/api/EndpointResponse";
+import PostScroller from "@components/post/PostScroller";
+import {PostWithRelations} from "@/utils/types";
+import {useInfiniteScroll} from "@components/InfiniteScroll";
+import {usePostStore} from "@/utils/posts/usePostStore";
+import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
+import {useShallow} from "zustand/react/shallow";
+import useMountedEffect from "@/utils/hooks/useMountedEffect";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    const posts = await context.prisma.$queryRawTyped(getPublicPosts(context.user.id));
-
-    return EndpointResponse({ user: context.user, posts });
+    return EndpointResponse({ user: context.user });
 }
 
 export default function Index() {
+    const data = useLoaderData<typeof loader>();
+
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
-    const isSSR = useIsSSR(); 
-    const data = useLoaderData<typeof loader>();
-    const createFetcher = useFetcher();
+
+    const { create } = usePostStore(useShallow((state: any) => ({ create: state.create })));
+    const { fetch, posts } = usePublicPostsStore(useShallow((state: any) => ({ fetch: state.fetch, add: state.add, posts: state.posts })));
+
+    const [ isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetch });
+
+    const fetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
 
-    useEffect(() => {
-        if (ref?.current && createFetcher.state === 'idle') {
-            ref.current.clearEditor();
+    useMountedEffect(() => {
+        if (fetcher?.data?.post) {
+            create(fetcher.data.post);
+            if (ref.current) {
+                ref.current.clearEditor();
+            }
+
         }
-    }, [createFetcher]);
+    }, [fetcher.data]);
 
     function onSubmit(evt: FormEvent<HTMLFormElement>) {
         evt.preventDefault();
         if (ref.current) {
             const formData = new FormData();
             formData.set('content', ref.current.getContent());
-            createFetcher.submit(formData, {
-                method: 'POST',
+
+            fetcher.submit(formData, {
                 action: '/posts/create',
+                method: 'POST',
             });
         }
     }
@@ -61,7 +74,7 @@ export default function Index() {
                                     isActive={isEditorActive}
                                     placeholder="Write a post..."
                                     onTextUpdate={(progress: number) => setEditorProgress(progress)}
-                                    editable={ createFetcher.state === 'idle' }
+                                    editable={fetcher.state === 'idle'}
                                     editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
                                     containerProps={{className: 'flex-grow w-full text-md'}}
                                     append={
@@ -74,10 +87,8 @@ export default function Index() {
                                                 Cancel
                                             </Button>
                                             <Button className="font-bold" type="submit"
-                                                    disabled={createFetcher.state !== 'idle'}>
-                                                {
-                                                    createFetcher.state === 'idle' ? 'Post' : <LoadingSpinner/>
-                                                }
+                                                    disabled={fetcher.state !== 'idle'}>
+                                                {fetcher.state === 'idle' ? 'Post' : <LoadingSpinner/>}
                                             </Button>
                                         </motion.div>
                                     }
@@ -86,21 +97,7 @@ export default function Index() {
                 </Form>
                 <hr/>
             </Fade>
-            <AnimatePresence initial={!isSSR}>
-                {
-                    data?.posts.map((post: any) =>
-                        <Fragment key={post.id}>
-                            <motion.div initial={{opacity: 0.25, transform: 'translateX(-10px)'}}
-                                        animate={{opacity: 1, height: 'auto', transform: 'translateX(0px)' }}
-                                        exit={{ opacity: 0.25, height: 0, transform: 'translateX(10px)' }}
-                                        transition={{ duration: 0.2 }}>
-                                <Post className="p-3 px-5" post={post} viewer={data?.user} />
-                            </motion.div>
-                            <hr />
-                        </Fragment>
-                    )
-                }
-            </AnimatePresence>
+            <PostScroller posts={posts} user={data?.user} onLoad={onLoad} isLoading={isLoading} />
         </div>
     )
 }

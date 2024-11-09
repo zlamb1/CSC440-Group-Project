@@ -1,11 +1,12 @@
 import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
-import {ensureContentLength, sanitizeContent} from "@/utils/post-validation";
+import {ensureContentLength, sanitizeContent} from "@/utils/posts/post-validation";
 import BadRequestResponse, {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
+import {getPostByID} from "@prisma/client/sql";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
@@ -44,8 +45,8 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         if (!post) {
             return ExplicitResourceNotFoundResponse('Post');
         }
-        
-        return ExplicitUpdateResponse('Post');
+
+        return ExplicitUpdateResponse('Post', { content: post.content, lastEdited: post.lastEdited });
     } catch (err) {
         return UnknownErrorResponse(err);
     }

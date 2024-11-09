@@ -1,4 +1,4 @@
-import useCookie from "@/utils/useCookie";
+import useCookie from "@/utils/hooks/useCookie";
 import {cookiePreferenceStorageName} from "@/utils/prefers-color-scheme";
 import * as Toast from "@radix-ui/react-toast";
 import {Card} from "@ui/card";

@@ -1,6 +1,6 @@
 import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
-import {ensureContentLength, sanitizeContent} from "@/utils/post-validation";
+import {ensureContentLength, sanitizeContent} from "@/utils/posts/post-validation";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitCreateResponse} from "@/api/CreateResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
@@ -30,7 +30,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             return EndpointResponse(msg, 400);
         }
 
-        await context.prisma.post.create({
+        const post = await context.prisma.post.create({
             data: {
                 userId: context.user.id,
                 content: sanitizedContent,
@@ -38,10 +38,10 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             },
         });
 
-        return ExplicitCreateResponse('Reply');
+        post.user = context.user;
+
+        return ExplicitCreateResponse('Reply', { post });
     } catch (err) {
         return UnknownErrorResponse(err);
     }
 }
-
-export default NotFound;

@@ -1,6 +1,8 @@
 import {AnimatePresence, motion} from "framer-motion";
 import {Avatar, AvatarFallback, AvatarImage} from "@ui/avatar";
 import Transition from "@ui/transition";
+import {useState} from "react";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export interface UserAvatarProps {
     className?: string,
@@ -24,24 +26,34 @@ function UserAvatarFallback({ userName, size }: { userName?: string, size: numbe
 }
 
 export default function UserAvatar({className, avatar, userName, size = 25}: UserAvatarProps) {
+    const [loadingStatus, setLoadingStatus] = useState<string | undefined>(avatar ? 'loading' : undefined);
+
+    function onLoadingStatusChange(status: string) {
+        setLoadingStatus(status);
+    }
+
     return (
         <div className={`flex justify-center items-center rounded-full select-none font-medium text-white ` + (className ?? '')}
              style={{width: size, height: size}}>
             <Avatar className="w-full h-full">
-                <Transition duration={0.1}
-                            show={avatar}
+                <Transition duration={1}
+                            show={true}
                             transition={{
                                 initial: {scale: 0.5, opacity: 0.25},
                                 animate: {scale: 1, opacity: 1},
                                 exit: {scale: 0.5, opacity: 0.25},
                             }}
                             initial={false}
-                            className="origin-center"
-                            fallback={<UserAvatarFallback size={size} userName={userName} />}
+                            className="origin-center w-full h-full"
                 >
-                    <AvatarImage className="object-cover rounded-full" style={{ width: size, height: size }} src={avatar} alt={`${userName}'s avatar image`} />
+                    <AvatarImage className="object-cover rounded-full"
+                                 style={{ width: size, height: size }}
+                                 src={avatar}
+                                 alt={`${userName}'s avatar image`}
+                                 onLoadingStatusChange={onLoadingStatusChange}
+                    />
                     <AvatarFallback>
-                        <UserAvatarFallback size={size} userName={userName} />
+                        { loadingStatus === 'loading' ? <LoadingSpinner /> : <UserAvatarFallback size={size} userName={userName} /> }
                     </AvatarFallback>
                 </Transition>
             </Avatar>

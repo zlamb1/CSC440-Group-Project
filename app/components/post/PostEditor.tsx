@@ -14,7 +14,7 @@ import React, {useEffect, useImperativeHandle, useState} from "react";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import {Separator} from "@ui/separator";
-import useIsSSR from "@/utils/useIsSSR";
+import useIsSSR from "@/utils/hooks/useIsSSR";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Card} from "@ui/card";
 import {AnimatePresence} from "framer-motion";

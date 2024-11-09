@@ -23,43 +23,39 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
         const likedString = String(formData.get('liked'));
 
         if (likedString === 'null') {
-            await context.prisma.$transaction([
-                context.prisma.postLike.delete({
-                    where: {
-                        postId_userId: {
-                            postId: params.id,
-                            userId: context.user.id,
-                        },
-                    },
-                }),
-            ]);
-
-            return ExplicitDeleteResponse('Post Like');
-        }
-
-        const liked = likedString === 'true';
-
-        await context.prisma.$transaction([
-            context.prisma.postLike.upsert({
+            await context.prisma.postLike.delete({
                 where: {
                     postId_userId: {
                         postId: params.id,
                         userId: context.user.id,
                     },
                 },
-                update: {
-                    liked,
-                    likedAt: new Date(),
-                },
-                create: {
+            });
+
+            return ExplicitDeleteResponse('Post Like', { liked: null });
+        }
+
+        const liked = likedString === 'true';
+
+        await context.prisma.postLike.upsert({
+            where: {
+                postId_userId: {
                     postId: params.id,
                     userId: context.user.id,
-                    liked
                 },
-            }),
-        ]);
+            },
+            update: {
+                liked,
+                likedAt: new Date(),
+            },
+            create: {
+                postId: params.id,
+                userId: context.user.id,
+                liked
+            },
+        });
 
-        return ExplicitCreateResponse('Post Like');
+        return ExplicitCreateResponse('Post Like', { liked: liked });
     } catch (err) {
         if (err instanceof PrismaClientKnownRequestError) {
             switch (err.code) {

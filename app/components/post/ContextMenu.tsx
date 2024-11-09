@@ -1,27 +1,49 @@
 import {useFetcher} from "@remix-run/react";
 import {useIsPresent} from "framer-motion";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
 import {Edit2, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Post} from "@prisma/client";
 import {UserWithLoggedIn} from "@/utils/types";
+import {usePostStore} from "@/utils/posts/usePostStore";
+import {useShallow} from "zustand/react/shallow";
+import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 
-export default function ContextMenu({ post, user, onEdit }: { post: Post, user: UserWithLoggedIn, onEdit?: () => void }) {
+export default function ContextMenu({ post, user, exitDuration, onEdit }: { post: Post, user: UserWithLoggedIn, exitDuration: number, onEdit?: () => void }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
     const [ isOpen, setOpen ] = useState(false);
+    const { deletePost, deleteReply } = usePostStore(useShallow((state: any) => ({ deletePost: state.delete, deleteReply: state.deleteReply })));
+
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
+
+    useEffect(() => {
+        if (fetcher?.data?.success) {
+            // notify post stores to trigger exit animation
+            emitter.emit(PostEvent.DELETE, { post: post.id });
+            if (post.replyTo) {
+                deleteReply({ id: post.id, replyTo: post.replyTo });
+            }
+            setTimeout(() => {
+                // delete element from usePostStore following exit animation
+                deletePost({ post, deleteReply: false, emit: false });
+            }, exitDuration * 1000 + 100);
+        }
+    }, [fetcher.data]);
+
     if (post.userId !== user?.id) {
         return null;
     }
+
     function onClickEdit() {
         setOpen(false);
         if (onEdit) {
             onEdit();
         }
     }
+
     return (
         <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)}  modal={false}>
             <DropdownMenuTrigger className={post.userId !== user?.id ? 'hidden' : ''} asChild>

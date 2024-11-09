@@ -1,11 +1,13 @@
 import {ActionFunctionArgs} from "@remix-run/node";
 import NotFound from "@/routes/$";
-import {ensureContentLength, sanitizeContent} from "@/utils/post-validation";
+import {ensureContentLength, sanitizeContent} from "@/utils/posts/post-validation";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import EndpointResponse from "@/api/EndpointResponse";
 import {ExplicitCreateResponse} from "@/api/CreateResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {getPostByID} from '@prisma/client/sql';
 
 export async function action({ context, request} : ActionFunctionArgs) {
     try {
@@ -26,14 +28,24 @@ export async function action({ context, request} : ActionFunctionArgs) {
             return EndpointResponse(msg, 400);
         }
 
-        await context.prisma.post.create({
+        const post = await context.prisma.post.create({
             data: {
                 userId: context.user.id,
                 content: sanitizedContent,
             }
         });
 
-        return ExplicitCreateResponse('Post');
+        if (!post) {
+            return ExplicitResourceNotFoundResponse('Post');
+        }
+
+        // manually set SQL-aggregated fields
+        post.replyCount = 0;
+        post.likeCount = 0;
+        post.liked = null;
+        post.user = context.user;
+
+        return ExplicitCreateResponse('Post', { post });
     } catch (err) {
         return UnknownErrorResponse(err);
     }

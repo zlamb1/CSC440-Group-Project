@@ -4,6 +4,6 @@ export default function ResourceNotFoundResponse(message?: string | object, stat
     return EndpointResponse(message ?? 'Resource Not Found', statusCode ?? ResponseType.ResourceNotFound);
 }
 
-export function ExplicitResourceNotFoundResponse(resource: string) {
-    return ResourceNotFoundResponse(`${resource} Not Found`);
+export function ExplicitResourceNotFoundResponse(resource: string, props?: object) {
+    return ResourceNotFoundResponse({ error: `${resource} Not Found`, ...props });
 }

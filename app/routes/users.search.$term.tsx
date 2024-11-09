@@ -1,4 +1,3 @@
-import NotFound from "@/routes/$";
 import {LoaderFunctionArgs} from "@remix-run/node";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
@@ -31,5 +30,3 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
         return UnknownErrorResponse(err);
     }
 }
-
-export default NotFound;

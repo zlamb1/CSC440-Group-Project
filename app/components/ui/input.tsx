@@ -11,12 +11,17 @@ export interface InputProps
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({ className, type, ...props }, ref) => {
-    const _ref = useRef<HTMLInputElement | null>(null);
-    const inputRef = ref ?? _ref;
+    const containerRef = useRef<HTMLDivElement>(null)
+    const inputRef = ref ?? useRef<HTMLInputElement | null>(null);
 
     function onClick() {
         if ("current" in inputRef) {
             inputRef?.current?.focus();
+        } else if (containerRef.current) {
+            const input = containerRef.current.querySelector('input');
+            if (input) {
+                input.focus();
+            }
         }
     }
 
@@ -28,6 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, type, ...pr
                 "rounded-md text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 " +
                 "focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", className)}
             onClick={onClick}
+            ref={containerRef}
         >
             {
                 props?.prepend ? props.prepend : null

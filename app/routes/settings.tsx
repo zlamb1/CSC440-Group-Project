@@ -27,11 +27,13 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 import UserDeletionDialog from "@components/user/UserDeletionDialog";
+import {validateUsername} from "@/routes/register";
+import {ErrorContext} from "@components/error/ErrorContext";
 
 const isProduction = process.env.NODE_ENV === "production";
 
 export async function loader({ context }: LoaderFunctionArgs) {
-    return json(context.user);
+    return json({ user: context.user });
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
@@ -42,6 +44,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
             request,
             uploadHandler
         );
+
+        const userName = String(formData.get('userName'));
+        if (userName && userName !== context.user.userName) {
+            const userNameValidation = await validateUsername(context, userName);
+            if (userNameValidation) {
+                return userNameValidation;
+            }
+        }
 
         const isUpdatingAvatar = formData.get("is-updating-avatar") === 'true';
         const file = formData.get("avatar");
@@ -81,33 +91,26 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
         const oldAvatar = context.user.avatarPath;
 
-        if (isUpdatingAvatar) {
-            const user = await context.prisma.user.update({
-                data: {
-                    avatarPath: avatar,
-                },
-                where: {
-                    id: context.user.id,
-                },
-            });
-
-            if (!user) {
-                return ExplicitResourceNotFoundResponse('User');
-            }
-        }
-
-        if (isProduction) {
+        if (isUpdatingAvatar && isProduction) {
             removeAvatar(oldAvatar);
         }
 
-        await context.prisma.user.update({
+        const user = await context.prisma.user.update({
             data: {
-                displayName, bio, visibility,
+                userName: userName || undefined,
+                avatarPath: isUpdatingAvatar ? avatar : undefined,
+                displayName,
+                bio,
+                visibility,
             },
             where: {
                 id: context.user.id,
             },
         });
+
+        if (!user) {
+            return ExplicitResourceNotFoundResponse('User');
+        }
 
         return ExplicitUpdateResponse('User');
     } catch (err) {
@@ -122,13 +125,13 @@ function formatKey(key: string) {
 export default function SettingsRoute() {
     const data = useLoaderData<typeof loader>();
     const fetcher = useFetcher();
-    const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.avatarPath);
+    const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.user?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (fetcher.state === 'idle') {
-            setUserAvatar(data?.avatarPath);
+            setUserAvatar(data?.user?.avatarPath);
             setIsAvatarUpdated(false)
         }
     }, [fetcher]);
@@ -154,12 +157,12 @@ export default function SettingsRoute() {
 
     function clearAvatar() {
         if (fileInputRef.current) {
-            if (userAvatar === data?.avatarPath) {
+            if (userAvatar === data?.user?.avatarPath) {
                 setUserAvatar(undefined);
                 setIsAvatarUpdated(true);
                 fileInputRef.current.value = '';
             } else {
-                setUserAvatar(data?.avatarPath);
+                setUserAvatar(data?.user?.avatarPath);
                 setIsAvatarUpdated(false);
             }
         }
@@ -174,18 +177,18 @@ export default function SettingsRoute() {
                     <HoverCard>
                         <HoverCardTrigger asChild>
                             <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon" type="button" onClick={ onClick }>
-                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.userName} />
+                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.user?.userName} />
                                 <motion.div animate={{ opacity: 0 }}
                                             whileHover={{ opacity: 1 }}
                                             className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
                                     <Edit2 className="text-white" size={20} />
-                                    <Input type="text" readOnly className="hidden" name="is-updating-avatar" value={'' + isAvatarUpdated} />
+                                    <Input type="text" className="hidden" name="is-updating-avatar" value={'' + isAvatarUpdated} readOnly />
                                     <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar} ref={fileInputRef} />
                                 </motion.div>
                             </Button>
                         </HoverCardTrigger>
                         <HoverCardContent className="rounded-full border-0 w-fit h-fit p-0">
-                            <Fade initial={false} show={userAvatar || data?.avatarPath}>
+                            <Fade initial={false} show={userAvatar || data?.user?.avatarPath}>
                                 <Button className="w-[25px] h-[25px] rounded-full" size="icon" variant="destructive" type="button"
                                         onClick={clearAvatar}>
                                     <X size={16} />
@@ -195,20 +198,21 @@ export default function SettingsRoute() {
                     </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
                         Username
-                        <Input placeholder={data?.userName}/>
+                        <Input name="userName" placeholder={data?.user?.userName} />
+                        <ErrorContext msg={fetcher?.data?.username} />
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">
                     Display Name
-                    <Input defaultValue={data?.displayName} name="displayName" />
+                    <Input defaultValue={data?.user?.displayName} name="displayName" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Bio
-                    <Textarea defaultValue={data?.bio} name="bio" />
+                    <Textarea defaultValue={data?.user?.bio} name="bio" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Profile Visibility
-                    <Select name="visibility" defaultValue={data?.visibility}>
+                    <Select name="visibility" defaultValue={data?.user?.visibility}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Public" />
                         </SelectTrigger>
@@ -223,7 +227,7 @@ export default function SettingsRoute() {
                     <Button variant="edit" type="submit">
                         Update Settings
                     </Button>
-                    <UserDeletionDialog user={data}>
+                    <UserDeletionDialog user={data?.user}>
                         <Button containerClass="w-fit" variant="destructive">
                             Delete Account
                         </Button>
