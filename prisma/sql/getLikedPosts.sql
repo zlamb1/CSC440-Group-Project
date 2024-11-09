@@ -1,3 +1,7 @@
+-- @param {String} $1:userId
+-- @param {String} $2:viewerId
+-- @param {DateTime} $3:cursor
+-- @param {Int} $4:limit
 SELECT
     p."id", p."postedAt", p."content", p."replyTo", p."lastEdited", p."userId",
     (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
@@ -64,6 +68,7 @@ LEFT JOIN LATERAL (
     GROUP BY r."id", u."id"
     ORDER BY r."postedAt" DESC
 ) r ON TRUE
-WHERE p."replyTo" IS NULL
+WHERE p."replyTo" IS NULL AND p."postedAt" < $3::TIMESTAMP
 GROUP BY p."id", u."id"
 ORDER BY p."postedAt" DESC
+LIMIT $4::INTEGER

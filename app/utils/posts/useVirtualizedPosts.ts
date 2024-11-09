@@ -38,16 +38,22 @@ function binarySearch(element: PostWithDate, array: PostWithDate[]) {
     return -(low + 1);
 }
 
-export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT }:
-{ name?: string, fetcher: (set: any, get: any, params: InfiniteFetcherParams) => Promise<void>, limit?: number }) {
+export interface VirtualizedPostsProps {
+    name?: string;
+    fetcher: (set: any, get: any, params: InfiniteFetcherParams) => Promise<void>;
+    limit?: number;
+    state?: object,
+}
+
+export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT, state }: VirtualizedPostsProps) {
     const initialState = {
-        posts: [], limit
+        posts: [], limit, ...state
     };
 
     const store = create((set, get: any) => ({
         ...initialState,
 
-        fetch: (params: InfiniteFetcherParams) => {
+        fetch(params: InfiniteFetcherParams) {
             return fetcher(set, get, params);
         },
 
@@ -103,6 +109,7 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
     emitter.on(PostEvent.CREATE, ({ post }: any) => {
         const state: any = store.getState();
         if (state?.add) {
+            // TODO: introduce conditions for adding post to store
             state.add([post]);
         }
     });

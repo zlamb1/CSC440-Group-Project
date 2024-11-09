@@ -10,11 +10,9 @@ export async function fetchPublicPosts(prisma: any, userId: string, cursor?: str
 export async function loader({ context, request }: LoaderFunctionArgs) {
     try {
         const url = new URL(request.url);
-        const cursor = url.searchParams.get("cursor");
-        const limit = url.searchParams.get("limit");
-
+        const cursor = url.searchParams?.get("cursor");
+        const limit = url.searchParams?.get("limit");
         const posts = await fetchPublicPosts(context.prisma, context.user.id, cursor, limit);
-
         return EndpointResponse({ posts });
     } catch (err) {
         return UnknownErrorResponse(err);

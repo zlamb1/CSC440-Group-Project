@@ -1,10 +1,10 @@
 import {UserWithLoggedIn} from "@/utils/types";
-import {AnimatePresence, motion} from "framer-motion";
+import {AnimatePresence} from "framer-motion";
 import React from "react";
 import Post from "@components/post/Post";
 import InfiniteScroll from "@components/InfiniteScroll";
 import useIsSSR from "@/utils/hooks/useIsSSR";
-import {PostWithDate} from "@/utils/posts/usePublicPostsStore";
+import {PostWithDate} from "@/utils/posts/useVirtualizedPosts";
 
 export interface PostScrollerProps {
     posts: PostWithDate[],
@@ -24,7 +24,7 @@ export default function PostScroller({ posts, user, onLoad, isLoading }: PostScr
         <InfiniteScroll load={doLoad} isLoading={isLoading}>
             <AnimatePresence initial={!isSSR}>
                 {
-                    posts.map(post =>
+                    posts?.map(post =>
                         <div className="flex flex-col" key={post.id}>
                             <Post className="p-3 px-5" id={post.id} viewer={user} />
                             <hr />

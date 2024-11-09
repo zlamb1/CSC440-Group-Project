@@ -12,7 +12,7 @@ export type InfiniteFetcherParams = {
 };
 
 export type UseInfiniteScrollProps<S> = {
-    fetchData: (params: InfiniteFetcherParams) => Promise<void>,
+    fetchData: (params: InfiniteFetcherParams) => Promise<void> | undefined,
 }
 
 export type InfiniteScrollReturn<S> = [
@@ -27,8 +27,9 @@ export function useInfiniteScroll<S>({ fetchData }: UseInfiniteScrollProps<S>): 
     useEffect(() => {
         if (isLoading) {
             let doUpdate = true;
-            fetchData({ isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
-                .then(() => {
+            // @ts-ignore
+            fetchData?.({ isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
+                .finally(() => {
                     if (doUpdate) {
                         setIsLoading(false);
                     }
@@ -103,7 +104,7 @@ export default function InfiniteScroll({ children, className, containerClass, lo
     }, [ref, containerRef, children, load]);
 
     return (
-        <ScrollArea className={cn('', className)} style={{maxHeight}} ref={containerRef}>
+        <ScrollArea className={cn('overflow-y-scroll', className)} style={{maxHeight}} ref={containerRef}>
             <div className={cn("flex flex-col pb-16", containerClass)}>
                 { children }
                 {

@@ -6,18 +6,20 @@ import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
 import {ProfileVisibility, Follow, Prisma, User} from "@prisma/client";
 import NotFound from "@/routes/$";
-import Post from "@components/post/Post";
-import {Fragment, useState} from "react";
+import {useRef, useState} from "react";
 import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
-import {getUserPosts, getLikedPosts} from '@prisma/client/sql';
-import {FollowWithRelations, PostWithRelations, PostWithUser} from "@/utils/types";
+import {FollowWithRelations, PostWithRelations, PostWithReplies} from "@/utils/types";
 import EndpointResponse from "@/api/EndpointResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {useShallow} from "zustand/react/shallow";
+import PostScroller from "@components/post/PostScroller";
+import {useInfiniteScroll} from "@components/InfiniteScroll";
+import useProfilePosts from "@/utils/posts/useProfilePosts";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -54,9 +56,6 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
                 userName: params.username,
             },
         });
-
-        user.posts = await context.prisma.$queryRawTyped(getUserPosts(user.id, context.user.id));
-        user.likedPosts = await context.prisma.$queryRawTyped(getLikedPosts(user.id, context.user.id));
 
         if (!user) {
             return ExplicitResourceNotFoundResponse('User');
@@ -119,10 +118,16 @@ export default function UserRoute() {
 
     const self = data?.self;
     const user = data?.user;
-    const posts = user?.posts;
-    const likedPosts = user?.likedPosts;
     const following = user?.following;
     const followers = user?.followers;
+
+    const store = useRef(useProfilePosts(user?.id));
+    const { profilePosts, likedPosts } = store.current(useShallow((state: any) => ({ profilePosts: state.profilePosts, likedPosts: state.likedPosts })));
+    const { fetch, posts } = profilePosts(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
+    const { _fetch, _posts } = likedPosts(useShallow((state: any) => ({ _fetch: state.fetch, _posts: state.posts })));
+
+    const [ isLoading, onLoad ] = useInfiniteScroll<PostWithReplies>({ fetchData: fetch });
+    const [ _isLoading, _onLoad ] = useInfiniteScroll<PostWithReplies>({ fetchData: _fetch });
 
     const isOwnPage = self?.id === user?.id;
 
@@ -194,13 +199,12 @@ export default function UserRoute() {
                 <Separator />
                 <TabsContent className="flex flex-col gap-2" value="posts">
                     {
-                        posts?.map((post: PostWithUser) =>
-                            <Fragment key={post.id}>
-                                <Post post={{...post, user}} viewer={self}/>
-                                <Separator/>
-                            </Fragment>
-                        )
+                        (!posts || !posts.length) && !isLoading &&
+                        <div className="font-bold select-none text-center mt-8">
+                            <span className="text-primary">@{user?.userName}</span> has no posts ¯\_(ツ)_/¯
+                        </div>
                     }
+                    <PostScroller posts={posts} user={self} isLoading={isLoading} onLoad={onLoad} />
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="following">
                     {
@@ -230,16 +234,12 @@ export default function UserRoute() {
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="liked">
                     {
-                        !likedPosts || !likedPosts.length ?
+                        (!_posts || !_posts.length) && !_isLoading &&
                             <div className="font-bold select-none text-center mt-8">
                                 <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
-                            </div> : null
+                            </div>
                     }
-                    {
-                        likedPosts?.map((post: PostWithRelations) =>
-                            <Post post={post} viewer={self} key={post.id} />
-                        )
-                    }
+                    <PostScroller posts={_posts} user={self} isLoading={_isLoading} onLoad={_onLoad}/>
                 </TabsContent>
             </Tabs>
         </div>
