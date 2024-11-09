@@ -75,7 +75,7 @@ function Post({className, post, viewer, depth = 1, autoReply = true}: {
                                showReplies={showReplies}
                                depth={depth}
                     />
-                    <ReplyEditor post={post} isReplying={isReplying} />
+                    { viewer?.loggedIn && <ReplyEditor post={post} isReplying={isReplying} /> }
                 </div>
             </div>
         </div>
