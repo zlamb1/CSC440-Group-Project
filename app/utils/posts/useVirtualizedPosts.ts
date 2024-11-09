@@ -42,10 +42,11 @@ export interface VirtualizedPostsProps {
     name?: string;
     fetcher: (set: any, get: any, params: InfiniteFetcherParams) => Promise<void>;
     limit?: number;
-    state?: object,
+    state?: object;
+    filterFn?: (post: Post | PostWithReplies | PostWithRelations) => boolean;
 }
 
-export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT, state }: VirtualizedPostsProps) {
+export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT, state, filterFn }: VirtualizedPostsProps) {
     const initialState = {
         posts: [], limit, ...state
     };
@@ -58,6 +59,10 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
         },
 
         add(posts: (Post | PostWithRelations | PostWithReplies)[]) {
+            if (filterFn) {
+                posts = posts?.filter?.(filterFn);
+            }
+
             return set((state: any) => {
                 if (!posts || !posts.length) {
                     return state;

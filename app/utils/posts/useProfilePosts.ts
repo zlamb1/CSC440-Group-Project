@@ -32,7 +32,8 @@ async function fetcher(set: any, get: any, { setHasMoreData }: InfiniteFetcherPa
 export default function useProfilePosts(userId: string) {
     return create((set, get: any) => ({
         id: userId,
-        profilePosts: useVirtualizedPosts({state: {id: userId}, fetcher: fetcher}),
-        likedPosts: useVirtualizedPosts({state: {id: userId, liked: true}, fetcher: fetcher}),
+        profilePosts: useVirtualizedPosts({state: {id: userId}, fetcher, filterFn: (post) => post.userId === userId}),
+        // don't add any new posts to the likedPosts unless we refetch
+        likedPosts: useVirtualizedPosts({state: {id: userId, liked: true}, fetcher, filterFn: () => false}),
     }));
 }
