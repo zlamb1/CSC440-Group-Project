@@ -118,7 +118,6 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                     </div>
                     { viewer?.loggedIn && <ReplyEditor post={post} isReplying={isReplying} /> }
                     { getReplyTree() }
-                    <ReplyEditor post={post} isReplying={isReplying} />
                 </div>
             </div>
         </motion.div>
