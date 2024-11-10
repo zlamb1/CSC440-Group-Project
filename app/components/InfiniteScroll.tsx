@@ -164,18 +164,7 @@ export default function InfiniteScroll({ children, className, containerClass, on
     const duration = 0.5;
 
     function getContent() {
-        if (isLoading) {
-            return (
-                <motion.div initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration }}
-                            className="w-full flex justify-center mt-2"
-                >
-                    <LoadingSpinner/>
-                </motion.div>
-            );
-        } else if (isEmpty && empty) {
+        if (!isLoading && isEmpty && empty) {
             return (
                 <motion.div initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -195,6 +184,7 @@ export default function InfiniteScroll({ children, className, containerClass, on
                         className={cn("flex flex-col pb-16", containerClass)}
             >
                 {children}
+                {isLoading && <motion.div className="flex justify-center items-center"><LoadingSpinner/></motion.div>}
             </motion.div>
         );
     }
