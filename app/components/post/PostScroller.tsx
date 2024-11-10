@@ -23,10 +23,10 @@ export default function PostScroller({ posts, user, fetcher, onLoad, empty }: Po
         onLoad?.(isLoading);
     }, [isLoading]);
 
-    const isEmpty = (!posts || !posts.length) && !isLoading;
+    const isEmpty = !posts || !posts.length;
 
     return (
-        <InfiniteScroll onLoad={_onLoad} isLoading={isLoading}>
+        <InfiniteScroll onLoad={_onLoad} isLoading={isLoading} empty={empty} isEmpty={isEmpty}>
             <AnimatePresence initial={!isSSR}>
                 {
                     posts?.map(post =>
@@ -37,9 +37,6 @@ export default function PostScroller({ posts, user, fetcher, onLoad, empty }: Po
                     )
                 }
             </AnimatePresence>
-            <Fade duration={0.25} show={isEmpty}>
-                { empty }
-            </Fade>
         </InfiniteScroll>
     )
 }

@@ -2,6 +2,8 @@ import {ScrollArea} from "@ui/scroll-area";
 import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {AnimatePresence, motion} from "framer-motion";
+import {isEmptyObject} from "@tiptap/react";
 
 export type InfiniteFetcherParams = {
     isLoading: boolean,
@@ -111,23 +113,16 @@ export interface InfiniteScrollProps {
     containerClass?: string;
     onLoad?: () => void;
     isLoading?: boolean;
+    isEmpty?: boolean;
+    empty?: ReactNode;
     useMaxHeight?: boolean;
     maxHeightProps?: MaxHeightProps;
 }
 
-export default function InfiniteScroll({ children, className, containerClass, onLoad, isLoading = false, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
+export default function InfiniteScroll({ children, className, containerClass, onLoad, isLoading = false, isEmpty = false, empty, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
     const ref = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [ maxHeight, setMaxHeight ] = useState<string>('none');
-
-    function calculateMaxHeight() {
-        if (useMaxHeight && containerRef.current) {
-            const y = containerRef.current.getBoundingClientRect().top;
-            setMaxHeight(`${window.innerHeight - y - maxHeightProps?.marginBottom}px`);
-        } else {
-            setMaxHeight('none');
-        }
-    }
 
     useEffect(() => {
         window.addEventListener('resize', calculateMaxHeight);
@@ -157,18 +152,59 @@ export default function InfiniteScroll({ children, className, containerClass, on
         }
     }, [ref, containerRef, children, onLoad]);
 
+    function calculateMaxHeight() {
+        if (useMaxHeight && containerRef.current) {
+            const y = containerRef.current.getBoundingClientRect().top;
+            setMaxHeight(`${window.innerHeight - y - maxHeightProps?.marginBottom}px`);
+        } else {
+            setMaxHeight('none');
+        }
+    }
+
+    const duration = 0.5;
+
+    function getContent() {
+        if (isLoading) {
+            return (
+                <motion.div initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration }}
+                            className="w-full flex justify-center mt-2"
+                >
+                    <LoadingSpinner/>
+                </motion.div>
+            );
+        } else if (isEmpty && empty) {
+            return (
+                <motion.div initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration }}
+                >
+                    {empty}
+                </motion.div>
+            )
+        }
+
+        return (
+            <motion.div initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration }}
+                        className={cn("flex flex-col pb-16", containerClass)}
+            >
+                {children}
+            </motion.div>
+        );
+    }
+
     return (
         <ScrollArea className={cn('overflow-y-scroll', className)} style={{maxHeight}} ref={containerRef}>
-            <div className={cn("flex flex-col pb-16", containerClass)}>
-                { children }
-                {
-                    isLoading &&
-                    <div className="w-full flex justify-center mt-2">
-                        <LoadingSpinner />
-                    </div>
-                }
-            </div>
-            <div className="w-0 h-0" ref={ref} />
+            <AnimatePresence mode="wait">
+                { getContent() }
+            </AnimatePresence>
+            <div className="w-0 h-0" ref={ref}/>
         </ScrollArea>
     )
 }
