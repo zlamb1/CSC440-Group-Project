@@ -29,8 +29,6 @@ export default function Index() {
     const { create } = usePostStore(useShallow((state: any) => ({ create: state.create })));
     const { fetch, posts } = usePublicPostsStore(useShallow((state: any) => ({ fetch: state.fetch, add: state.add, posts: state.posts })));
 
-    const [ isLoading, onLoad ] = useInfiniteScroll({ fetcher: fetch });
-
     const fetcher = useFetcher();
     const ref = createRef<PostEditorElement>();
 
@@ -96,7 +94,7 @@ export default function Index() {
                 </Form>
                 <hr/>
             </Fade>
-            <PostScroller posts={posts} user={data?.user} onLoad={onLoad} isLoading={isLoading} />
+            <PostScroller posts={posts} user={data?.user} fetcher={fetch} />
         </div>
     )
 }

@@ -109,13 +109,13 @@ export interface InfiniteScrollProps {
     children: ReactNode;
     className?: string;
     containerClass?: string;
-    load?: () => void;
+    onLoad?: () => void;
     isLoading?: boolean;
     useMaxHeight?: boolean;
     maxHeightProps?: MaxHeightProps;
 }
 
-export default function InfiniteScroll({ children, className, containerClass, load, isLoading = false, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
+export default function InfiniteScroll({ children, className, containerClass, onLoad, isLoading = false, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
     const ref = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [ maxHeight, setMaxHeight ] = useState<string>('none');
@@ -137,13 +137,15 @@ export default function InfiniteScroll({ children, className, containerClass, lo
     useEffect(() => {
         calculateMaxHeight();
 
-        if (load && containerRef.current) {
+        if (onLoad && containerRef.current) {
             const options = {
                 root: containerRef.current,
             }
             const observer = new IntersectionObserver(entries => {
                 if (entries[0].intersectionRatio <= 0) return;
-                load();
+                if (!isLoading) {
+                    onLoad();
+                }
             }, options);
 
             if (ref.current) {
@@ -153,7 +155,7 @@ export default function InfiniteScroll({ children, className, containerClass, lo
                 }
             }
         }
-    }, [ref, containerRef, children, load]);
+    }, [ref, containerRef, children, onLoad]);
 
     return (
         <ScrollArea className={cn('overflow-y-scroll', className)} style={{maxHeight}} ref={containerRef}>

@@ -11,14 +11,13 @@ import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
-import {FollowWithRelations, PostWithReplies} from "@/utils/types";
+import {FollowWithRelations} from "@/utils/types";
 import EndpointResponse from "@/api/EndpointResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {useShallow} from "zustand/react/shallow";
 import PostScroller from "@components/post/PostScroller";
-import {useInfiniteScroll} from "@components/InfiniteScroll";
 import useProfilePosts from "@/utils/posts/useProfilePosts";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
@@ -126,9 +125,6 @@ export default function UserRoute() {
     const { fetch, posts } = profilePosts(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
     const { _fetch, _posts } = likedPosts(useShallow((state: any) => ({ _fetch: state.fetch, _posts: state.posts })));
 
-    const [ isLoading, onLoad ] = useInfiniteScroll({ fetcher: fetch });
-    const [ _isLoading, _onLoad ] = useInfiniteScroll({ fetcher: _fetch });
-
     const isOwnPage = self?.id === user?.id;
 
     function isFollowing() {
@@ -198,13 +194,11 @@ export default function UserRoute() {
                 </LayoutGroup>
                 <Separator />
                 <TabsContent className="flex flex-col gap-2" value="posts">
-                    {
-                        (!posts || !posts.length) && !isLoading &&
+                    <PostScroller posts={posts} user={self} fetcher={fetch} empty={
                         <div className="font-bold select-none text-center mt-8">
                             <span className="text-primary">@{user?.userName}</span> has no posts ¯\_(ツ)_/¯
                         </div>
-                    }
-                    <PostScroller posts={posts} user={self} isLoading={isLoading} onLoad={onLoad} />
+                    }/>
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="following">
                     {
@@ -233,13 +227,11 @@ export default function UserRoute() {
                     }
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="liked">
-                    {
-                        (!_posts || !_posts.length) && !_isLoading &&
-                            <div className="font-bold select-none text-center mt-8">
-                                <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
-                            </div>
-                    }
-                    <PostScroller posts={_posts} user={self} isLoading={_isLoading} onLoad={_onLoad}/>
+                    <PostScroller posts={_posts} user={self} fetcher={_fetch} empty={
+                        <div className="font-bold select-none text-center mt-8">
+                            <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
+                        </div>
+                    }/>
                 </TabsContent>
             </Tabs>
         </div>

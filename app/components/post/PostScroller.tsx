@@ -1,27 +1,32 @@
 import {UserWithLoggedIn} from "@/utils/types";
-import {AnimatePresence} from "framer-motion";
-import React from "react";
+import {AnimatePresence, motion} from "framer-motion";
+import React, {ReactNode, useEffect} from "react";
 import Post from "@components/post/Post";
-import InfiniteScroll from "@components/InfiniteScroll";
+import InfiniteScroll, {InfiniteFetcherParams, useInfiniteScroll} from "@components/InfiniteScroll";
 import useIsSSR from "@/utils/hooks/useIsSSR";
 import {PostWithDate} from "@/utils/posts/useVirtualizedPosts";
+import Fade from "@ui/fade";
 
 export interface PostScrollerProps {
-    posts: PostWithDate[],
-    user: UserWithLoggedIn,
-    onLoad: () => void,
-    isLoading: boolean,
+    posts: PostWithDate[];
+    user: UserWithLoggedIn;
+    fetcher: (params: InfiniteFetcherParams) => Promise<void>;
+    onLoad?: (isLoading: boolean) => void;
+    empty?: ReactNode;
 }
 
-export default function PostScroller({ posts, user, onLoad, isLoading }: PostScrollerProps) {
+export default function PostScroller({ posts, user, fetcher, onLoad, empty }: PostScrollerProps) {
+    const [ isLoading, _onLoad ] = useInfiniteScroll({ fetcher });
     const isSSR = useIsSSR();
 
-    function doLoad() {
-        if (!isLoading) onLoad();
-    }
+    useEffect(() => {
+        onLoad?.(isLoading);
+    }, [isLoading]);
+
+    const isEmpty = (!posts || !posts.length) && !isLoading;
 
     return (
-        <InfiniteScroll load={doLoad} isLoading={isLoading}>
+        <InfiniteScroll onLoad={_onLoad} isLoading={isLoading}>
             <AnimatePresence initial={!isSSR}>
                 {
                     posts?.map(post =>
@@ -32,6 +37,9 @@ export default function PostScroller({ posts, user, onLoad, isLoading }: PostScr
                     )
                 }
             </AnimatePresence>
+            <Fade duration={0.25} show={isEmpty}>
+                { empty }
+            </Fade>
         </InfiniteScroll>
     )
 }
