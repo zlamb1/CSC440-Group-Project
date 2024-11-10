@@ -7,6 +7,7 @@ import {LayoutGroup} from "framer-motion";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
+import RegisterForm from "@components/RegisterForm";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (context.user.loggedIn) {
@@ -74,7 +75,7 @@ export default function LoginPortal() {
                     <LoginForm header="Sign in to Stories" submit="Log In" icon={<Lock className="text-primary"/>} />
                 </TabsContent>
                 <TabsContent value="register">
-                    <LoginForm header="Register for Stories" submit="Register" icon={<Key className="text-primary"/>} action="/register" />
+                    <RegisterForm />
                 </TabsContent>
             </Tabs>
         </div>
