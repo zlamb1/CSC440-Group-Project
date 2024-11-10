@@ -27,8 +27,8 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 import UserDeletionDialog from "@components/user/UserDeletionDialog";
-import {validateUsername} from "@/routes/register";
 import {ErrorContext} from "@components/error/ErrorContext";
+import {validateUsername} from "@/utils/login-validation";
 
 const isProduction = process.env.NODE_ENV === "production";
 
