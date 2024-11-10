@@ -2,7 +2,7 @@ import {Form, useFetcher, useLoaderData} from "@remix-run/react";
 import {Button} from "@ui/button";
 import {LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {createRef, FormEvent, useEffect, useState} from "react";
+import React, {createRef, FormEvent, useState} from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {motion} from "framer-motion";
@@ -10,7 +10,6 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import Fade from "@ui/fade";
 import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
-import {PostWithRelations} from "@/utils/types";
 import {useInfiniteScroll} from "@components/InfiniteScroll";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
@@ -30,7 +29,7 @@ export default function Index() {
     const { create } = usePostStore(useShallow((state: any) => ({ create: state.create })));
     const { fetch, posts } = usePublicPostsStore(useShallow((state: any) => ({ fetch: state.fetch, add: state.add, posts: state.posts })));
 
-    const [ isLoading, onLoad ] = useInfiniteScroll<PostWithRelations>({ fetchData: fetch });
+    const [ isLoading, onLoad ] = useInfiniteScroll({ fetcher: fetch });
 
     const fetcher = useFetcher();
     const ref = createRef<PostEditorElement>();

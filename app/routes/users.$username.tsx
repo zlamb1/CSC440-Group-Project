@@ -11,7 +11,7 @@ import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
 import UserDisplay from "@components/user/UserDisplay";
-import {FollowWithRelations, PostWithRelations, PostWithReplies} from "@/utils/types";
+import {FollowWithRelations, PostWithReplies} from "@/utils/types";
 import EndpointResponse from "@/api/EndpointResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
@@ -126,8 +126,8 @@ export default function UserRoute() {
     const { fetch, posts } = profilePosts(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
     const { _fetch, _posts } = likedPosts(useShallow((state: any) => ({ _fetch: state.fetch, _posts: state.posts })));
 
-    const [ isLoading, onLoad ] = useInfiniteScroll<PostWithReplies>({ fetchData: fetch });
-    const [ _isLoading, _onLoad ] = useInfiniteScroll<PostWithReplies>({ fetchData: _fetch });
+    const [ isLoading, onLoad ] = useInfiniteScroll({ fetcher: fetch });
+    const [ _isLoading, _onLoad ] = useInfiniteScroll({ fetcher: _fetch });
 
     const isOwnPage = self?.id === user?.id;
 
