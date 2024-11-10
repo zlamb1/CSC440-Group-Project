@@ -1,12 +1,12 @@
 import {LoaderFunctionArgs} from "@remix-run/node";
-import {Link, useLoaderData} from "@remix-run/react";
+import {Link, useLoaderData, useParams} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
 import {ProfileVisibility, Follow, Prisma, User} from "@prisma/client";
 import NotFound from "@/routes/$";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
@@ -19,6 +19,9 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {useShallow} from "zustand/react/shallow";
 import PostScroller from "@components/post/PostScroller";
 import useProfilePosts from "@/utils/posts/useProfilePosts";
+import {UseBoundStore} from "zustand/react";
+import {StoreApi} from "zustand/vanilla";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -109,23 +112,30 @@ function FollowRow({ follow, user }: { follow: Follow, user: User }) {
 
 export default function UserRoute() {
     const data = useLoaderData<typeof loader>();
+    const store = useRef<UseBoundStore<StoreApi<unknown>> | undefined>();
     const [tab, setTab] = useState('posts');
+    const [user, setUser] = useState<any | null>(null);
+
+    useEffect(() => {
+        if (data?.user) {
+            setUser(data.user);
+        }
+    }, [data]);
+
+    const self = data?.self;
+    const following = user?.following;
+    const followers = user?.followers;
+
+    store.current = useProfilePosts(user?.id);
+    const profilePostsStore = store.current?.(useShallow((state: any) => ({ profileStore: state.profilePosts, likedStore: state.likedPosts })));
+    const profileStore = profilePostsStore?.profileStore?.(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
+    const likedStore = profilePostsStore?.likedStore?.(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
+
+    const isOwnPage = self?.id === user?.id;
 
     if (data?.error && data.error === 'User Not Found') {
         return <NotFound />;
     }
-
-    const self = data?.self;
-    const user = data?.user;
-    const following = user?.following;
-    const followers = user?.followers;
-
-    const store = useRef(useProfilePosts(user?.id));
-    const { profilePosts, likedPosts } = store.current(useShallow((state: any) => ({ profilePosts: state.profilePosts, likedPosts: state.likedPosts })));
-    const { fetch, posts } = profilePosts(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
-    const { _fetch, _posts } = likedPosts(useShallow((state: any) => ({ _fetch: state.fetch, _posts: state.posts })));
-
-    const isOwnPage = self?.id === user?.id;
 
     function isFollowing() {
         return self?.following?.some((follow: Follow) => follow.followingId === user?.id);
@@ -194,7 +204,7 @@ export default function UserRoute() {
                 </LayoutGroup>
                 <Separator />
                 <TabsContent className="flex flex-col gap-2" value="posts">
-                    <PostScroller posts={posts} user={self} fetcher={fetch} empty={
+                    <PostScroller posts={profileStore?.posts} user={self} fetcher={profileStore?.fetch} empty={
                         <div className="font-bold select-none text-center mt-8">
                             <span className="text-primary">@{user?.userName}</span> has no posts ¯\_(ツ)_/¯
                         </div>
@@ -227,7 +237,7 @@ export default function UserRoute() {
                     }
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="liked">
-                    <PostScroller posts={_posts} user={self} fetcher={_fetch} empty={
+                    <PostScroller posts={likedStore?.posts} user={self} fetcher={likedStore?.fetch} empty={
                         <div className="font-bold select-none text-center mt-8">
                             <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
                         </div>
