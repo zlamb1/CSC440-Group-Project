@@ -112,21 +112,14 @@ function FollowRow({ follow, user }: { follow: Follow, user: User }) {
 
 export default function UserRoute() {
     const data = useLoaderData<typeof loader>();
-    const store = useRef<UseBoundStore<StoreApi<unknown>> | undefined>();
     const [tab, setTab] = useState('posts');
-    const [user, setUser] = useState<any | null>(null);
-
-    useEffect(() => {
-        if (data?.user) {
-            setUser(data.user);
-        }
-    }, [data]);
+    const [user] = useState<any | null>(data?.user);
 
     const self = data?.self;
     const following = user?.following;
     const followers = user?.followers;
 
-    store.current = useProfilePosts(user?.id);
+    const store = useRef(useProfilePosts(data?.user?.id));
     const profilePostsStore = store.current?.(useShallow((state: any) => ({ profileStore: state.profilePosts, likedStore: state.likedPosts })));
     const profileStore = profilePostsStore?.profileStore?.(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
     const likedStore = profilePostsStore?.likedStore?.(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));

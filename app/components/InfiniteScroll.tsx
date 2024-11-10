@@ -1,9 +1,8 @@
 import {ScrollArea} from "@ui/scroll-area";
 import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
-import {LoadingSpinner} from "@components/LoadingSpinner";
 import {AnimatePresence, motion} from "framer-motion";
-import {isEmptyObject} from "@tiptap/react";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export type InfiniteFetcherParams = {
     isLoading: boolean,
@@ -184,7 +183,11 @@ export default function InfiniteScroll({ children, className, containerClass, on
                         className={cn("flex flex-col pb-16", containerClass)}
             >
                 {children}
-                {isLoading && <motion.div className="flex justify-center items-center"><LoadingSpinner/></motion.div>}
+                {isLoading &&
+                    <motion.div className="flex justify-center items-center">
+                        <LoadingSpinner />
+                    </motion.div>
+                }
             </motion.div>
         );
     }
