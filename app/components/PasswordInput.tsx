@@ -10,9 +10,10 @@ import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 export interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
     password?: string;
     error?: string;
+    useStrength?: boolean;
 }
 
-export default function PasswordInput({ password, error, ...props }: PasswordInputProps) {
+export default function PasswordInput({ password, error, useStrength = true, ...props }: PasswordInputProps) {
     const [strength, setStrength] = useState<number>(0);
     const [hidden, setHidden] = useState<boolean>(true);
     const [_error, setError] = useState<string | undefined>(error);
@@ -21,36 +22,41 @@ export default function PasswordInput({ password, error, ...props }: PasswordInp
     const strengths = [ 'Weak', 'Medium', 'Strong' ];
 
     useEffect(() => {
-        const length = password?.length ?? 0;
+        if (useStrength) {
+            const length = password?.length ?? 0;
 
-        if (!length) {
+            if (!length) {
+                setError('');
+                return setStrength(0);
+            }
+
+            if (!password?.match(/[A-Z]+/)) {
+                setError('Password must contain an uppercase letter.');
+                return setStrength(0);
+            }
+
+            if (!password?.match(/[0-9]+/)) {
+                setError('Password must contain a digit.');
+                return setStrength(0);
+            }
+
+            if (length < 8) {
+                setError('Password must be at least 8 characters.');
+                return setStrength(0);
+            }
+
             setError('');
-            return setStrength(0);
-        }
 
-        if (!password?.match(/[A-Z]+/)) {
-            setError('Password must contain an uppercase letter.');
-            return setStrength(0);
-        }
-
-        if (!password?.match(/[0-9]+/)) {
-            setError('Password must contain a digit.');
-            return setStrength(0);
-        }
-
-        if (length < 8) {
-            setError('Password must be at least 8 characters.');
-            return setStrength(0);
-        }
-
-        setError('');
-
-        if (length > 10 || password?.match(/[$&+,:;=?@#|'<>.^*()%!-]+/)) {
-            setStrength(2);
+            if (length > 10 || password?.match(/[$&+,:;=?@#|'<>.^*()%!-]+/)) {
+                setStrength(2);
+            } else {
+                setStrength(1);
+            }
         } else {
-            setStrength(1);
+            setError('');
+            setStrength(0);
         }
-    }, [password]);
+    }, [password, useStrength]);
 
     useEffect(() => {
         setError(error);
@@ -96,32 +102,42 @@ export default function PasswordInput({ password, error, ...props }: PasswordInp
             />
             <AnimatePresence>
                 {password ?
-                    <motion.div className="flex flex-col gap-1 overflow-y-hidden mx-1" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}>
-                        <div className="w-full h-[1px] rounded-full bg-gray-300 dark:bg-gray-600 relative">
-                            <div className="absolute left-0 h-full rounded-full" style={{
-                                transition: 'all 0.25s ease-in-out',
-                                right: (33 * (2 - strength)) + '%',
-                                backgroundColor: colors[strength]
-                            }} />
-                        </div>
+                    <motion.div className="flex flex-col gap-1 overflow-y-hidden mx-1"
+                                initial={{ height: 0 }}
+                                animate={{ height: 'auto' }}
+                                exit={{ height: 0 }}
+                    >
+                        {
+                            useStrength &&
+                            <div className="w-full h-[1px] rounded-full bg-gray-300 dark:bg-gray-600 relative">
+                                <div className="absolute left-0 h-full rounded-full" style={{
+                                    transition: 'all 0.25s ease-in-out',
+                                    right: (33 * (2 - strength)) + '%',
+                                    backgroundColor: colors[strength]
+                                }}/>
+                            </div>
+                        }
                         <div className="flex items-center justify-between">
                             <div className="text-red-700 text-xs select-none">{_error}</div>
-                            <div className="flex items-center gap-1" style={{
-                                transition: 'all 0.25s ease-in-out',
-                                color: colors[strength]
-                            }}>
-                                <div className="select-none text-xs font-bold">
-                                    {strengths[strength]}
+                            {
+                                useStrength &&
+                                <div className="flex items-center gap-1" style={{
+                                    transition: 'all 0.25s ease-in-out',
+                                    color: colors[strength]
+                                }}>
+                                    <div className="select-none text-xs font-bold">
+                                        {strengths[strength]}
+                                    </div>
+                                    <HoverCard>
+                                        <HoverCardTrigger asChild>
+                                            {strength !== 2 && <InfoIcon size={14}/>}
+                                        </HoverCardTrigger>
+                                        <HoverCardContent style={{color: colors[strength]}}>
+                                            {HoverContent()}
+                                        </HoverCardContent>
+                                    </HoverCard>
                                 </div>
-                                <HoverCard>
-                                    <HoverCardTrigger asChild>
-                                        { strength !== 2 && <InfoIcon size={14} /> }
-                                    </HoverCardTrigger>
-                                    <HoverCardContent style={{color: colors[strength]}}>
-                                        { HoverContent() }
-                                    </HoverCardContent>
-                                </HoverCard>
-                            </div>
+                            }
                         </div>
                     </motion.div> : null
                 }

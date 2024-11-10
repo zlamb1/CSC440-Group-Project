@@ -72,7 +72,7 @@ export default function LoginPortal() {
                     </LayoutGroup>
                 </TabsList>
                 <TabsContent value="login">
-                    <LoginForm header="Sign in to Stories" submit="Log In" icon={<Lock className="text-primary"/>} />
+                    <LoginForm />
                 </TabsContent>
                 <TabsContent value="register">
                     <RegisterForm />

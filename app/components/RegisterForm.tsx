@@ -8,17 +8,18 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Key} from "lucide-react";
 import {ChangeEvent, useState} from "react";
 import PasswordInput from "@components/PasswordInput";
+import {cn} from "@/lib/utils";
 
-export default function RegisterForm() {
+export default function RegisterForm({ className }: { className?: string }) {
     const [password, setPassword] = useState<string>('');
     const fetcher = useFetcher();
 
     function onChange(evt: ChangeEvent<HTMLInputElement>) {
-        setPassword(evt.target.value);
+        setPassword(evt?.target?.value);
     }
 
     return (
-        <div className="flex flex-col gap-3 items-center">
+        <div className={cn("flex flex-col gap-3 items-center", className)}>
             <div className="border-4 border-primary p-2 rounded-full">
                 <Key className="text-primary"/>
             </div>
