@@ -1,11 +1,9 @@
-import {Follow, User} from "@prisma/client";
+import {User} from "@prisma/client";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import { ReactNode } from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import {UserWithLoggedIn} from "@/utils/types";
-import {Button} from "@ui/button";
 import {Form, Link, useFetcher} from "@remix-run/react";
-import {LoadingSpinner} from "@components/LoadingSpinner";
 import Fade from "@ui/fade";
 import FollowButton from "@components/FollowButton";
 
@@ -42,9 +40,9 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                 {children}
             </HoverCardTrigger>
             <HoverCardContent className="flex flex-row w-fit gap-2">
-                <div className="flex flex-col">
+                <div className="flex gap-1 flex-col">
                     <div className="flex justify-between items-center gap-12">
-                        <Link to={`users/${user.userName}`} className="flex gap-2">
+                        <Link to={`/users/${user.userName}`} className="flex gap-2">
                             <UserAvatar avatar={user.avatarPath} userName={user.userName} />
                             {
                                 user.displayName ?
