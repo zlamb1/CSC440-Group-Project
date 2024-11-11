@@ -7,10 +7,12 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {Form} from "@remix-run/react";
+import ProgressCircle from "@components/ProgressCircle";
 
 export default function ReplyEditor({ post, isReplying = true }: { post: PostWithUser, isReplying?: boolean }) {
     const [isEditorActive, setEditorActive] = useState(false);
     const [isPending, setIsPending] = useState(false);
+    const [editorProgress, setEditorProgress] = useState<number>(0);
     const ref = useRef<PostEditorElement>();
 
     const { create } = usePostStore(useShallow((state: any) => ({ create: state.create })));
@@ -61,11 +63,13 @@ export default function ReplyEditor({ post, isReplying = true }: { post: PostWit
                                         focus={setEditorActive}
                                         editable={!isPending}
                                         editorProps={{attributes: {class: 'break-all focus-visible:outline-none'}}}
+                                        onTextUpdate={(progress: number) => setEditorProgress(progress)}
                                         append={
                                             <motion.div initial={{opacity: 0, height: 0}}
                                                         animate={{opacity: 1, height: 'auto'}}
                                                         exit={{opacity: 0, height: 0}}
                                                         className="flex gap-2 justify-end overflow-y-hidden">
+                                                <ProgressCircle percentage={editorProgress} />
                                                 <Button variant="ghost" onClick={handleCancel} type="button">
                                                     Cancel
                                                 </Button>
