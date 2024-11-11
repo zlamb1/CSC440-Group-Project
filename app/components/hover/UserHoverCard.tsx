@@ -25,8 +25,6 @@ function getFormattedDate(date: Date) {
 }
 
 export default function UserHoverCard({ viewer, user, children }: { viewer: UserWithLoggedIn, user: User | null, children: ReactNode }) {
-    const fetcher = useFetcher();
-
     if (!user) {
         return children;
     }
