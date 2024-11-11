@@ -184,7 +184,7 @@ export default function InfiniteScroll({ children, className, containerClass, on
             >
                 {children}
                 {isLoading &&
-                    <motion.div className="flex justify-center items-center">
+                    <motion.div className="flex justify-center items-center p-3">
                         <LoadingSpinner />
                     </motion.div>
                 }
