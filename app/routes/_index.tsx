@@ -62,7 +62,7 @@ export default function Index() {
 
     return (
         <div className="flex flex-col w-full px-1">
-            <Fade show={data?.user.loggedIn}>
+            <Fade show={!!data?.user.loggedIn}>
                 <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
                     <div className="flex gap-3">
                         <UserAvatar avatar={data?.user.avatarPath} userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
@@ -85,7 +85,7 @@ export default function Index() {
                                             </Button>
                                             <Button className="font-bold" type="submit"
                                                     disabled={fetcher.state !== 'idle'}>
-                                                {fetcher.state === 'idle' ? 'Post' : <LoadingSpinner/>}
+                                                {fetcher.state === 'idle' ? 'Post' : <LoadingSpinner />}
                                             </Button>
                                         </motion.div>
                                     }
