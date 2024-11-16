@@ -54,7 +54,7 @@ export default function UserHoverCard({ viewer, user, children }: { viewer: User
                             <FollowButton user={user} isFollowing={isFollowing} />
                         </Fade>
                     </div>
-                    <div className="text-sm dark:text-gray-300">
+                    <div className="text-sm dark:text-gray-300" suppressHydrationWarning>
                         Joined {getFormattedDate(user.joinedAt)}
                     </div>
                     {
