@@ -19,6 +19,7 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {useShallow} from "zustand/react/shallow";
 import PostScroller from "@components/post/PostScroller";
 import useProfilePosts from "@/utils/posts/useProfilePosts";
+import usePersistedLoaderData from "@/utils/hooks/usePersistedLoaderData";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -108,15 +109,8 @@ function FollowRow({ follow, user }: { follow: Follow, user: User }) {
 }
 
 export default function UserRoute() {
-    const lastData = useRef();
-    const data = useLoaderData<typeof loader>() || lastData.current;
+    const { data } = usePersistedLoaderData();
     const [tab, setTab] = useState('posts');
-
-    useEffect(() => {
-        if (data) {
-            lastData.current = data;
-        }
-    }, [data]);
 
     const self = data?.self;
     const user = data?.user;
