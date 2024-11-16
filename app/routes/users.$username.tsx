@@ -109,7 +109,7 @@ function FollowRow({ follow, user }: { follow: Follow, user: User }) {
 }
 
 export default function UserRoute() {
-    const data= usePersistedLoaderData();
+    const data = usePersistedLoaderData();
     const [tab, setTab] = useState('posts');
 
     const self = data?.self;
