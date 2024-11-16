@@ -164,7 +164,7 @@ export default function UserRoute() {
                             </> :
                             <span className="font-bold text-3xl">@{user?.userName}</span>
                     }
-                    <span className="text-sm mt-2">{"Joined " + getFormattedDate(user?.joinedAt)}</span>
+                    <span className="text-sm mt-2" suppressHydrationWarning>{"Joined " + getFormattedDate(user?.joinedAt)}</span>
                     {
                         user?.bio == null ?
                             <span className="text-sm mt-2">This user has not yet set a bio.</span> :

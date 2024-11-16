@@ -78,7 +78,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                                 <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
                                 <div className="flex items-center gap-1">
                                     {post.user?.userName}
-                                    <span className="text-sm text-gray-400">• {formattedTime}</span>
+                                    <span className="text-sm text-gray-400" suppressHydrationWarning>• {formattedTime}</span>
                                 </div>
                             </Link>
                         </UserHoverCard>
