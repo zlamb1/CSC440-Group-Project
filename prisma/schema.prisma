@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["typedSql"]
 }
 
@@ -10,83 +10,88 @@ datasource db {
 }
 
 model Notification {
-  dateIssued  DateTime @default(now()) @db.Timestamptz(6)
-  type        String?  @db.VarChar
-  content     String?  @db.VarChar
-  expiresOn   DateTime @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
-  id          BigInt   @id @default(autoincrement())
-  userId      String   @db.Uuid
-  viewed      Boolean  @default(false)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  dateIssued DateTime @default(now()) @db.Timestamptz(6)
+  type       String?  @db.VarChar
+  content    String?  @db.VarChar
+  expiresOn  DateTime @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
+  id         BigInt   @id @default(autoincrement())
+  userId     String   @db.Uuid
+  postId     String?  @db.Uuid
+  viewed     Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model PostLike {
-  postId   String   @db.Uuid
-  userId   String   @db.Uuid
-  liked    Boolean  @default(true)
-  likedAt  DateTime @default(now()) @db.Timestamptz(6)
-  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  postId  String   @db.Uuid
+  userId  String   @db.Uuid
+  liked   Boolean  @default(true)
+  likedAt DateTime @default(now()) @db.Timestamptz(6)
+  post    Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([postId, userId])
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Post {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  postedAt    DateTime     @default(now()) @db.Timestamptz(6)
-  content     String
-  replyTo     String?      @db.Uuid
-  lastEdited  DateTime     @default(now()) @db.Timestamptz(6)
-  userId      String?      @db.Uuid
-  postLikes   PostLike[]
-  genres      PostGenre[]
-  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post        Post?        @relation("postsToposts", fields: [replyTo], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  replies     Post[]       @relation("postsToposts")
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postedAt      DateTime       @default(now()) @db.Timestamptz(6)
+  content       String
+  replyTo       String?        @db.Uuid
+  lastEdited    DateTime       @default(now()) @db.Timestamptz(6)
+  userId        String?        @db.Uuid
+  postLikes     PostLike[]
+  genres        PostGenre[]
+  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post          Post?          @relation("postsToposts", fields: [replyTo], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  replies       Post[]         @relation("postsToposts")
+  notifications Notification[]
 }
 
 model Session {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  expiresAt DateTime @db.Timestamptz(6) @default(dbgenerated("NOW() + '7 days'::interval"))
+  expiresAt DateTime @default(dbgenerated("NOW() + '7 days'::interval")) @db.Timestamptz(6)
   data      Json?
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model User {
-  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userName        String             @unique @db.VarChar(25)
-  joinedAt        DateTime           @default(now()) @db.Timestamptz(6)
-  passwordHash    String             @db.Char(60)
-  avatarPath      String?            @db.VarChar
-  role            UserRole           @default(NONE)
-  visibility      ProfileVisibility  @default(PUBLIC)
-  displayName     String?            @db.VarChar(20)
-  bio             String?            @db.VarChar(300)
-  notifications   Notification[]
-  postLikes       PostLike[]
-  posts           Post[]
-  sessions        Session[]
-  following       Follow[]           @relation("follower")
-  followers       Follow[]           @relation("following")
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userName      String            @unique @db.VarChar(25)
+  joinedAt      DateTime          @default(now()) @db.Timestamptz(6)
+  passwordHash  String            @db.Char(60)
+  avatarPath    String?           @db.VarChar
+  role          UserRole          @default(NONE)
+  visibility    ProfileVisibility @default(PUBLIC)
+  displayName   String?           @db.VarChar(20)
+  bio           String?           @db.VarChar(300)
+  notifications Notification[]
+  postLikes     PostLike[]
+  posts         Post[]
+  sessions      Session[]
+  following     Follow[]          @relation("follower")
+  followers     Follow[]          @relation("following")
 }
 
 model Follow {
-  followerId   String    @db.Uuid
-  followingId  String    @db.Uuid
-  followedAt   DateTime  @default(now())
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  followedAt  DateTime @default(now())
 
-  follower     User      @relation("follower", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  following    User      @relation("following", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
   @@id([followerId, followingId])
 }
 
 model PostGenre {
-  postId  String  @db.Uuid
-  genre   Genre
+  postId String @db.Uuid
+  genre  Genre
 
-  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
   @@id([postId, genre])
 }
 
