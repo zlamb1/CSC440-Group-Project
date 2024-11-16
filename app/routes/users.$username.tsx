@@ -1,5 +1,5 @@
 import {LoaderFunctionArgs} from "@remix-run/node";
-import {Link, useLoaderData, useParams} from "@remix-run/react";
+import {Link, useLoaderData} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
@@ -19,9 +19,6 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {useShallow} from "zustand/react/shallow";
 import PostScroller from "@components/post/PostScroller";
 import useProfilePosts from "@/utils/posts/useProfilePosts";
-import {UseBoundStore} from "zustand/react";
-import {StoreApi} from "zustand/vanilla";
-import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -111,15 +108,22 @@ function FollowRow({ follow, user }: { follow: Follow, user: User }) {
 }
 
 export default function UserRoute() {
-    const data = useLoaderData<typeof loader>();
+    const lastData = useRef();
+    const data = useLoaderData<typeof loader>() || lastData.current;
     const [tab, setTab] = useState('posts');
-    const [user] = useState<any | null>(data?.user);
+
+    useEffect(() => {
+        if (data) {
+            lastData.current = data;
+        }
+    }, [data]);
 
     const self = data?.self;
+    const user = data?.user;
     const following = user?.following;
     const followers = user?.followers;
 
-    const store = useRef(useProfilePosts(data?.user?.id));
+    const store = useRef(useProfilePosts(user?.id));
     const profilePostsStore = store.current?.(useShallow((state: any) => ({ profileStore: state.profilePosts, likedStore: state.likedPosts })));
     const profileStore = profilePostsStore?.profileStore?.(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));
     const likedStore = profilePostsStore?.likedStore?.(useShallow((state: any) => ({ fetch: state.fetch, posts: state.posts })));

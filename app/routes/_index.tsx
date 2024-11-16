@@ -10,7 +10,6 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import Fade from "@ui/fade";
 import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
-import {useInfiniteScroll} from "@components/InfiniteScroll";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
 import {useShallow} from "zustand/react/shallow";
