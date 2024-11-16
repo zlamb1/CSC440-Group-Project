@@ -3,7 +3,7 @@ import {ActionFunctionArgs, redirect} from "@remix-run/node";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
-import {useSession} from "@/sessions.server";
+import {useSession} from "@/utils/hooks/useSession.server";
 import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
 import {PrismaClientKnownRequestError} from "@prisma/client/runtime/library";
 

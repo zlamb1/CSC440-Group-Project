@@ -1,5 +1,5 @@
 import {ActionFunctionArgs, redirect} from "@remix-run/node";
-import {useSession} from "@/sessions.server";
+import {useSession} from "@/utils/hooks/useSession.server";
 
 export async function action({context, request}: ActionFunctionArgs) {
     if (!context.user.loggedIn) {
