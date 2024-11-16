@@ -81,9 +81,8 @@ export function Layout({children}: {children: ReactNode}) {
                             <div className="border-0 bg-background flex-grow flex justify-center">
                                 {children}
                             </div>
-                            <div className="lg:w-[15%] xl:w-[20%] flex-shrink-0"></div>
+                            <SortPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky" style={{ top: boundingRect.height }} user={user} />
                         </div>
-                        <SortPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user}/>
                     </div>
                     <Scripts />
                     <Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-[10px] m-1" style={{ zIndex: 2147483647 }} />
