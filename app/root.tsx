@@ -10,7 +10,7 @@ import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import twStylesheet from "@css/tailwind.css?url";
 import tiptapStylesheet from "@css/tiptap.css?url";
 import animationStylesheet from "@css/animation.css?url";
-import React from "react";
+import React, {ReactNode, useRef} from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName, cookiePreferenceStorageName, defaultColorScheme} from "@/utils/prefers-color-scheme";
@@ -19,6 +19,7 @@ import SortPanel from "@components/SortPanel";
 import CookieToast from "@components/toast/CookieToast";
 import * as Toast from "@radix-ui/react-toast";
 import {StoreInvalidator} from "@/StoreInvalidator";
+import useResizeObserver from "@/utils/hooks/useResizeObserver";
 
 export const links: LinksFunction = () => [
     { rel: "stylesheet", href: twStylesheet },
@@ -45,10 +46,13 @@ export async function loader({context, request}: LoaderFunctionArgs) {
     return json({ ssrColorScheme, cookiePreference, user: context.user });
 }
 
-export function Layout({children}: {children: React.ReactNode}) {
+export function Layout({children}: {children: ReactNode}) {
     const data = useRouteError() ? null : useRouteLoaderData("root");
+    const ref = useRef<HTMLDivElement | undefined>();
     const user = data?.user;
-    
+
+    const [_, boundingRect] = useResizeObserver({ref});
+
     return (
         <html lang="en" suppressHydrationWarning>
             <StoreInvalidator />
@@ -70,10 +74,10 @@ export function Layout({children}: {children: React.ReactNode}) {
                 </head>
                 <body>
                     <CookieToast initial={data?.cookiePreference}/>
-                    <div className="flex flex-col bg-background min-h-[100vh] p-3">
-                        <NavBar {...data} className="w-100 text-lg h-fit sm:px-16 md:px-32 lg:px-64 xl:px-96"/>
-                        <div className="flex-grow flex gap-3 w-full">
-                            <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0" user={user}/>
+                    <div className="flex flex-col bg-background min-h-[100vh]">
+                        <NavBar {...data} className="bg-background w-100 text-lg h-fit sm:px-16 md:px-32 lg:px-64 xl:px-96 sticky top-0 p-3" ref={ref} />
+                        <div className="flex-grow flex gap-3 w-full px-3">
+                            <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky" style={{ top: boundingRect.height }} user={user}/>
                             <div className="border-0 bg-background flex-grow flex justify-center">
                                 {children}
                             </div>

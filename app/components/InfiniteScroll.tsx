@@ -124,23 +124,13 @@ export default function InfiniteScroll({ children, className, containerClass, on
     const [ maxHeight, setMaxHeight ] = useState<string>('none');
 
     useEffect(() => {
-        window.addEventListener('resize', calculateMaxHeight);
-        return () => window.removeEventListener('resize', calculateMaxHeight);
-    });
-
-    useEffect(() => {
-        calculateMaxHeight();
-
         if (onLoad && containerRef.current) {
-            const options = {
-                root: containerRef.current,
-            }
             const observer = new IntersectionObserver(entries => {
                 if (entries[0].intersectionRatio <= 0) return;
                 if (!isLoading) {
                     onLoad();
                 }
-            }, options);
+            });
 
             if (ref.current) {
                 observer.observe(ref.current);
@@ -150,15 +140,6 @@ export default function InfiniteScroll({ children, className, containerClass, on
             }
         }
     }, [ref, containerRef, children, onLoad]);
-
-    function calculateMaxHeight() {
-        if (useMaxHeight && containerRef.current) {
-            const y = containerRef.current.getBoundingClientRect().top;
-            setMaxHeight(`${window.innerHeight - y - maxHeightProps?.marginBottom}px`);
-        } else {
-            setMaxHeight('none');
-        }
-    }
 
     const duration = 0.5;
 

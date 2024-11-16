@@ -7,7 +7,7 @@ import {Link} from "@remix-run/react";
 import {Bell, LogIn, MessageCircleCode, Search} from "lucide-react";
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
-import React from "react";
+import React, {forwardRef, RefObject} from "react";
 import UserNavDropdown from "@components/dropdown/UserNavDropdown";
 import Fade from "@ui/fade";
 import NotificationNavDropdown from "@components/dropdown/NotificationNavDropdown";
@@ -21,9 +21,9 @@ export interface NavBarProps {
     notificationCount: number;
 }
 
-export default function NavBar({ ssrColorScheme, className, user, notificationCount }: NavBarProps) {
+const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ ssrColorScheme, className, user, notificationCount }, ref) => {
     return (
-        <NavigationMenu className={className}>
+        <NavigationMenu className={className} ref={ref}>
             <NavigationMenuList className="flex flex-row items-baseline gap-5">
                 <NavigationMenuItem>
                     <Link className="flex flex-row items-baseline font-bold gap-1" to="/">
@@ -60,11 +60,11 @@ export default function NavBar({ ssrColorScheme, className, user, notificationCo
                       show={user?.loggedIn}
                       container={<NavigationMenuItem className="flex items-center" />}
                       fallback={
-                        <Link to="/login">
-                            <Button variant="ghost" size="icon" type="submit">
-                                <LogIn />
-                            </Button>
-                        </Link>
+                          <Link to="/login">
+                              <Button variant="ghost" size="icon" type="submit">
+                                  <LogIn />
+                              </Button>
+                          </Link>
                       }
                 >
                     <UserNavDropdown user={user} />
@@ -72,4 +72,6 @@ export default function NavBar({ ssrColorScheme, className, user, notificationCo
             </NavigationMenuList>
         </NavigationMenu>
     );
-}
+});
+
+export default NavBar;

@@ -3,12 +3,12 @@ import {Button} from "@ui/button";
 import {ChevronUp, ChevronDown} from "lucide-react";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
-import React, {useState} from "react";
+import React, {CSSProperties, useState} from "react";
 import {FollowWithFollowing, UserWithLoggedIn} from "@/utils/types";
 import {cn} from "@/lib/utils";
 import {Link} from "@remix-run/react";
 
-export default function FollowingPanel({ className, user }: { className?: string, user: UserWithLoggedIn, }) {
+export default function FollowingPanel({ className, style, user }: { className?: string, style?: CSSProperties, user: UserWithLoggedIn, }) {
     if (!user?.loggedIn) {
         return <div className={className} />;
     }
@@ -22,7 +22,7 @@ export default function FollowingPanel({ className, user }: { className?: string
     };
 
     return (
-        <Card className={cn("h-full flex flex-col overflow-hidden", className)}>
+        <Card className={cn("h-full flex flex-col overflow-hidden", className)} style={style}>
             <div className="flex justify-between px-3 py-2 items-center">
                 <span className="font-bold select-none">Following</span>
                 <Button className="w-[20px] h-[20px]" size="icon" variant="ghost" onClick={ toggleContent }>
