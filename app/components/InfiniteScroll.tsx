@@ -121,7 +121,6 @@ export interface InfiniteScrollProps {
 export default function InfiniteScroll({ children, className, containerClass, onLoad, isLoading = false, isEmpty = false, empty, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
     const ref = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [ maxHeight, setMaxHeight ] = useState<string>('none');
 
     useEffect(() => {
         if (onLoad && containerRef.current) {
@@ -174,11 +173,11 @@ export default function InfiniteScroll({ children, className, containerClass, on
     }
 
     return (
-        <ScrollArea className={cn('overflow-y-scroll', className)} style={{maxHeight}} ref={containerRef}>
+        <div className={className} ref={containerRef}>
             <AnimatePresence mode="wait">
                 { getContent() }
             </AnimatePresence>
             <div className="w-0 h-0" ref={ref}/>
-        </ScrollArea>
+        </div>
     )
 }
