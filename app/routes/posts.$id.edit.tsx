@@ -6,7 +6,6 @@ import UnauthorizedResponse from "@/api/UnauthorizedError";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
-import {getPostByID} from "@prisma/client/sql";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {

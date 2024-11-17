@@ -1,10 +1,6 @@
 import {Button} from "@ui/button";
-import DataTable, {Column, Slot, SlotProps} from "@components/table/DataTable";
-import {Columns} from "lucide-react";
-import {TableCell} from "@ui/table";
-import {Link} from "@remix-run/react";
+import DataTable, {Slot, SlotProps} from "@components/table/DataTable";
 import ReplyCell from "@components/table/notification/ReplyCell";
-import {UserWithLoggedIn} from "@/utils/types";
 
 function formatType(type: string) {
     return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
@@ -78,7 +74,6 @@ function DefaultAppend(props?: SlotProps) {
 }
 
 export interface InboxTableProps {
-    viewer?: UserWithLoggedIn;
     notifications?: any[];
     filter?: string;
     prepend?: Slot;
@@ -86,7 +81,7 @@ export interface InboxTableProps {
     compact?: boolean;
 }
 
-export default function InboxTable({viewer, notifications, filter, prepend, append, compact = false}: InboxTableProps) {
+export default function InboxTable({ notifications, filter, prepend, append, compact = false }: InboxTableProps) {
     const columns = [
         {
             name: 'dateIssued',
@@ -107,7 +102,7 @@ export default function InboxTable({viewer, notifications, filter, prepend, appe
             name: 'content',
             cell: ({ row }: { row: any }) => {
                 if (row.type === 'reply') {
-                    return <ReplyCell viewer={viewer} row={row} />
+                    return <ReplyCell row={row} />
                 }
             }
         },

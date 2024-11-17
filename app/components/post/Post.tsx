@@ -1,6 +1,6 @@
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {
     MessageCircle,
     Pencil,
@@ -8,7 +8,6 @@ import {
 import {Link} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
-import {UserWithLoggedIn} from "@/utils/types";
 import UserHoverCard from "@components/hover/UserHoverCard";
 import LikePanel from "@components/post/LikePanel";
 import ReplyEditor from "@components/post/ReplyEditor";
@@ -18,17 +17,18 @@ import {Card} from "@ui/card";
 import {useShallow} from "zustand/react/shallow";
 import {cn} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
+import {UserContext} from "@/utils/context/UserContext";
 
-function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration = 0.25}: {
+function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}: {
     className?: string,
     id: string,
-    viewer: UserWithLoggedIn,
     depth?: number,
     autoReply?: boolean,
     exitDuration?: number,
 }) {
+    const viewer = useContext(UserContext);
     const [isEditing, setEditing] = useState<boolean>(false);
-    const [isReplying, setIsReplying] = useState<boolean>(viewer?.loggedIn && autoReply);
+    const [isReplying, setIsReplying] = useState<boolean>(!!viewer?.loggedIn && autoReply);
     const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
     const [formattedTime, setFormattedTime] = useState<string>('');
 
@@ -56,7 +56,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
         return (
             <AnimatePresence>
                 {
-                    post?.replies?.map((reply: string) => <Post key={reply} id={reply} viewer={viewer} depth={depth - 1} autoReply={false} />)
+                    post?.replies?.map((reply: string) => <Post key={reply} id={reply} depth={depth - 1} autoReply={false} />)
                 }
             </AnimatePresence>
         )
@@ -73,7 +73,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
             <div className={cn("flex flex-col w-full", className)}>
                 <div className="flex justify-between items-center gap-3">
                     <div className="flex gap-3 select-none">
-                        <UserHoverCard viewer={viewer} user={post.user}>
+                        <UserHoverCard user={post.user}>
                             <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
                                 <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
                                 <div className="flex items-center gap-1">
@@ -83,7 +83,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                             </Link>
                         </UserHoverCard>
                     </div>
-                    <ContextMenu post={post} user={viewer} exitDuration={exitDuration} onEdit={() => setEditing(true)} />
+                    <ContextMenu post={post} exitDuration={exitDuration} onEdit={() => setEditing(true)} />
                 </div>
                 <div className="ml-10 flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
@@ -93,7 +93,7 @@ function Post({className, id, viewer, depth = 1, autoReply = true, exitDuration 
                             />
                         </div>
                         <div className="flex gap-2">
-                            <LikePanel post={post} viewer={viewer} />
+                            <LikePanel post={post} />
                             <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
                                 <Button containerClass="flex"
                                         className="h-[25px] flex gap-1 items-center rounded-full"

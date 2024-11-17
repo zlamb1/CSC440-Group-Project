@@ -5,7 +5,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger
 } from "@ui/alert-dialog";
-import React, {ReactNode, useEffect, useState} from "react";
+import React, {ReactNode, useContext, useEffect, useState} from "react";
 import {User} from "@prisma/client";
 import {useFetcher} from "@remix-run/react";
 import {Label} from "@ui/label";
@@ -15,6 +15,7 @@ import {ErrorContext} from "@components/error/ErrorContext";
 import {Button} from "@ui/button";
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {UserContext} from "@/utils/context/UserContext";
 
 function UserDeletionForm({ user, onCancel }: { user: User, onCancel?: () => void }) {
     const fetcher = useFetcher();
@@ -72,7 +73,8 @@ function UserDeletionConfirmation({ onContinue }: { onContinue: () => void }) {
     )
 }
 
-export default function UserDeletionDialog({ user, children }: { user: User, children: ReactNode }) {
+export default function UserDeletionDialog({ children }: { children: ReactNode }) {
+    const user = useContext(UserContext);
     const [ stage, setStage ] = useState(0);
     const [ isOpen, setIsOpen ] = useState(false);
 

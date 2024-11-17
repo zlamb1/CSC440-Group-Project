@@ -1,19 +1,20 @@
 import {useFetcher} from "@remix-run/react";
 import {useIsPresent} from "framer-motion";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
 import {Edit2, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Post} from "@prisma/client";
-import {UserWithLoggedIn} from "@/utils/types";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
+import {UserContext} from "@/utils/context/UserContext";
 
-export default function ContextMenu({ post, user, exitDuration, onEdit }: { post: Post, user: UserWithLoggedIn, exitDuration: number, onEdit?: () => void }) {
+export default function ContextMenu({ post, exitDuration, onEdit }: { post: Post, exitDuration: number, onEdit?: () => void }) {
     const fetcher = useFetcher();
     const isPresent = useIsPresent();
+    const user = useContext(UserContext)
     const [ isOpen, setOpen ] = useState(false);
     const { deletePost, deleteReply } = usePostStore(useShallow((state: any) => ({ deletePost: state.delete, deleteReply: state.deleteReply })));
 

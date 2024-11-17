@@ -1,7 +1,6 @@
 import {ActionFunctionArgs, redirect, LoaderFunctionArgs} from "@remix-run/node";
 import {useSession} from "@/utils/hooks/useSession.server";
 import LoginForm from "@components/LoginForm";
-import {Key, Lock} from "lucide-react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup} from "framer-motion";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";

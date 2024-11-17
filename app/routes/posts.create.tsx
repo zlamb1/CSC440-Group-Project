@@ -7,7 +7,6 @@ import EndpointResponse from "@/api/EndpointResponse";
 import {ExplicitCreateResponse} from "@/api/CreateResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
-import {getPostByID} from '@prisma/client/sql';
 
 export async function action({ context, request} : ActionFunctionArgs) {
     try {

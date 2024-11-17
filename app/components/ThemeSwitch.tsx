@@ -1,5 +1,5 @@
 import {Laptop, Moon, Sun} from "lucide-react";
-import {defaultColorScheme, themes, useTheme} from "@/utils/prefers-color-scheme";
+import {themes, useTheme} from "@/utils/prefers-color-scheme";
 import {useEffect, useState} from "react";
 import React from "react";
 import {

@@ -1,26 +1,21 @@
-import {Form, useFetcher, useLoaderData} from "@remix-run/react";
+import {Form, useFetcher} from "@remix-run/react";
 import {Button} from "@ui/button";
-import {LoaderFunctionArgs} from "@remix-run/node";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
-import React, {createRef, FormEvent, useState} from "react";
+import React, {createRef, FormEvent, useContext, useState} from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import ProgressCircle from "@components/ProgressCircle";
 import {motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import Fade from "@ui/fade";
-import EndpointResponse from "@/api/EndpointResponse";
 import PostScroller from "@components/post/PostScroller";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/hooks/useMountedEffect";
-
-export async function loader({ context }: LoaderFunctionArgs) {
-    return EndpointResponse({ user: context.user });
-}
+import {UserContext} from "@/utils/context/UserContext";
 
 export default function Index() {
-    const data = useLoaderData<typeof loader>();
+    const user = useContext(UserContext);
 
     const [ editorProgress, setEditorProgress ] = useState<number>(0);
     const [ isEditorActive, setEditorActive ] = useState<boolean>(false);
@@ -61,10 +56,10 @@ export default function Index() {
 
     return (
         <div className="flex flex-col w-full px-1">
-            <Fade show={!!data?.user.loggedIn}>
+            <Fade show={!!user?.loggedIn}>
                 <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
                     <div className="flex gap-3">
-                        <UserAvatar avatar={data?.user.avatarPath} userName={data?.user.userName} className="flex-shrink-0 mt-[2px]" />
+                        <UserAvatar avatar={user?.avatarPath} userName={user?.userName} className="flex-shrink-0 mt-[2px]" />
                         <PostEditor ref={ref}
                                     focus={setEditorActive}
                                     isActive={isEditorActive}
@@ -93,7 +88,7 @@ export default function Index() {
                 </Form>
                 <hr/>
             </Fade>
-            <PostScroller posts={posts} user={data?.user} fetcher={fetch} />
+            <PostScroller posts={posts} fetcher={fetch} />
         </div>
     )
 }

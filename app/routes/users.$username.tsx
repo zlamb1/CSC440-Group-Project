@@ -1,12 +1,12 @@
 import {LoaderFunctionArgs} from "@remix-run/node";
-import {Link, useLoaderData} from "@remix-run/react";
+import {Link} from "@remix-run/react";
 
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
 import {ProfileVisibility, Follow, Prisma, User} from "@prisma/client";
 import NotFound from "@/routes/$";
-import {useEffect, useRef, useState} from "react";
+import {useContext, useRef, useState} from "react";
 import FollowButton from "@components/FollowButton";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@ui/tabs";
 import {LayoutGroup, motion} from "framer-motion";
@@ -20,6 +20,7 @@ import {useShallow} from "zustand/react/shallow";
 import PostScroller from "@components/post/PostScroller";
 import useProfilePosts from "@/utils/posts/useProfilePosts";
 import usePersistedLoaderData from "@/utils/hooks/usePersistedLoaderData";
+import {UserContext} from "@/utils/context/UserContext";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -69,7 +70,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             }
         }
 
-        return EndpointResponse({ user, self: context.user });
+        return EndpointResponse({ user });
     } catch (err) {
         return UnknownErrorResponse(err);
     }
@@ -112,7 +113,7 @@ export default function UserRoute() {
     const data = usePersistedLoaderData();
     const [tab, setTab] = useState('posts');
 
-    const self = data?.self;
+    const self = useContext(UserContext);
     const user = data?.user;
     const following = user?.following;
     const followers = user?.followers;
@@ -177,7 +178,7 @@ export default function UserRoute() {
                         <Link to="/settings" className="flex flex-row gap-1 w-fit items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
                             Edit Profile
                         </Link>
-                    ) : <FollowButton user={user} isFollowing={isFollowing()} />
+                    ) : <FollowButton user={user} isFollowing={!!isFollowing()} />
                 }
             </div>
             <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
@@ -195,7 +196,7 @@ export default function UserRoute() {
                 </LayoutGroup>
                 <Separator />
                 <TabsContent className="flex flex-col gap-2" value="posts">
-                    <PostScroller posts={profileStore?.posts} user={self} fetcher={profileStore?.fetch} empty={
+                    <PostScroller posts={profileStore?.posts} fetcher={profileStore?.fetch} empty={
                         <div className="font-bold select-none text-center mt-8">
                             <span className="text-primary">@{user?.userName}</span> has no posts ¯\_(ツ)_/¯
                         </div>
@@ -228,7 +229,7 @@ export default function UserRoute() {
                     }
                 </TabsContent>
                 <TabsContent className="flex flex-col gap-2" value="liked">
-                    <PostScroller posts={likedStore?.posts} user={self} fetcher={likedStore?.fetch} empty={
+                    <PostScroller posts={likedStore?.posts} fetcher={likedStore?.fetch} empty={
                         <div className="font-bold select-none text-center mt-8">
                             <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
                         </div>

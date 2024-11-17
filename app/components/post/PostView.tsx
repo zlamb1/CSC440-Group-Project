@@ -1,5 +1,5 @@
 import {useFetcher} from "@remix-run/react";
-import React, {FormEvent, useEffect, useRef} from "react";
+import React, {FormEvent, useRef} from "react";
 import {PostEditor, PostEditorElement} from "@components/post/PostEditor";
 import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@ui/button";

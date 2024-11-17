@@ -1,13 +1,14 @@
-import {PostWithUser, UserWithLoggedIn} from "@/utils/types";
+import {PostWithUser} from "@/utils/types";
 import {useFetcher} from "@remix-run/react";
 import {cn} from "@/lib/utils";
 import {Button} from "@ui/button";
 import {ThumbsDown, ThumbsUp} from "lucide-react";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useContext} from "react";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/hooks/useMountedEffect";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {UserContext} from "@/utils/context/UserContext";
 
 function getIsLiked(state: any) {
     if (state == null || state == 'null') {
@@ -31,8 +32,9 @@ function getLikeCount(likeCount: number, oldState?: any, state?: any) {
     return likeCount;
 }
 
-export default function LikePanel({ className, post, viewer }: { className?: string, post: PostWithUser, viewer: UserWithLoggedIn }) {
+export default function LikePanel({ className, post }: { className?: string, post: PostWithUser }) {
     const fetcher = useFetcher();
+    const viewer = useContext(UserContext);
 
     const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.liked;
     const likeCount = fetcher.formData ? getLikeCount(post?.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : (post?.likeCount ?? 0);

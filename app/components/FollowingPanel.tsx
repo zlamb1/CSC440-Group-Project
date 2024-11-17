@@ -3,12 +3,15 @@ import {Button} from "@ui/button";
 import {ChevronUp, ChevronDown} from "lucide-react";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
-import React, {CSSProperties, useState} from "react";
-import {FollowWithFollowing, UserWithLoggedIn} from "@/utils/types";
+import React, {CSSProperties, useContext, useState} from "react";
+import {FollowWithFollowing} from "@/utils/types";
 import {cn} from "@/lib/utils";
 import {Link} from "@remix-run/react";
+import {UserContext} from "@/utils/context/UserContext";
 
-export default function FollowingPanel({ className, style, user }: { className?: string, style?: CSSProperties, user: UserWithLoggedIn, }) {
+export default function FollowingPanel({ className, style }: { className?: string, style?: CSSProperties }) {
+    const user = useContext(UserContext);
+
     if (!user?.loggedIn) {
         return <div className={className} />;
     }

@@ -1,6 +1,6 @@
 import {Separator} from "@ui/separator";
 import {Input} from "@ui/input";
-import {useFetcher, useLoaderData} from "@remix-run/react";
+import {useFetcher} from "@remix-run/react";
 import {Label} from "@ui/label";
 import {Textarea} from "@ui/textarea";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@ui/select";
@@ -8,13 +8,11 @@ import {Button} from "@ui/button";
 import UserAvatar from "@components/user/UserAvatar";
 import {
     ActionFunctionArgs,
-    json,
-    LoaderFunctionArgs,
     unstable_parseMultipartFormData
 } from "@remix-run/node";
 import {Edit2, X} from "lucide-react";
 import {motion} from "framer-motion";
-import {useEffect, useRef, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import {
     createImageUploader,
     IMAGE_API_V1, IMAGE_CDN_URL, IMAGE_DEV_CDN_URL,
@@ -29,12 +27,9 @@ import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 import UserDeletionDialog from "@components/user/UserDeletionDialog";
 import {ErrorContext} from "@components/error/ErrorContext";
 import {validateUsername} from "@/utils/login-validation";
+import {UserContext} from "@/utils/context/UserContext";
 
 const isProduction = process.env.NODE_ENV === "production";
-
-export async function loader({ context }: LoaderFunctionArgs) {
-    return json({ user: context.user });
-}
 
 export async function action({ context, request }: ActionFunctionArgs) {
     try {
@@ -123,15 +118,15 @@ function formatKey(key: string) {
 }
 
 export default function SettingsRoute() {
-    const data = useLoaderData<typeof loader>();
+    const user = useContext(UserContext);
     const fetcher = useFetcher();
-    const [ userAvatar, setUserAvatar ] = useState<string | undefined>(data?.user?.avatarPath);
+    const [ userAvatar, setUserAvatar ] = useState<string | null | undefined>(user?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (fetcher.state === 'idle') {
-            setUserAvatar(data?.user?.avatarPath);
+            setUserAvatar(user?.avatarPath ?? undefined);
             setIsAvatarUpdated(false)
         }
     }, [fetcher]);
@@ -157,12 +152,12 @@ export default function SettingsRoute() {
 
     function clearAvatar() {
         if (fileInputRef.current) {
-            if (userAvatar === data?.user?.avatarPath) {
+            if (userAvatar === user?.avatarPath) {
                 setUserAvatar(undefined);
                 setIsAvatarUpdated(true);
                 fileInputRef.current.value = '';
             } else {
-                setUserAvatar(data?.user?.avatarPath);
+                setUserAvatar(user?.avatarPath);
                 setIsAvatarUpdated(false);
             }
         }
@@ -177,7 +172,7 @@ export default function SettingsRoute() {
                     <HoverCard>
                         <HoverCardTrigger asChild>
                             <Button containerClass="w-[50px] h-[50px]" className="relative rounded-full size-full" variant="ghost" size="icon" type="button" onClick={ onClick }>
-                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={data?.user?.userName} />
+                                <UserAvatar size="100%" className="text-2xl" avatar={userAvatar} userName={user?.userName} />
                                 <motion.div animate={{ opacity: 0 }}
                                             whileHover={{ opacity: 1 }}
                                             className="absolute size-full flex justify-center items-center bg-gray-950 bg-opacity-20 dark:bg-opacity-50">
@@ -188,7 +183,7 @@ export default function SettingsRoute() {
                             </Button>
                         </HoverCardTrigger>
                         <HoverCardContent className="rounded-full border-0 w-fit h-fit p-0">
-                            <Fade initial={false} show={userAvatar || data?.user?.avatarPath}>
+                            <Fade initial={false} show={!!userAvatar || !!user?.avatarPath}>
                                 <Button className="w-[25px] h-[25px] rounded-full" size="icon" variant="destructive" type="button"
                                         onClick={clearAvatar}>
                                     <X size={16} />
@@ -198,21 +193,21 @@ export default function SettingsRoute() {
                     </HoverCard>
                     <Label className="flex-grow flex flex-col gap-2">
                         Username
-                        <Input name="userName" placeholder={data?.user?.userName} />
+                        <Input name="userName" placeholder={user?.userName} />
                         <ErrorContext msg={fetcher?.data?.username} />
                     </Label>
                 </div>
                 <Label className="flex flex-col gap-2">
                     Display Name
-                    <Input defaultValue={data?.user?.displayName} name="displayName" />
+                    <Input defaultValue={user?.displayName ?? ''} name="displayName" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Bio
-                    <Textarea defaultValue={data?.user?.bio} name="bio" />
+                    <Textarea defaultValue={user?.bio ?? ''} name="bio" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Profile Visibility
-                    <Select name="visibility" defaultValue={data?.user?.visibility}>
+                    <Select name="visibility" defaultValue={user?.visibility}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Public" />
                         </SelectTrigger>
@@ -227,7 +222,7 @@ export default function SettingsRoute() {
                     <Button variant="edit" type="submit">
                         Update Settings
                     </Button>
-                    <UserDeletionDialog user={data?.user}>
+                    <UserDeletionDialog>
                         <Button containerClass="w-fit" variant="destructive">
                             Delete Account
                         </Button>

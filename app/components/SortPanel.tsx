@@ -2,11 +2,13 @@ import {Card} from "@ui/card";
 import {Button} from "@ui/button";
 import {ChevronUp, ChevronDown} from "lucide-react";
 import {Separator} from "@ui/separator";
-import React, {CSSProperties, useState} from "react";
-import {UserWithLoggedIn} from "@/utils/types";
+import React, {CSSProperties, useContext, useState} from "react";
 import {cn} from "@/lib/utils";
+import {UserContext} from "@/utils/context/UserContext";
 
-export default function SortPanel({ className, style, user }: { className?: string, style?: CSSProperties, user: UserWithLoggedIn, }) {
+export default function SortPanel({ className, style }: { className?: string, style?: CSSProperties }) {
+    const user = useContext(UserContext);
+
     if (!user?.loggedIn) {
         return <div className={className} />;
     }

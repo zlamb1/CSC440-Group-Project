@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {Link, useFetcher} from "@remix-run/react";
 import {DropdownMenu} from "@radix-ui/react-dropdown-menu";
 import {DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger} from "@ui/dropdown-menu";
@@ -6,10 +6,12 @@ import {Button} from "@ui/button";
 import UserAvatar from "@components/user/UserAvatar";
 import {LogOut, Settings, UserRound} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {UserContext} from "@/utils/context/UserContext";
 
-export default function UserNavDropdown({ user }: { user: any }) {
+export default function UserNavDropdown() {
     const [ isOpen, setIsOpen ] = useState(false);
     const fetcher = useFetcher();
+    const user = useContext(UserContext);
 
     return (
         <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setIsOpen(isOpen)} modal={false}>

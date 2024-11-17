@@ -1,4 +1,3 @@
-import {ScrollArea} from "@ui/scroll-area";
 import {Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState} from "react";
 import {cn} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
@@ -118,7 +117,7 @@ export interface InfiniteScrollProps {
     maxHeightProps?: MaxHeightProps;
 }
 
-export default function InfiniteScroll({ children, className, containerClass, onLoad, isLoading = false, isEmpty = false, empty, useMaxHeight = true, maxHeightProps = { marginBottom: 12 } }: InfiniteScrollProps) {
+export default function InfiniteScroll({ children, className, containerClass, onLoad, isLoading = false, isEmpty = false, empty }: InfiniteScrollProps) {
     const ref = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
 

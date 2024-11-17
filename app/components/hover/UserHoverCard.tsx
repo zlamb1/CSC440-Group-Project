@@ -1,11 +1,11 @@
 import {User} from "@prisma/client";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
-import { ReactNode } from "react";
+import {ReactNode, useContext} from "react";
 import UserAvatar from "@components/user/UserAvatar";
-import {UserWithLoggedIn} from "@/utils/types";
 import {Link} from "@remix-run/react";
 import Fade from "@ui/fade";
 import FollowButton from "@components/FollowButton";
+import {UserContext} from "@/utils/context/UserContext";
 
 function getFormattedDate(date: Date) {
     if (!date) {
@@ -24,11 +24,12 @@ function getFormattedDate(date: Date) {
     );
 }
 
-export default function UserHoverCard({ viewer, user, children }: { viewer?: UserWithLoggedIn, user: User | null, children: ReactNode }) {
+export default function UserHoverCard({ user, children }: { user: User | null, children: ReactNode }) {
     if (!user) {
         return children;
     }
 
+    const viewer = useContext(UserContext);
     const isSelf = viewer?.id === user.id;
     const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id) || false;
 

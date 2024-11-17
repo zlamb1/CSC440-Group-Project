@@ -4,10 +4,9 @@ import {User} from "@prisma/client";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import UserAvatar from "@components/user/UserAvatar";
 import UserHoverCard from "@components/hover/UserHoverCard";
-import {UserWithLoggedIn} from "@/utils/types";
 import {AnimatePresence, motion} from "framer-motion";
 
-export default function ReplyCell({ row, viewer }: { row: any, viewer?: UserWithLoggedIn }) {
+export default function ReplyCell({ row }: { row: any }) {
     const hasFetched = useRef<boolean>(false);
     const fetcher = useFetcher();
     const [user, setUser] = useState<User | null>(null);
@@ -30,7 +29,7 @@ export default function ReplyCell({ row, viewer }: { row: any, viewer?: UserWith
 
     function getWrapper(child: ReactNode) {
         return (
-            <motion.div animate={{ opacity: 1 }} transition={{ duration: 0.3 }} layout>
+            <motion.div layout>
                 { child }
             </motion.div>
         )
@@ -46,7 +45,7 @@ export default function ReplyCell({ row, viewer }: { row: any, viewer?: UserWith
             row.content = `${name} replied to your post!`;
             return (
                 <div className="flex gap-1">
-                    <UserHoverCard viewer={viewer} user={user}>
+                    <UserHoverCard user={user}>
                         <Link to={`/users/${user.userName}`} className="flex gap-1 items-center">
                             <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName} /> {name}
                         </Link>

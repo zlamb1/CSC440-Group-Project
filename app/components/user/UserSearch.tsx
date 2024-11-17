@@ -1,5 +1,5 @@
 import {Input} from "@ui/input";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Link, useFetcher} from "@remix-run/react";
 import {LockKeyhole, Search, X} from "lucide-react";
 import {ProfileVisibility, User} from "@prisma/client";
@@ -8,11 +8,13 @@ import {Button} from "@ui/button";
 import UserAvatar from "@components/user/UserAvatar";
 import {cn} from "@/lib/utils";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {UserWithLoggedIn} from "@/utils/types";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@ui/tooltip";
 import FollowButton from "@components/FollowButton";
+import {UserContext} from "@/utils/context/UserContext";
 
-export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
+export default function UserSearch() {
+    const user = useContext(UserContext);
+
     const [ term, setTerm ] = useState('');
     const [ users, setUsers ] = useState([]);
     const fetcher = useFetcher();
@@ -49,7 +51,7 @@ export default function UserSearch({ user }: { user: UserWithLoggedIn }) {
     }
 
     function isFollowing(id: string) {
-        return user?.following?.some(follow => follow.followingId === id);
+        return !!user?.following?.some(follow => follow.followingId === id);
     }
 
     function onFollow(evt: React.MouseEvent<HTMLButtonElement>) {

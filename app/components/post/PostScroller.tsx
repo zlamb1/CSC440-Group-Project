@@ -1,21 +1,18 @@
-import {UserWithLoggedIn} from "@/utils/types";
-import {AnimatePresence, motion} from "framer-motion";
+import {AnimatePresence} from "framer-motion";
 import React, {ReactNode, useEffect} from "react";
 import Post from "@components/post/Post";
 import InfiniteScroll, {InfiniteFetcherParams, useInfiniteScroll} from "@components/InfiniteScroll";
 import useIsSSR from "@/utils/hooks/useIsSSR";
 import {PostWithDate} from "@/utils/posts/useVirtualizedPosts";
-import Fade from "@ui/fade";
 
 export interface PostScrollerProps {
     posts: PostWithDate[];
-    user: UserWithLoggedIn;
     fetcher: (params: InfiniteFetcherParams) => Promise<void>;
     onLoad?: (isLoading: boolean) => void;
     empty?: ReactNode;
 }
 
-export default function PostScroller({ posts, user, fetcher, onLoad, empty }: PostScrollerProps) {
+export default function PostScroller({ posts, fetcher, onLoad, empty }: PostScrollerProps) {
     const [ isLoading, _onLoad ] = useInfiniteScroll({ fetcher });
     const isSSR = useIsSSR();
 
@@ -31,7 +28,7 @@ export default function PostScroller({ posts, user, fetcher, onLoad, empty }: Po
                 {
                     posts?.map(post =>
                         <div className="flex flex-col" key={post.id}>
-                            <Post className="p-3 px-5" id={post.id} viewer={user} />
+                            <Post className="p-3 px-5" id={post.id} />
                             <hr />
                         </div>
                     )

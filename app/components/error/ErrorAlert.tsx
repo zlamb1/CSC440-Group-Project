@@ -1,5 +1,5 @@
 import {Alert, AlertDescription, AlertTitle} from "@ui/alert";
-import {TriangleAlert, TriangleAlertIcon} from "lucide-react";
+import {TriangleAlertIcon} from "lucide-react";
 
 export default function ErrorAlert({ msg }: { msg: string }) {
     return (

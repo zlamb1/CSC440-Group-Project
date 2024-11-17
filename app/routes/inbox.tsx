@@ -18,7 +18,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
     const notifications = await fetchNotifications(context, context.user.id);
 
-    return json({ notifications, viewer: context.user });
+    return json({ notifications });
 }
 
 export default function InboxRoute() {
@@ -68,7 +68,7 @@ export default function InboxRoute() {
 
     return (
         <div className="p-8 w-full h-full flex flex-col gap-3">
-            <InboxTable viewer={data?.viewer} notifications={data?.notifications} filter={filter} prepend={prepend} />
+            <InboxTable notifications={data?.notifications} filter={filter} prepend={prepend} />
         </div>
     );
 }

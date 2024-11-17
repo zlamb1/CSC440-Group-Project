@@ -1,18 +1,17 @@
 import {
-    NavigationMenu, NavigationMenuContent,
+    NavigationMenu,
     NavigationMenuItem,
-    NavigationMenuList, NavigationMenuTrigger,
+    NavigationMenuList,
 } from "@ui/navigation-menu";
 import {Link} from "@remix-run/react";
-import {Bell, LogIn, MessageCircleCode, Search} from "lucide-react";
+import {Bell, LogIn, MessageCircleCode} from "lucide-react";
 import {Button} from "@ui/button";
 import ThemeSwitch from "@components/ThemeSwitch";
-import React, {forwardRef, RefObject} from "react";
+import React, {forwardRef, useContext} from "react";
 import UserNavDropdown from "@components/dropdown/UserNavDropdown";
 import Fade from "@ui/fade";
-import NotificationNavDropdown from "@components/dropdown/NotificationNavDropdown";
-import {Input} from "@ui/input";
 import UserSearch from "@components/user/UserSearch";
+import {UserContext} from "@/utils/context/UserContext";
 
 export interface NavBarProps {
     ssrColorScheme?: string;
@@ -21,7 +20,9 @@ export interface NavBarProps {
     notificationCount: number;
 }
 
-const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ ssrColorScheme, className, user, notificationCount }, ref) => {
+const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ ssrColorScheme, className, notificationCount }, ref) => {
+    const user = useContext(UserContext);
+
     return (
         <NavigationMenu className={className} ref={ref}>
             <NavigationMenuList className="flex flex-row items-baseline gap-5">
@@ -34,7 +35,7 @@ const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ ssrColorScheme, classN
             </NavigationMenuList>
             <NavigationMenuList className="flex flex-row items-center gap-1">
                 <NavigationMenuItem className="hidden md:flex">
-                    <UserSearch user={user} />
+                    <UserSearch />
                 </NavigationMenuItem>
                 <NavigationMenuItem className="flex items-center">
                     <ThemeSwitch ssrColorScheme={ssrColorScheme} />
@@ -67,7 +68,7 @@ const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ ssrColorScheme, classN
                           </Link>
                       }
                 >
-                    <UserNavDropdown user={user} />
+                    <UserNavDropdown />
                 </Fade>
             </NavigationMenuList>
         </NavigationMenu>
