@@ -1,6 +1,8 @@
 import {ActionFunctionArgs, redirect} from "@remix-run/node";
 import {validatePassword, validateUsername} from "@/utils/login-validation";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {PrismaClient} from "@prisma/client";
 
 export async function action({ context, request }: ActionFunctionArgs) {
     try {
@@ -20,10 +22,27 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
         const session = await context.session.getSession();
         const passwordHash = await context.bcrypt.hash(passWord);
-        const user = await context.prisma.user.create({
-            data: {
-                userName, passwordHash
-            },
+
+        const user = await context.prisma.$transaction(async (tx: PrismaClient) => {
+            const user = await tx.user.create({ data: { userName, passwordHash } });
+
+            if (!user) {
+                throw new Error('Failed to create user.');
+            }
+
+            const notification = await tx.notification.create({
+                data: {
+                    type: 'greeting',
+                    content: 'Welcome to Stories!',
+                    userId: user.id,
+                },
+            });
+
+            if (!notification) {
+                throw new Error('Failed to create notification.');
+            }
+
+            return user;
         });
 
         session.set(context.cookieProperty.userID, user.id);
