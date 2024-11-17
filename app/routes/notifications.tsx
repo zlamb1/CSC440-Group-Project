@@ -11,6 +11,7 @@ export async function fetchNotifications(context: any, userId: string) {
             dateIssued: true,
             type: true,
             content: true,
+            data: true,
             expiresOn: true,
             userId: true,
             postId: true,

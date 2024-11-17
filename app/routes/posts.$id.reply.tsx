@@ -52,7 +52,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             context.prisma.notification.create({
                 data: {
                     type: 'reply',
-                    content: 'content',
+                    content: context.user.userName,
                     userId: replyTo.userId,
                     postId: replyTo.id,
                 },
