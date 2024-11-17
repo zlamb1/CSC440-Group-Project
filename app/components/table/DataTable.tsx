@@ -97,7 +97,7 @@ function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: 
             column.name.substring(0, 1).toUpperCase() + column.name.substring(1).toLowerCase());
         if (column.sortable) {
             return (
-                <Button containerClass={`flex ${getJustify()}`} variant="ghost" onClick={ onClick }>
+                <Button containerClass={`flex ${getJustify()} w-full`} variant="ghost" onClick={ onClick }>
                     { text }
                     { getSortIcon() }
                 </Button>

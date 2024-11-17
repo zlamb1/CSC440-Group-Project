@@ -96,13 +96,13 @@ export function useTable(props?: { collection?: any[], pageSize?: number, filter
         }
 
         const index = page * pageSize;
-        let slice = props.collection.slice(index, index + pageSize);
+        let slice = props.collection?.slice?.(index, index + pageSize);
         const filterFn = props?.filterFn;
         if (filterFn) {
-            slice = slice?.filter(filterFn);
+            slice = slice?.filter?.(filterFn);
         }
         if (sortedBy) {
-            slice?.sort(defaultSort);
+            slice?.sort?.(defaultSort);
         }
         return slice;
     }

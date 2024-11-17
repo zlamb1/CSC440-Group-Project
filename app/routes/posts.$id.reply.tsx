@@ -6,6 +6,7 @@ import {ExplicitCreateResponse} from "@/api/CreateResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import EndpointResponse from "@/api/EndpointResponse";
+import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 
 export async function action({ context, params, request }: ActionFunctionArgs) {
     try {
@@ -30,13 +31,33 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             return EndpointResponse(msg, 400);
         }
 
-        const post = await context.prisma.post.create({
-            data: {
-                userId: context.user.id,
-                content: sanitizedContent,
-                replyTo: params.id,
+        const replyTo = await context.prisma.post.findUnique({
+            where: {
+                id: params.id,
             },
         });
+
+        if (!replyTo) {
+            return ExplicitResourceNotFoundResponse('ReplyTo');
+        }
+
+        const [post] = await context.prisma.$transaction([
+            context.prisma.post.create({
+                data: {
+                    userId: context.user.id,
+                    content: sanitizedContent,
+                    replyTo: params.id,
+                },
+            }),
+            context.prisma.notification.create({
+                data: {
+                    type: 'reply',
+                    content: 'content',
+                    userId: replyTo.userId,
+                    postId: replyTo.id,
+                },
+            }),
+        ]);
 
         post.user = context.user;
 

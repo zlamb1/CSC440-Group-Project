@@ -7,20 +7,14 @@ import {Bell, Search, X} from "lucide-react";
 import Fade from "@ui/fade";
 import InboxTable from "@components/table/InboxTable";
 import {SlotProps} from "@components/table/DataTable";
+import {fetchNotifications} from "@/routes/notifications";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (!context.user.loggedIn) {
         return redirect('/');
     }
 
-    const notifications = await context.prisma.notification.findMany({
-        orderBy: {
-            dateIssued: 'desc',
-        },
-        where: {
-            userId: context.user.id,
-        },
-    });
+    const notifications = await fetchNotifications(context, context.user.id);
 
     return json({ notifications });
 }
