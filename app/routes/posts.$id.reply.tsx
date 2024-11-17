@@ -49,7 +49,7 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             },
         });
 
-        const data = { replierId: context.user.id, replierName: context.user.userName, replyTo: replyTo.id, replyId: post.id };
+        const data = { replierName: context.user.userName, replyTo: replyTo.id, replyId: post.id };
 
         await context.prisma.notification.create({
             data: {
