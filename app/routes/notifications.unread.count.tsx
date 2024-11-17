@@ -21,7 +21,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
             return ExplicitResourceNotFoundResponse("Notifications");
         }
 
-        const unreadCount = notifications?.reduce((count: number, notification: Notification) => (notification.viewed ? 0 : 1) + count ) ?? 0;
+        const unreadCount = notifications?.reduce((count: number, notification: Notification) => (notification.viewed ? 0 : 1) + count, 0);
 
         return EndpointResponse({ unread: unreadCount });
     } catch (err) {
