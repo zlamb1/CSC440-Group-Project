@@ -3,6 +3,8 @@ import DataTable, {Column, Slot, SlotProps} from "@components/table/DataTable";
 import {Columns} from "lucide-react";
 import {TableCell} from "@ui/table";
 import {Link} from "@remix-run/react";
+import ReplyCell from "@components/table/notification/ReplyCell";
+import {UserWithLoggedIn} from "@/utils/types";
 
 function formatType(type: string) {
     return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
@@ -76,6 +78,7 @@ function DefaultAppend(props?: SlotProps) {
 }
 
 export interface InboxTableProps {
+    viewer?: UserWithLoggedIn;
     notifications?: any[];
     filter?: string;
     prepend?: Slot;
@@ -83,7 +86,7 @@ export interface InboxTableProps {
     compact?: boolean;
 }
 
-export default function InboxTable({notifications, filter, prepend, append, compact = false}: InboxTableProps) {
+export default function InboxTable({viewer, notifications, filter, prepend, append, compact = false}: InboxTableProps) {
     const columns = [
         {
             name: 'dateIssued',
@@ -103,16 +106,8 @@ export default function InboxTable({notifications, filter, prepend, append, comp
         {
             name: 'content',
             cell: ({ row }: { row: any }) => {
-                const data = JSON.parse(row.data);
                 if (row.type === 'reply') {
-                    if (data) {
-                        return (
-                            <div>
-                                {data.replierName} <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyId}`}>replied</Link> to your <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyTo}`}>post</Link>!
-                            </div>
-                        );
-                    }
-                    return <span>Somebody responded to your post!</span>
+                    return <ReplyCell viewer={viewer} row={row} />
                 }
             }
         },

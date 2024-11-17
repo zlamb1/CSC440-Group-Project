@@ -1,4 +1,4 @@
-import {ReactNode, useState} from "react";
+import {ReactNode} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@ui/table";
 import Omit from "@ui/omit";
 import {Button} from "@ui/button";
@@ -6,7 +6,7 @@ import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
 import {useTable} from "@components/table/table";
 import {cn} from "@/lib/utils";
-import {AnimatePresence, AnimateSharedLayout, LayoutGroup, motion, Reorder} from "framer-motion";
+import {Reorder} from "framer-motion";
 
 export interface Column {
     name: string;

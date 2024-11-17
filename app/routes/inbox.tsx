@@ -1,13 +1,15 @@
 import {json, LoaderFunctionArgs, redirect} from "@remix-run/node";
-import {useLoaderData} from "@remix-run/react";
+import {useFetcher} from "@remix-run/react";
 import {Input} from "@ui/input";
-import { useState} from "react";
+import {FormEvent, useState} from "react";
 import {Button} from "@ui/button";
 import {Bell, Search, X} from "lucide-react";
 import Fade from "@ui/fade";
 import InboxTable from "@components/table/InboxTable";
 import {SlotProps} from "@components/table/DataTable";
 import {fetchNotifications} from "@/routes/notifications";
+import usePersistedLoaderData from "@/utils/hooks/usePersistedLoaderData";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export async function loader({ context }: LoaderFunctionArgs) {
     if (!context.user.loggedIn) {
@@ -16,12 +18,22 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
     const notifications = await fetchNotifications(context, context.user.id);
 
-    return json({ notifications });
+    return json({ notifications, viewer: context.user });
 }
 
 export default function InboxRoute() {
-    const data = useLoaderData<typeof loader>();
+    const data = usePersistedLoaderData();
+    const fetcher = useFetcher();
     const [ filter, setFilter ] = useState('');
+
+    function onDismiss(evt: FormEvent) {
+        evt.preventDefault();
+        const formData = new FormData();
+        fetcher.submit(formData, {
+            action: '/notifications/dismiss',
+            method: 'POST',
+        });
+    }
 
     function prepend({selected}: SlotProps) {
         const clear = (
@@ -43,7 +55,11 @@ export default function InboxRoute() {
                 />
                 <div className="flex-grow flex justify-end">
                     <Fade show={selected && selected.length > 0}>
-                        <Button className="flex flex-row items-center gap-2" variant="outline">Dismiss <Bell size={14} /></Button>
+                        <fetcher.Form onSubmit={onDismiss}>
+                            <Button className="flex flex-row items-center gap-2 min-w-[100px]" variant="outline">
+                                { fetcher.state !== 'idle' ? <LoadingSpinner /> : <>Dismiss <Bell size={14} /></> }
+                            </Button>
+                        </fetcher.Form>
                     </Fade>
                 </div>
             </div>
@@ -52,7 +68,7 @@ export default function InboxRoute() {
 
     return (
         <div className="p-8 w-full h-full flex flex-col gap-3">
-            <InboxTable notifications={data?.notifications} filter={filter} prepend={prepend} />
+            <InboxTable viewer={data?.viewer} notifications={data?.notifications} filter={filter} prepend={prepend} />
         </div>
     );
 }

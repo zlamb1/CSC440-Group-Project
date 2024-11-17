@@ -3,7 +3,7 @@ import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import { ReactNode } from "react";
 import UserAvatar from "@components/user/UserAvatar";
 import {UserWithLoggedIn} from "@/utils/types";
-import {Form, Link, useFetcher} from "@remix-run/react";
+import {Link} from "@remix-run/react";
 import Fade from "@ui/fade";
 import FollowButton from "@components/FollowButton";
 
@@ -24,13 +24,13 @@ function getFormattedDate(date: Date) {
     );
 }
 
-export default function UserHoverCard({ viewer, user, children }: { viewer: UserWithLoggedIn, user: User | null, children: ReactNode }) {
+export default function UserHoverCard({ viewer, user, children }: { viewer?: UserWithLoggedIn, user: User | null, children: ReactNode }) {
     if (!user) {
         return children;
     }
 
     const isSelf = viewer?.id === user.id;
-    const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id)
+    const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id) || false;
 
     return (
         <HoverCard>
