@@ -6,7 +6,7 @@ import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
 import {useTable} from "@components/table/table";
 import {cn} from "@/lib/utils";
-import {Reorder} from "framer-motion";
+import {AnimatePresence, motion, Reorder} from "framer-motion";
 
 export interface Column {
     name: string;
@@ -112,7 +112,11 @@ function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: 
     return (
         <Omit omit={column?.hidden}>
             <TableHead>
-                { column?.header ? column.header : getHeaderCell() }
+                <AnimatePresence>
+                    <motion.div layout>
+                        { column?.header ? column.header : getHeaderCell() }
+                    </motion.div>
+                </AnimatePresence>
             </TableHead>
         </Omit>
     );
