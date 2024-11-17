@@ -133,6 +133,7 @@ export default function InboxTable({viewer, notifications, filter, prepend, appe
                        prepend={prepend}
                        append={typeof append === 'undefined' ? DefaultAppend : append}
                        pageSize={compact ? 5 : 15}
+                       empty="You have no notifications."
             />
         </div>
     )

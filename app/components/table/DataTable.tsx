@@ -45,6 +45,7 @@ export interface DataTableProps {
     prepend?: Slot;
     append?: Slot;
     styleHeaderOnSelectAll?: boolean;
+    empty?: ReactNode;
 }
 
 function ColumnHead({ column, isSorted = false, isDescending = false, onSort }: { column: Column, isSorted?: boolean, isDescending?: boolean, onSort?: () => void }) {
@@ -165,7 +166,7 @@ function ColumnCell(row: any, column: Column) {
 
 export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, useReordering = true, className,
                                     styleHeaderOnSelectAll = true, useSelection = true, keyFn = (row => row.id), filterFn,
-                                    filter, prepend, append
+                                    filter, prepend, append, empty
                                   }: DataTableProps)
 {
     const table = useTable({
@@ -295,7 +296,7 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
                 <Omit omit={!isEmpty} fallback={getTableBody()}>
                     <TableBody>
                         <TableRow>
-                            <TableCell>No data available ¯\_(ツ)_/¯</TableCell>
+                            <TableCell>{empty || 'No data available ¯\\_(ツ)_/¯'}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Omit>
