@@ -1,5 +1,8 @@
 import {Button} from "@ui/button";
-import DataTable, {Slot, SlotProps} from "@components/table/DataTable";
+import DataTable, {Column, Slot, SlotProps} from "@components/table/DataTable";
+import {Columns} from "lucide-react";
+import {TableCell} from "@ui/table";
+import {Link} from "@remix-run/react";
 
 function formatType(type: string) {
     return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
@@ -99,12 +102,25 @@ export default function InboxTable({notifications, filter, prepend, append, comp
         },
         {
             name: 'content',
+            cell: ({ row }: { row: any }) => {
+                const data = JSON.parse(row.data);
+                if (row.type === 'reply') {
+                    if (data) {
+                        return (
+                            <div>
+                                {data.replierName} <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyId}`}>replied</Link> to your <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyTo}`}>post</Link>!
+                            </div>
+                        );
+                    }
+                    return <span>Somebody responded to your post!</span>
+                }
+            }
         },
         {
             name: 'expiresOn',
             displayName: 'Expires In',
             align: 'center',
-            formatFn:   formatDate,
+            formatFn: formatDate,
             sortable: true,
             hidden: compact,
             suppressHydrationWarning: true,

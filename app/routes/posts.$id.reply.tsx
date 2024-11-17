@@ -41,23 +41,25 @@ export async function action({ context, params, request }: ActionFunctionArgs) {
             return ExplicitResourceNotFoundResponse('ReplyTo');
         }
 
-        const [post] = await context.prisma.$transaction([
-            context.prisma.post.create({
-                data: {
-                    userId: context.user.id,
-                    content: sanitizedContent,
-                    replyTo: params.id,
-                },
-            }),
-            context.prisma.notification.create({
-                data: {
-                    type: 'reply',
-                    content: context.user.userName,
-                    userId: replyTo.userId,
-                    postId: replyTo.id,
-                },
-            }),
-        ]);
+        const post = await context.prisma.post.create({
+            data: {
+                userId: context.user.id,
+                content: sanitizedContent,
+                replyTo: params.id,
+            },
+        });
+
+        const data = { replierId: context.user.id, replierName: context.user.userName, replyTo: replyTo.id, replyId: post.id };
+
+        await context.prisma.notification.create({
+            data: {
+                data: JSON.stringify(data),
+                type: 'reply',
+                content: context.user.userName,
+                userId: replyTo.userId,
+                postId: post.id,
+            },
+        });
 
         post.user = context.user;
 

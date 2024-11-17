@@ -15,7 +15,7 @@ export interface Column {
     align?: string;
     formatFn?: (col: any) => any;
     header?: ReactNode;
-    cell?: ReactNode;
+    cell?: ReactNode | (({ row, col }: { row: any, col: Column }) => ReactNode);
     sortable?: boolean;
     suppressHydrationWarning?: boolean;
 }
@@ -134,6 +134,21 @@ function ColumnCell(row: any, column: Column) {
     }
 
     function getTableCell() {
+        if (column.cell) {
+            if (typeof column.cell === 'function') {
+                const content = column.cell({ row, col: column });
+                if (content) {
+                    return (
+                        <TableCell className={getTextAlign()} key={column.name} suppressHydrationWarning={column?.suppressHydrationWarning}>
+                            { content }
+                        </TableCell>
+                    );
+                }
+            } else {
+                return column.cell;
+            }
+        }
+
         return (
             <TableCell className={getTextAlign()} key={column.name} suppressHydrationWarning={column?.suppressHydrationWarning}>
                 { column.formatFn ? column.formatFn(value) : value }
@@ -143,9 +158,7 @@ function ColumnCell(row: any, column: Column) {
 
     return (
         <Omit key={column.name} omit={column?.hidden}>
-            {
-                column?.cell ? column.cell : getTableCell()
-            }
+            { getTableCell() }
         </Omit>
     );
 }
@@ -188,10 +201,10 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
                                         useSelection ?
                                             <TableCell>
                                                 <Checkbox className="w-4 h-4" checked={isSelected}
-                                                          onClick={() => selectRow(row)}/>
+                                                          onClick={() => selectRow(row)} />
                                             </TableCell> : null
                                     }
-                                    {columns.map(col => ColumnCell(row, col))}
+                                    { columns.map(col => ColumnCell(row, col)) }
                                 </Reorder.Item>
                             )
                         }))
