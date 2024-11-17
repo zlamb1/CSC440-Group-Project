@@ -182,8 +182,8 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
     });
 
     const {
-            page, pageCount, prevPage, nextPage, rows, setRows, selected, selectRow, selectAll, selectedAll,
-            sortedBy, setSorted, isSortedDescending, setSortedDescending,
+            page, pageCount, prevPage, nextPage, rows, setRows, selectRow, selectAll, selectedAll,
+            sortedBy, setSorted, isSortedDescending, setSortedDescending, selected
     } = table;
 
     const isEmpty = !rows || !rows.length || rows.length === 0;

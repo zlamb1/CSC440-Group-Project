@@ -9,8 +9,9 @@ import NotFound from "@/routes/$";
 import Post from "@components/post/Post";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
-import {useEffect} from "react";
+import {useEffect, useLayoutEffect, useRef} from "react";
 import {useParams} from "@remix-run/react";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -43,19 +44,31 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
 
 export default function PostRoute() {
     const data = usePersistedLoaderData();
+    const isAdded = useRef<boolean>(false);
     const params = useParams();
 
     if (!params.id || !data?.post) {
         return NotFound;
     }
 
-    const {add} = usePostStore(useShallow((state: any) => ({ add: state.add, post: state[params.id || ''] })));
+    const {add, post} = usePostStore(useShallow((state: any) => ({ add: state.add, post: state[params.id || ''] })));
 
     useEffect(() => {
-        add(data.post);
+        add([data.post]);
+        isAdded.current = true;
     }, []);
 
+    if (!isAdded.current && !post) {
+        return (
+            <div className="w-full flex justify-center">
+                <LoadingSpinner />
+            </div>
+        )
+    }
+
     return (
-        <Post id={params.id} />
+        <div className="w-full">
+            <Post id={params.id} />
+        </div>
     );
 }
