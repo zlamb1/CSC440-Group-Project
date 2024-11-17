@@ -9,9 +9,10 @@ import NotFound from "@/routes/$";
 import Post from "@components/post/Post";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
-import {useEffect, useLayoutEffect, useRef} from "react";
+import {useEffect, useRef} from "react";
 import {useParams} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {getPostByID} from '@prisma/client/sql';
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
     try {
@@ -19,18 +20,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
             return RequiredFieldResponse('Post ID');
         }
 
-        const post = await context.prisma.post.findUnique({
-            where: {
-                id: params.id,
-            },
-            include: {
-                user: {
-                    where: {
-                        visibility: ProfileVisibility.PUBLIC,
-                    },
-                },
-            },
-        });
+        const post = await context.prisma.$queryRawTyped(getPostByID(params.id, context.user.id));
 
         if (!post) {
             return ExplicitResourceNotFoundResponse('Post');
@@ -54,7 +44,7 @@ export default function PostRoute() {
     const {add, post} = usePostStore(useShallow((state: any) => ({ add: state.add, post: state[params.id || ''] })));
 
     useEffect(() => {
-        add([data.post]);
+        add(data.post);
         isAdded.current = true;
     }, []);
 
