@@ -102,6 +102,13 @@ enum Genre {
   THRILLER
   ROMANCE
   FANTASY
+  SCARY
+  ACTION
+  FICTION
+  MUSIC
+  TELEVISION
+  ART
+  POLITICAL
 }
 
 enum ProfileVisibility {
