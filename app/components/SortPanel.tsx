@@ -38,12 +38,17 @@ export default function SortPanel({ className, style }: { className?: string, st
                 showContent &&
                 <div className="px-3 py-2 w-full flow-root">
                     <span className="font-bold select-none opacity-70 text-sm mx-1">Genre</span>
-                    <div className="w-full flex flex-row flex-wrap">
+                    <div className="w-full flex flex-wrap gap-1">
                     {
                         showContent && Object.keys(Genre)?.map?.((genre: string) => {
                             const color = GenreThemes[genre] || '';
                             return (
-                                <Button key={genre} containerClass="w-100" className={"justify-between rounded-full m-1 h-7"} style={{ background: color }} size="sm">
+                                <Button key={genre}
+                                        containerClass="min-w-[100px] flex justify-center"
+                                        className={"w-full rounded-full-center m-1 h-7"}
+                                        style={{ background: color }}
+                                        size="sm"
+                                >
                                     {formatGenre(genre)}
                                 </Button>
                             );

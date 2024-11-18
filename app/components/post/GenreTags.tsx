@@ -103,33 +103,6 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
                     ))
                 }
             </AnimatePresence>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
-            <span>TEST</span>
         </div>
     );
 }
