@@ -19,6 +19,7 @@ import {cn} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
 import {UserContext} from "@/utils/context/UserContext";
 import GenreTags from "@components/post/GenreTags";
+import {PostContext} from "@/utils/context/PostContext";
 
 function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}: {
     className?: string,
@@ -64,65 +65,66 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
     }
 
     return (
-        <motion.div initial={{opacity: 0 }}
-                    animate={{opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: exitDuration }}
-                    className="overflow-y-hidden"
-                    key={post.id}
-        >
-            <div className={cn("flex flex-col w-full", className)}>
-                <div className="flex justify-between items-center gap-3">
-                    <div className="flex gap-3 items-center select-none">
-                        <UserHoverCard user={post.user}>
-                            <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
-                                <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
-                                <div className="flex items-center gap-1">
-                                    {post.user?.userName}
-                                    <span className="text-sm text-gray-400" suppressHydrationWarning>• {formattedTime}</span>
+        <PostContext.Provider value={post}>
+            <motion.div initial={{opacity: 0}}
+                        animate={{opacity: 1, height: 'auto'}}
+                        exit={{opacity: 0, height: 0}}
+                        transition={{duration: exitDuration}}
+                        className="overflow-y-hidden"
+                        key={post.id}
+            >
+                <div className={cn("flex flex-col w-full", className)}>
+                    <div className="flex justify-between items-center gap-3">
+                        <div className="flex gap-3 items-center select-none">
+                            <UserHoverCard user={post.user}>
+                                <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
+                                    <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName}/>
+                                    <div className="flex items-center gap-1">
+                                        {post.user?.userName}
+                                        <span className="text-sm text-gray-400"
+                                              suppressHydrationWarning>• {formattedTime}</span>
+                                    </div>
+                                </Link>
+                            </UserHoverCard>
+                            <GenreTags genres={post.genres}/>
+                        </div>
+                        <ContextMenu post={post} exitDuration={exitDuration} onEdit={() => setEditing(true)}/>
+                    </div>
+                    <div className="ml-10 flex flex-col gap-3">
+                        <div className="flex flex-col gap-1">
+                            <div className="flex flex-col">
+                                <PostView post={post} isEditing={isEditing} onIsEditingChange={(_isEditing: boolean) => setEditing(_isEditing)} />
+                            </div>
+                            <div className="flex gap-2">
+                                <LikePanel post={post}/>
+                                <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
+                                    <Button containerClass="flex"
+                                            className="h-[25px] flex gap-1 items-center rounded-full"
+                                            size="icon"
+                                            variant={isReplying ? undefined : 'ghost'}
+                                            disabled={!viewer?.loggedIn}
+                                            onClick={() => setIsReplying(!isReplying)}>
+                                        <Pencil size={16}/>
+                                    </Button>
                                 </div>
-                            </Link>
-                        </UserHoverCard>
-                        <GenreTags genres={post.genres} />
-                    </div>
-                    <ContextMenu post={post} exitDuration={exitDuration} onEdit={() => setEditing(true)} />
-                </div>
-                <div className="ml-10 flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
-                        <div className="flex flex-col">
-                            <PostView post={post} isEditing={isEditing}
-                                      onIsEditingChange={(_isEditing: boolean) => setEditing(_isEditing)}
-                            />
-                        </div>
-                        <div className="flex gap-2">
-                            <LikePanel post={post} />
-                            <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
-                                <Button containerClass="flex"
-                                        className="h-[25px] flex gap-1 items-center rounded-full"
-                                        size="icon"
-                                        variant={isReplying ? undefined : 'ghost'}
-                                        disabled={!viewer?.loggedIn}
-                                        onClick={() => setIsReplying(!isReplying)}>
-                                    <Pencil size={16} />
-                                </Button>
-                            </div>
-                            <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
-                                <Button containerClass="flex"
-                                        className="h-[25px] flex gap-1 items-center rounded-full"
-                                        size="icon"
-                                        variant="ghost"
-                                        onClick={() => setShowReplies(!showReplies)}>
-                                    <MessageCircle size={16}/>
-                                    <span className="text-bold">{post.replyCount}</span>
-                                </Button>
+                                <div className="flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900">
+                                    <Button containerClass="flex"
+                                            className="h-[25px] flex gap-1 items-center rounded-full"
+                                            size="icon"
+                                            variant="ghost"
+                                            onClick={() => setShowReplies(!showReplies)}>
+                                        <MessageCircle size={16}/>
+                                        <span className="text-bold">{post.replyCount}</span>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
+                        {viewer?.loggedIn && <ReplyEditor post={post} isReplying={isReplying}/>}
+                        {getReplyTree()}
                     </div>
-                    { viewer?.loggedIn && <ReplyEditor post={post} isReplying={isReplying} /> }
-                    { getReplyTree() }
                 </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </PostContext.Provider>
     );
 }
 
