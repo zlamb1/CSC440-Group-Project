@@ -6,17 +6,7 @@ import React, {CSSProperties, useContext, useState} from "react";
 import {cn} from "@/lib/utils";
 import {UserContext} from "@/utils/context/UserContext";
 import {Genre} from "@prisma/client";
-import {GenreTheme} from "@/utils/genre-theme";
-
-function formatGenre(genre: string) {
-    // this is necessary because genres from the enum are fully capitalized
-    let formattedGenre = '';
-    const parts = genre.split('_');
-    for (const part of parts) {
-        formattedGenre += part.charAt(0).toUpperCase() + part.substring(1).toLowerCase();
-    }
-    return formattedGenre;
-}
+import {formatGenre, GenreThemes} from "@/utils/genre-util";
 
 export default function SortPanel({ className, style }: { className?: string, style?: CSSProperties }) {
     const user = useContext(UserContext);
@@ -51,7 +41,7 @@ export default function SortPanel({ className, style }: { className?: string, st
                     <div className="w-full flex flex-row flex-wrap">
                     {
                         showContent && Object.keys(Genre)?.map?.((genre: string) => {
-                            const color = GenreTheme[genre] || '';
+                            const color = GenreThemes[genre] || '';
                             return (
                                 <Button key={genre} containerClass="w-100" className={"justify-between rounded-full m-1 h-7"} style={{ background: color }} size="sm">
                                     {formatGenre(genre)}

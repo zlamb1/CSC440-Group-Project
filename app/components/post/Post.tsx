@@ -18,6 +18,7 @@ import {useShallow} from "zustand/react/shallow";
 import {cn} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
 import {UserContext} from "@/utils/context/UserContext";
+import GenreTags from "@components/post/GenreTags";
 
 function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}: {
     className?: string,
@@ -72,7 +73,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
         >
             <div className={cn("flex flex-col w-full", className)}>
                 <div className="flex justify-between items-center gap-3">
-                    <div className="flex gap-3 select-none">
+                    <div className="flex gap-3 items-center select-none">
                         <UserHoverCard user={post.user}>
                             <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
                                 <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName} />
@@ -82,6 +83,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
                                 </div>
                             </Link>
                         </UserHoverCard>
+                        <GenreTags genres={post.genres} />
                     </div>
                     <ContextMenu post={post} exitDuration={exitDuration} onEdit={() => setEditing(true)} />
                 </div>
