@@ -28,14 +28,17 @@ SELECT
                 'likeCount',   r."likeCount",
                 'replyCount',  r."replyCount",
                 'liked',       r."liked",
-                'user',        r."user"
+                'user',        r."user",
+                'genres',      r."genres"
             )
         ) FILTER (WHERE r."id" IS NOT NULL),
         '[]'::jsonb
-    ) as replies
+    ) as replies,
+    COALESCE(JSONB_AGG(g."genre") FILTER (WHERE g."genre" IS NOT NULL), '[]'::jsonb) AS "genres"
 FROM "Post" p
 INNER JOIN "User" u ON u."id" = p."userId" AND (u."visibility" = 'PUBLIC' OR u."id" = $1::UUID)
 LEFT JOIN "PostLike" l ON l."postId" = p."id"
+LEFT JOIN "PostGenre" g On g."postId" = p."id"
 LEFT JOIN LATERAL (
     SELECT
         r."id", r."postedAt", r."content", r."replyTo", r."lastEdited", r."userId",
@@ -54,11 +57,13 @@ LEFT JOIN LATERAL (
             'visibility',   u."visibility",
             'displayName',  u."displayName",
             'bio',          u."bio"
-        ) AS user
+        ) AS user,
+        COALESCE(JSONB_AGG(g."genre") FILTER (WHERE g."genre" IS NOT NULL), '[]'::jsonb) AS "genres"
     FROM "Post" r
     INNER JOIN "User" AS u ON u."id" = r."userId"
     LEFT JOIN "Post" AS rr ON rr."replyTo" = r."id"
     LEFT JOIN "PostLike" AS l ON l."postId" = r."id"
+    LEFT JOIN "PostGenre" AS g ON g."postId" = r."id"
     WHERE r."replyTo" = p."id"
     GROUP BY r."id", u."id"
     ORDER BY r."postedAt" DESC
