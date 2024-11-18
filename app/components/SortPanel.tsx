@@ -53,7 +53,7 @@ export default function SortPanel({ className, style }: { className?: string, st
                         showContent && Object.keys(Genre)?.map?.((genre: string) => {
                             const color = GenreTheme[genre] || '';
                             return (
-                                <Button key={genre} containerClass="w-100" className={"justify-between rounded-full bg-" + color + "-400 hover:bg-" + color + "-500 hover:text-white text-white m-1 h-7"} variant="ghost" size="sm">
+                                <Button key={genre} containerClass="w-100" className={"justify-between rounded-full m-1 h-7"} style={{ background: color }} size="sm">
                                     {formatGenre(genre)}
                                 </Button>
                             );

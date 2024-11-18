@@ -1,7 +1,7 @@
 export const GenreTheme: { [key: string]: string } = {
-    'Comedy': 'yellow',
-    'SciFi': 'lime',
-    'Thriller': 'purple',
-    'Romance': 'red',
-    'Fantasy': 'blue'
+    'COMEDY': '#c39424',
+    'SCI_FI': '#579a30',
+    'THRILLER': '#6b259a',
+    'ROMANCE': '#a81d1d',
+    'FANTASY': '#3b60b3'
 };

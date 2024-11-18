@@ -1,42 +1,10 @@
 import {Button} from "@ui/button";
 import DataTable, {Slot, SlotProps} from "@components/table/DataTable";
 import ReplyCell from "@components/table/notification/ReplyCell";
+import {formatFutureDate, formatPastDate} from "@/utils/time";
 
 function formatType(type: string) {
     return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
-}
-
-function formatDate(date: Date | string, suffix?: string) {
-    if (typeof date === "string") {
-        date = new Date(date);
-    }
-
-    const now = new Date();
-    const d1 = now > date ? now : date;
-    const d2 = now > date ? date : now;
-
-    const years = d1.getFullYear() - d2.getFullYear();
-    if (years == 0) {
-        const months = d1.getMonth() - d2.getMonth();
-        if (months == 0) {
-            const days = d1.getDate() - d2.getDate();
-            if (days == 0) {
-                const hours = d1.getHours() - d2.getHours();
-                if (hours == 0) {
-                    const minutes = d1.getMinutes() - d2.getMinutes();
-                    if (minutes == 0) {
-                        const seconds = d1.getSeconds() - d2.getSeconds();
-                        return `${seconds} second${seconds !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
-                    }
-                    return `${minutes} minute${minutes !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
-                }
-                return `${hours} hour${hours !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
-            }
-            return `${days} day${days !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
-        }
-        return `${months} month${months !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
-    }
-    return `${years} year${years !== 1 ? 's' : ''}` + (suffix ? ` ${suffix}` : '');
 }
 
 function DefaultAppend(props?: SlotProps) {
@@ -87,7 +55,7 @@ export default function InboxTable({ notifications, filter, prepend, append, com
             name: 'dateIssued',
             displayName: 'Date Issued',
             align: 'center',
-            formatFn: (date: any) => formatDate(date, 'ago'),
+            formatFn: (date: any) => formatPastDate(date),
             sortable: true,
             hidden: compact,
             suppressHydrationWarning: true,
@@ -110,7 +78,7 @@ export default function InboxTable({ notifications, filter, prepend, append, com
             name: 'expiresOn',
             displayName: 'Expires In',
             align: 'center',
-            formatFn: formatDate,
+            formatFn: formatFutureDate,
             sortable: true,
             hidden: compact,
             suppressHydrationWarning: true,

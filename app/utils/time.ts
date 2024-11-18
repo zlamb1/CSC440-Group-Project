@@ -15,7 +15,7 @@ export function formatPastDate(date: string | Date, suffix?: string) {
         date = new Date(date);
     }
 
-    if (!suffix) {
+    if (suffix == null) {
         suffix = 'ago';
     }
 
@@ -48,5 +48,48 @@ export function formatPastDate(date: string | Date, suffix?: string) {
     }
 
     const days = Math.floor(epochDiff / MS_DAY);
+    return `${days} day${isPlural(days)} ${suffix}`;
+}
+
+export function formatFutureDate(date: string | Date, suffix?: string) {
+    if (!date) return '';
+
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+
+    if (!suffix) {
+        suffix = '';
+    }
+
+    const now = new Date();
+    const msDiff = date.getTime() - now.getTime();
+
+    if (msDiff < MS_MINUTE) {
+        const seconds = Math.floor(msDiff / MS_SECOND);
+        return `${seconds} second${isPlural(seconds)} ${suffix}`;
+    }
+
+    if (msDiff < MS_HOUR) {
+        const minutes = Math.floor(msDiff / MS_MINUTE);
+        return `${minutes} minute${isPlural(minutes)} ${suffix}`;
+    }
+
+    if (msDiff < MS_DAY) {
+        const hours = Math.floor(msDiff / MS_HOUR);
+        return `${hours} hour${isPlural(hours)} ${suffix}`;
+    }
+
+    const years = date.getFullYear() - now.getFullYear();
+    if (years > 0) {
+        return `${years} year${isPlural(years)} ${suffix}`;
+    }
+
+    const months = date.getMonth() - now.getMonth();
+    if (months > 0) {
+        return `${months} month${isPlural(months)} ${suffix}`;
+    }
+
+    const days = Math.floor(msDiff / MS_DAY);
     return `${days} day${isPlural(days)} ${suffix}`;
 }
