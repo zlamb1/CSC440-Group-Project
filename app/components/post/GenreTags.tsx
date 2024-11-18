@@ -55,10 +55,6 @@ export function GenreCommand({ children, genres }: { children: ReactNode, genres
 }
 
 export default function GenreTags({ genres, editable = true }: { genres: string[], editable?: boolean }) {
-    if (!genres || !genres.length) {
-        return null;
-    }
-
     const post = useContext(PostContext);
     const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })))
 
@@ -68,13 +64,22 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
 
     return (
         <div className="flex items-center gap-1">
+            {
+                editable && (
+                    <GenreCommand genres={genres}>
+                        <Button className="w-[24px] h-[24px]" variant="ghost" size="icon">
+                            <Plus size={14} />
+                        </Button>
+                    </GenreCommand>
+                )
+            }
             <AnimatePresence>
                 {
                     genres?.map?.(genre => (
                         <motion.div initial={{ width: 0 }}
                                     animate={{ width: 'auto' }}
                                     exit={{ width: 0 }}
-                                    transition={{ duration: 0.25 }}
+                                    transition={{ duration: 0.15 }}
                                     className="overflow-x-hidden"
                                     key={genre}
                         >
@@ -97,15 +102,6 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
                     ))
                 }
             </AnimatePresence>
-            {
-                editable && (
-                    <GenreCommand genres={genres}>
-                        <Button className="w-[24px] h-[24px]" variant="ghost" size="icon">
-                            <Plus size={14} />
-                        </Button>
-                    </GenreCommand>
-                )
-            }
         </div>
     );
 }
