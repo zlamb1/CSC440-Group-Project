@@ -5,28 +5,30 @@ import {Separator} from "@ui/separator";
 import React, {CSSProperties, useContext, useState} from "react";
 import {cn} from "@/lib/utils";
 import {UserContext} from "@/utils/context/UserContext";
+import {Genre} from "@prisma/client";
+import {GenreTheme} from "@/utils/genre-theme";
+
+function formatGenre(genre: string) {
+    // this is necessary because genres from the enum are fully capitalized
+    let formattedGenre = '';
+    const parts = genre.split('_');
+    for (const part of parts) {
+        formattedGenre += part.charAt(0).toUpperCase() + part.substring(1).toLowerCase();
+    }
+    return formattedGenre;
+}
 
 export default function SortPanel({ className, style }: { className?: string, style?: CSSProperties }) {
     const user = useContext(UserContext);
-
-    if (!user?.loggedIn) {
-        return <div className={className} />;
-    }
-
-    //PROBABLY TEMPORARY - WOULD BE BETTER TO GET THIS OUT OF DATABASE 
-    const genres = [
-        {genre: 'Comedy',   id: 0,  color: 'yellow'},
-        {genre: 'SciFi',    id: 1,  color: 'lime'},
-        {genre: 'Thriller', id: 2,  color: 'purple'},
-        {genre: 'Romance',  id: 3,  color: 'red'},
-        {genre: 'Fantasy',  id: 4,  color: 'blue'}
-    ];
-
     const [showContent, setShowContent] = useState(true);
 
     const toggleContent = () => {
         setShowContent(!showContent);
     };
+
+    if (!user?.loggedIn) {
+        return <div className={className} />;
+    }
 
     return (
         <Card className={cn("h-full flex flex-col overflow-hidden", className)} style={style}>
@@ -48,10 +50,11 @@ export default function SortPanel({ className, style }: { className?: string, st
                     <span className="font-bold select-none opacity-70 text-sm mx-1">Genre</span>
                     <div className="w-full flex flex-row flex-wrap">
                     {
-                        showContent && genres?.map((value: {genre: string, id: number, color: string}) => {
+                        showContent && Object.keys(Genre)?.map?.((genre: string) => {
+                            const color = GenreTheme[genre] || '';
                             return (
-                                <Button containerClass="w-100" className={"justify-between rounded-full bg-" + value.color + "-400 hover:bg-" + value.color + "-500 hover:text-white text-white m-1 h-7"} key={value.id} variant="ghost" size="sm">
-                                    {value.genre}
+                                <Button key={genre} containerClass="w-100" className={"justify-between rounded-full bg-" + color + "-400 hover:bg-" + color + "-500 hover:text-white text-white m-1 h-7"} variant="ghost" size="sm">
+                                    {formatGenre(genre)}
                                 </Button>
                             );
                         })
