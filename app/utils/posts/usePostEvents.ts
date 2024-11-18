@@ -8,6 +8,7 @@ export enum PostEvent {
     CREATE = 'post-create',
     LIKE   = 'post-like',
     EDIT   = 'post-edit',
+    GENRE  = 'post-genre',
     DELETE = 'post-delete',
 }
 
@@ -41,6 +42,11 @@ function usePostSync() {
             case PostEvent.LIKE: {
                 const {post, liked} = data.evt;
                 state.like(post, liked, false);
+                break;
+            }
+            case PostEvent.GENRE: {
+                const {post, genre, remove} = data.evt;
+                state.genre({ post, genre, remove, emit: false });
                 break;
             }
             case PostEvent.DELETE: {

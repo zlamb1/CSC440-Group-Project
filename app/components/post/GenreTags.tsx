@@ -7,15 +7,24 @@ import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@ui/command";
 import {Genre} from "@prisma/client";
 import {PostContext} from "@/utils/context/PostContext";
+import {usePostStore} from "@/utils/posts/usePostStore";
+import {useShallow} from "zustand/react/shallow";
+import {AnimatePresence, motion} from "framer-motion";
 
 export function GenreCommand({ children, genres }: { children: ReactNode, genres: string[] }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const post = useContext(PostContext);
+    const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })))
+
+    if (!post) {
+        return null;
+    }
 
     const allGenres = Object.keys(Genre);
 
-    function onClickGenre(genre: string) {
-
+    function onClickGenre(_genre: string) {
+        const remove = genres.includes(_genre);
+        genre({ post: post!.id, genre: _genre, remove });
     }
 
     return (
@@ -50,22 +59,44 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
         return null;
     }
 
+    const post = useContext(PostContext);
+    const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })))
+
+    function onRemoveGenre(_genre: string) {
+        genre({ post: post!.id, genre: _genre, remove: true });
+    }
+
     return (
         <div className="flex items-center gap-1">
-            {
-                genres?.map?.(genre => (
-                    <Badge key={genre} className="flex items-center gap-1" style={{ background: GenreThemes[genre] }}>
-                        {formatGenre(genre)}
-                        {
-                            editable && (
-                                <Button className="w-[16px] h-[16px]" variant="ghost" size="icon" style={{ background: GenreThemes[genre] }}>
-                                    <X size={14} />
-                                </Button>
-                            )
-                        }
-                    </Badge>
-                ))
-            }
+            <AnimatePresence>
+                {
+                    genres?.map?.(genre => (
+                        <motion.div initial={{ width: 0 }}
+                                    animate={{ width: 'auto' }}
+                                    exit={{ width: 0 }}
+                                    transition={{ duration: 0.25 }}
+                                    className="overflow-x-hidden"
+                                    key={genre}
+                        >
+                            <Badge className="flex items-center gap-1" style={{ background: GenreThemes[genre] }}>
+                                {formatGenre(genre)}
+                                {
+                                    editable && (
+                                        <Button className="w-[16px] h-[16px]"
+                                                variant="ghost"
+                                                size="icon"
+                                                style={{ background: GenreThemes[genre] }}
+                                                onClick={() => onRemoveGenre(genre)}
+                                        >
+                                            <X size={14} />
+                                        </Button>
+                                    )
+                                }
+                            </Badge>
+                        </motion.div>
+                    ))
+                }
+            </AnimatePresence>
             {
                 editable && (
                     <GenreCommand genres={genres}>

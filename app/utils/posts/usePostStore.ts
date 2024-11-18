@@ -85,6 +85,41 @@ export const usePostStore = create((set, get: any) => ({
         });
     },
 
+    genre({ post, genre, remove, emit = true }: { post: string, genre: string, remove?: boolean, emit?: boolean }) {
+        if (!post) {
+            return console.error('[usePostStore] cannot update genre for null post');
+        }
+
+        if (!genre) {
+            return console.error('[usePostStore] cannot update post with null genre');
+        }
+
+        return set((state: any) => {
+            const _post = {...state[post]};
+
+            if (!_post) {
+                return state;
+            }
+
+            const indexOf = _post.genres?.indexOf?.(genre);
+            if (remove) {
+                if (indexOf > -1) {
+                    _post.genres.splice(indexOf, 1);
+                }
+            } else {
+                if (indexOf < 0) {
+                    _post.genres.push(genre);
+                }
+            }
+
+            if (emit) {
+                emitter.emit(PostEvent.GENRE, { post, genre, remove });
+            }
+
+            return {...state, [post]: _post};
+        });
+    },
+
     reply(parentId: string, replyId: string) {
         return set((state: any) => {
             const parent = {...state[parentId]};
