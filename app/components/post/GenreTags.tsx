@@ -10,6 +10,7 @@ import {PostContext} from "@/utils/context/PostContext";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {AnimatePresence, motion} from "framer-motion";
+import {ScrollArea, ScrollBar} from "@ui/scroll-area";
 
 export function GenreCommand({ children, genres }: { children: ReactNode, genres: string[] }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -63,12 +64,12 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
     }
 
     return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-scroll">
             {
                 editable && (
                     <GenreCommand genres={genres}>
                         <Button className="w-[24px] h-[24px]" variant="ghost" size="icon">
-                            <Plus size={14} />
+                            <Plus size={14}/>
                         </Button>
                     </GenreCommand>
                 )
@@ -76,24 +77,24 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
             <AnimatePresence>
                 {
                     genres?.map?.(genre => (
-                        <motion.div initial={{ width: 0 }}
-                                    animate={{ width: 'auto' }}
-                                    exit={{ width: 0 }}
-                                    transition={{ duration: 0.15 }}
-                                    className="overflow-x-hidden"
+                        <motion.div initial={{width: 0}}
+                                    animate={{width: 'auto'}}
+                                    exit={{width: 0}}
+                                    transition={{duration: 0.15}}
+                                    className="overflow-x-hidden flex-shrink-0"
                                     key={genre}
                         >
-                            <Badge className="flex items-center gap-1" style={{ background: GenreThemes[genre] }}>
+                            <Badge className="flex items-center gap-1" style={{background: GenreThemes[genre]}}>
                                 {formatGenre(genre)}
                                 {
                                     editable && (
                                         <Button className="w-[16px] h-[16px]"
                                                 variant="ghost"
                                                 size="icon"
-                                                style={{ background: GenreThemes[genre] }}
+                                                style={{background: GenreThemes[genre]}}
                                                 onClick={() => onRemoveGenre(genre)}
                                         >
-                                            <X size={14} />
+                                            <X size={14}/>
                                         </Button>
                                     )
                                 }
@@ -102,6 +103,33 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
                     ))
                 }
             </AnimatePresence>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
+            <span>TEST</span>
         </div>
     );
 }

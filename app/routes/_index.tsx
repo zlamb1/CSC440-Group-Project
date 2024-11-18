@@ -55,7 +55,7 @@ export default function Index() {
     }
 
     return (
-        <div className="flex flex-col w-full px-1">
+        <div className="flex flex-col w-full">
             <Fade show={!!user?.loggedIn}>
                 <Form navigate={false} className="flex flex-col gap-3 p-3 px-5" onSubmit={onSubmit}>
                     <div className="flex gap-3">
@@ -86,7 +86,7 @@ export default function Index() {
                         />
                     </div>
                 </Form>
-                <hr/>
+                <hr />
             </Fade>
             <PostScroller posts={posts} fetcher={fetch} />
         </div>

@@ -79,15 +79,12 @@ export function Layout({children}: {children: ReactNode}) {
                     <NavBar {...data}
                             className="bg-background w-100 text-lg h-fit sm:px-16 md:px-32 lg:px-64 xl:px-96 sticky top-0 p-3"
                             ref={ref}/>
-                    <div className="flex-grow flex gap-3 w-full px-3">
-                        <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky"
-                                        style={{top: boundingRect.height}} />
-                        <div className="border-0 bg-background flex-grow flex justify-center">
+                    <div className="w-full flex px-3">
+                        <FollowingPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky" style={{top: boundingRect.height}} />
+                        <div className="px-3 w-full lg:w-[70%] xl:w-[60%] border-0 bg-background">
                             {children}
                         </div>
-                        <SortPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky"
-                                   style={{top: boundingRect.height}}
-                        />
+                        <SortPanel className="hidden md:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky" style={{top: boundingRect.height}} />
                     </div>
                 </div>
                 <Scripts/>
@@ -119,7 +116,7 @@ export default function App() {
     return (
         <AnimatePresence mode="wait" initial={false}>
             <motion.main key={pathname}
-                         className="w-full flex justify-center"
+                         className="w-full"
                          initial={{opacity: 0}}
                          animate={{opacity: 1}}
                          exit={{opacity: 0}}

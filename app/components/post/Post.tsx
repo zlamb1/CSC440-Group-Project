@@ -70,14 +70,14 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
                         animate={{opacity: 1, height: 'auto'}}
                         exit={{opacity: 0, height: 0}}
                         transition={{duration: exitDuration}}
-                        className="overflow-y-hidden"
+                        className="flex overflow-y-hidden"
                         key={post.id}
             >
                 <div className={cn("flex flex-col w-full", className)}>
-                    <div className="flex justify-between items-center gap-3">
-                        <div className="flex gap-3 items-center select-none">
+                    <div className="flex justify-between items-center gap-3 flex-grow-0 overflow-x-hidden">
+                        <div className="flex gap-3 items-center flex-grow-0 overflow-x-hidden">
                             <UserHoverCard user={post.user}>
-                                <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3">
+                                <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3 flex-shrink-0">
                                     <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName}/>
                                     <div className="flex items-center gap-1">
                                         {post.user?.userName}
