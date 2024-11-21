@@ -12,39 +12,14 @@ import {useShallow} from "zustand/react/shallow";
 import {AnimatePresence, motion} from "framer-motion";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 
-export function GenreCommand({ children, genres }: { children: ReactNode, genres: string[] }) {
+export function GenreCommand({ children, genres, loadingGenres, onUpdateGenre }:
+    { children: ReactNode, genres: string[], loadingGenres: any, onUpdateGenre: (_genre: string, remove?: boolean) => void }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [loadingGenres, setLoadingGenres] = useState<any>({});
-    const post = useContext(PostContext);
-    const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })))
-
-    if (!post) {
-        return null;
-    }
 
     const allGenres = Object.keys(Genre);
 
     function onClickGenre(_genre: string) {
-        const remove = genres.includes(_genre);
-
-        const formData = new FormData();
-        formData.append("genre", _genre);
-        formData.append("delete", remove?.toString?.());
-
-        setLoadingGenres((prev: any) => ({...prev, [_genre]: true}));
-        fetch(`/posts/${post!.id}/genre`, {
-            method: 'POST',
-            body: formData
-        }).then(async res => {
-            console.log('here');
-            res.json().then(json => {
-                if (json.success) {
-                    genre({ post: post!.id, genre: _genre, remove });
-                }
-            });
-        }).finally(() => {
-            setLoadingGenres((prev: any) => ({...prev, [_genre]: false}));
-        });
+        onUpdateGenre(_genre, genres.includes(_genre));
     }
 
     return (
@@ -80,18 +55,45 @@ export function GenreCommand({ children, genres }: { children: ReactNode, genres
 }
 
 export default function GenreTags({ genres, editable = true }: { genres: string[], editable?: boolean }) {
+    const [loadingGenres, setLoadingGenres] = useState<any>({});
     const post = useContext(PostContext);
-    const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })))
+    const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })));
+
+    if (!post) {
+        return null;
+    }
+
+    function onUpdateGenre(_genre: string, remove?: boolean) {
+        if (!remove) remove = false;
+
+        const formData = new FormData();
+        formData.append("genre", _genre);
+        formData.append("delete", remove?.toString?.());
+
+        setLoadingGenres((prev: any) => ({...prev, [_genre]: true}));
+        fetch(`/posts/${post!.id}/genre`, {
+            method: 'POST',
+            body: formData
+        }).then(async res => {
+            res.json().then(json => {
+                if (json.success) {
+                    genre({ post: post!.id, genre: _genre, remove });
+                }
+            });
+        }).finally(() => {
+            setLoadingGenres((prev: any) => ({...prev, [_genre]: false}));
+        });
+    }
 
     function onRemoveGenre(_genre: string) {
-        genre({ post: post!.id, genre: _genre, remove: true });
+        onUpdateGenre(_genre, true);
     }
 
     return (
         <div className="flex items-center gap-1 overflow-x-scroll">
             {
                 editable && (
-                    <GenreCommand genres={genres}>
+                    <GenreCommand genres={genres} loadingGenres={loadingGenres} onUpdateGenre={onUpdateGenre}>
                         <Button className="w-[24px] h-[24px]" variant="ghost" size="icon">
                             <Plus size={14}/>
                         </Button>
@@ -109,7 +111,7 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
                                     key={genre}
                         >
                             <Badge className="flex items-center gap-1" style={{background: GenreThemes[genre]}}>
-                                {formatGenre(genre)}
+                                <span className="select-none">{formatGenre(genre)}</span>
                                 {
                                     editable && (
                                         <Button className="w-[16px] h-[16px]"
@@ -117,8 +119,9 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
                                                 size="icon"
                                                 style={{background: GenreThemes[genre]}}
                                                 onClick={() => onRemoveGenre(genre)}
+                                                disabled={loadingGenres[genre]}
                                         >
-                                            <X size={14}/>
+                                            { (loadingGenres[genre] && <LoadingSpinner size={14} />) || <X size={14} /> }
                                         </Button>
                                     )
                                 }
