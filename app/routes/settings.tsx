@@ -10,7 +10,7 @@ import {
     ActionFunctionArgs,
     unstable_parseMultipartFormData
 } from "@remix-run/node";
-import {Edit2, X} from "lucide-react";
+import {CalendarIcon, Edit2, X} from "lucide-react";
 import {motion} from "framer-motion";
 import {useContext, useEffect, useRef, useState} from "react";
 import {
@@ -28,6 +28,8 @@ import UserDeletionDialog from "@components/user/UserDeletionDialog";
 import {ErrorContext} from "@components/error/ErrorContext";
 import {validateUsername} from "@/utils/login-validation";
 import {UserContext} from "@/utils/context/UserContext";
+import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
+import {Calendar} from "@ui/calendar";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -167,7 +169,7 @@ export default function SettingsRoute() {
         <div className="flex-grow flex flex-col gap-3 m-4">
             <span className="text-xl font-medium select-none">Account Settings</span>
             <Separator />
-            <fetcher.Form method="POST" encType="multipart/form-data" className="flex flex-col gap-5">
+            <fetcher.Form method="POST" encType="multipart/form-data" style={{alignSelf: 'center'}} className="w-full lg:w-[90%] xl:w-[75%] flex flex-col gap-5">
                 <div className="flex items-center gap-3">
                     <HoverCard>
                         <HoverCardTrigger asChild>
@@ -202,13 +204,32 @@ export default function SettingsRoute() {
                     <Input defaultValue={user?.displayName ?? ''} name="displayName" />
                 </Label>
                 <Label className="flex flex-col gap-2">
+                    Date of Birth
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button containerClass="w-full" className="w-full pl-3 text-left font-normal" variant="outline" noClickAnimation disableRipple>
+                                <span>Pick a date</span>
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single"
+                                      disabled={(date) =>
+                                          date > new Date() || date < new Date("1900-01-01")
+                                      }
+                                      initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </Label>
+                <Label className="flex flex-col gap-2">
                     Bio
                     <Textarea defaultValue={user?.bio ?? ''} name="bio" />
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Profile Visibility
                     <Select name="visibility" defaultValue={user?.visibility}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full">
                             <SelectValue placeholder="Public" />
                         </SelectTrigger>
                         <SelectContent>
@@ -218,15 +239,15 @@ export default function SettingsRoute() {
                         </SelectContent>
                     </Select>
                 </Label>
-                <div className="flex gap-3">
-                    <Button variant="edit" type="submit">
-                        Update Settings
-                    </Button>
+                <div className="flex justify-center gap-3">
                     <UserDeletionDialog>
                         <Button containerClass="w-fit" variant="destructive">
                             Delete Account
                         </Button>
                     </UserDeletionDialog>
+                    <Button variant="edit" type="submit">
+                        Update Settings
+                    </Button>
                 </div>
             </fetcher.Form>
         </div>
