@@ -62,7 +62,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             return null;
         }
         return (
-            <motion.div whileTap={noClickAnimation ? undefined : { scale: clickAnimationScale }} className={cn('w-fit', containerClass)}>
+            <motion.div whileTap={noClickAnimation || props?.disabled ? undefined : { scale: clickAnimationScale }} className={cn('w-fit', containerClass)}>
                 <Comp onClick={_onClick} className={cn(buttonVariants({variant, size, className}))} ref={ref} autoComplete="off" {...props}>
                     <Slottable>{children}</Slottable>
                     <Ripple {...RippleProps} />
