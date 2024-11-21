@@ -47,7 +47,7 @@ function getMonthMode({ onChangeMonth }: { onChangeMonth?: (month: string) => vo
                             [0, 1, 2, 3].map(j =>
                                 <Button key={j}
                                         containerClass="w-full"
-                                        className="w-full bg-transparent rounded-[0.5rem]"
+                                        className="w-full bg-transparent"
                                         variant="outline"
                                         onClick={() => onChangeMonth?.(months[i + j * 3])}
                                 >
@@ -70,7 +70,7 @@ function getYearMode({ fromYear, toYear, onChangeYear }: { fromYear: number; toY
             <div className="grid grid-cols-4">
                 {
                     years.map(year =>
-                        <Button className="bg-transparent rounded-[0.5rem]" variant="ghost" onClick={() => onChangeYear?.(year)}>
+                        <Button className="bg-transparent" variant="ghost" onClick={() => onChangeYear?.(year)}>
                             {year}
                         </Button>
                     )
@@ -97,7 +97,7 @@ export default function DatePicker({ children, className, value, onChangeValue, 
 
     const navBtnClasses = cn(
         buttonVariants({ variant: "outline" }),
-        "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-[0.5rem]"
+        "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
     );
 
     const todayBtnClasses = 'bg-accent text-accent-foreground';
@@ -167,7 +167,7 @@ export default function DatePicker({ children, className, value, onChangeValue, 
                                         __date.setDate(__date.getDate() + 7 * i);
                                         const outside = __date.getMonth() !== month;
                                         const _disabled = disabled?.(__date) ?? false;
-                                        const className = cn('h-8 w-8 p-0 rounded-[0.6rem] font-normal aria-selected:opacity-100',
+                                        const className = cn('h-8 w-8 p-0 font-normal aria-selected:opacity-100',
                                             isToday(__date) && todayBtnClasses,
                                             cmpDateWithValue(__date) && selectedBtnClasses,
                                             outside && outsideBtnClasses,
