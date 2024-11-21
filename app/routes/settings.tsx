@@ -216,7 +216,7 @@ export default function SettingsRoute() {
                                 }
                     >
                         <Button containerClass="w-full" className="w-full pl-3 text-left font-normal" variant="outline" noClickAnimation disableRipple>
-                            <span>{ birthDate ? formatMDY(birthDate) : 'Pick a Date' }</span>
+                            <span>{ birthDate ? formatMDY(birthDate) : 'Pick a date' }</span>
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                     </DatePicker>
