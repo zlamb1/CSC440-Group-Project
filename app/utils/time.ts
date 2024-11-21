@@ -93,3 +93,22 @@ export function formatFutureDate(date: string | Date, suffix?: string) {
     const days = Math.floor(msDiff / MS_DAY);
     return `${days} day${isPlural(days)} ${suffix}`;
 }
+
+const suffix = [ 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th' ]
+
+export function formatMDY(date: string | Date) {
+    if (!date) return '';
+    if (typeof date === 'string') {
+        date = new Date(date);
+    }
+
+    const day = date.getDate();
+    const suffixMap = [ 'th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th' ];
+    let suffix = suffixMap[day % 10];
+
+    if (day > 10 && day < 14) {
+        suffix = 'th';
+    }
+
+    return date.toLocaleString('default', { month: 'long' }) + ` ${day}${suffix}, ${date.getFullYear()}`;
+}

@@ -30,6 +30,8 @@ import {validateUsername} from "@/utils/login-validation";
 import {UserContext} from "@/utils/context/UserContext";
 import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
 import {Calendar} from "@ui/calendar";
+import {formatMDY} from "@/utils/time";
+import DatePicker from "@components/DatePicker";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -124,6 +126,7 @@ export default function SettingsRoute() {
     const fetcher = useFetcher();
     const [ userAvatar, setUserAvatar ] = useState<string | null | undefined>(user?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
+    const [ birthDate, setBirthDate ] = useState<Date>();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -169,7 +172,7 @@ export default function SettingsRoute() {
         <div className="flex-grow flex flex-col gap-3 m-4">
             <span className="text-xl font-medium select-none">Account Settings</span>
             <Separator />
-            <fetcher.Form method="POST" encType="multipart/form-data" style={{alignSelf: 'center'}} className="w-full lg:w-[90%] xl:w-[75%] flex flex-col gap-5">
+            <fetcher.Form method="POST" encType="multipart/form-data" style={{alignSelf: 'center'}} className="w-full lg:w-[75%] xl:w-[50%] flex flex-col gap-5">
                 <div className="flex items-center gap-3">
                     <HoverCard>
                         <HoverCardTrigger asChild>
@@ -205,22 +208,18 @@ export default function SettingsRoute() {
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Date of Birth
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button containerClass="w-full" className="w-full pl-3 text-left font-normal" variant="outline" noClickAnimation disableRipple>
-                                <span>Pick a date</span>
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single"
-                                      disabled={(date) =>
-                                          date > new Date() || date < new Date("1900-01-01")
-                                      }
-                                      initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
+                    <DatePicker value={birthDate}
+                                onChangeValue={setBirthDate}
+                                fromYear={1900} toYear={new Date().getFullYear()}
+                                disabled={(date) =>
+                                    date > new Date() || date < new Date("1900-01-01")
+                                }
+                    >
+                        <Button containerClass="w-full" className="w-full pl-3 text-left font-normal" variant="outline" noClickAnimation disableRipple>
+                            <span>{ birthDate ? formatMDY(birthDate) : 'Pick a Date' }</span>
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                    </DatePicker>
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Bio
