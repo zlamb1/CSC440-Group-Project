@@ -68,6 +68,7 @@ model User {
   visibility    ProfileVisibility @default(PUBLIC)
   displayName   String?           @db.VarChar(20)
   bio           String?           @db.VarChar(300)
+  birthDate     DateTime?
   notifications Notification[]
   postLikes     PostLike[]
   posts         Post[]
