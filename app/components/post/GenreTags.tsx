@@ -10,10 +10,11 @@ import {PostContext} from "@/utils/context/PostContext";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {AnimatePresence, motion} from "framer-motion";
-import {ScrollArea, ScrollBar} from "@ui/scroll-area";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 export function GenreCommand({ children, genres }: { children: ReactNode, genres: string[] }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [loadingGenres, setLoadingGenres] = useState<any>({});
     const post = useContext(PostContext);
     const {genre} = usePostStore(useShallow((state: any) => ({ genre: state.genre })))
 
@@ -25,7 +26,25 @@ export function GenreCommand({ children, genres }: { children: ReactNode, genres
 
     function onClickGenre(_genre: string) {
         const remove = genres.includes(_genre);
-        genre({ post: post!.id, genre: _genre, remove });
+
+        const formData = new FormData();
+        formData.append("genre", _genre);
+        formData.append("delete", remove?.toString?.());
+
+        setLoadingGenres((prev: any) => ({...prev, [_genre]: true}));
+        fetch(`/posts/${post!.id}/genre`, {
+            method: 'POST',
+            body: formData
+        }).then(async res => {
+            console.log('here');
+            res.json().then(json => {
+                if (json.success) {
+                    genre({ post: post!.id, genre: _genre, remove });
+                }
+            });
+        }).finally(() => {
+            setLoadingGenres((prev: any) => ({...prev, [_genre]: false}));
+        });
     }
 
     return (
@@ -41,9 +60,14 @@ export function GenreCommand({ children, genres }: { children: ReactNode, genres
                         <CommandGroup>
                             {
                                 allGenres.map(genre => (
-                                    <CommandItem key={genre} className="flex justify-between cursor-pointer" value={genre} onSelect={() => onClickGenre(genre)}>
-                                        {formatGenre(genre)}
-                                        { genres.includes(genre) && <Check /> }
+                                    <CommandItem key={genre}
+                                                 className="flex justify-between cursor-pointer"
+                                                 value={genre}
+                                                 onSelect={() => onClickGenre(genre)}
+                                                 disabled={loadingGenres[genre]}
+                                    >
+                                        { formatGenre(genre) }
+                                        { (loadingGenres[genre] && <LoadingSpinner />) || (genres.includes(genre) && <Check />) }
                                     </CommandItem>
                                 ))
                             }
