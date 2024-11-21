@@ -38,7 +38,7 @@ export default function SortPanel({ className, style }: { className?: string, st
                 showContent &&
                 <div className="px-3 py-2 w-full flex flex-col gap-1">
                     <span className="font-bold select-none opacity-70 text-sm mx-1">Genre</span>
-                    <div className="w-full flex justify-center flex-wrap gap-1">
+                    <div className="w-full flex flex-wrap">
                     {
                         showContent && Object.keys(Genre)?.map?.((genre: string) => {
                             const color = GenreThemes[genre] || '';
