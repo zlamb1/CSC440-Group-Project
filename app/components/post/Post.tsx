@@ -75,7 +75,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
             >
                 <div className={cn("flex flex-col w-full", className)}>
                     <div className="flex justify-between items-center gap-3 flex-grow-0 overflow-x-hidden">
-                        <div className="flex gap-3 items-center flex-grow-0 overflow-x-hidden">
+                        <div className="flex gap-1 items-center flex-grow-0 flex-wrap">
                             <UserHoverCard user={post.user}>
                                 <Link to={`/users/${post.user?.userName}`} className="font-bold flex flex-row gap-3 flex-shrink-0">
                                     <UserAvatar avatar={post.user?.avatarPath} userName={post.user?.userName}/>
@@ -86,11 +86,13 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
                                     </div>
                                 </Link>
                             </UserHoverCard>
-                            <GenreTags genres={post.genres}/>
+                            <GenreTags genres={post.genres} editable={post?.userId === viewer?.id} />
                         </div>
-                        <ContextMenu post={post} exitDuration={exitDuration} onEdit={() => setEditing(true)}/>
+                        <div className="h-full">
+                            <ContextMenu post={post} exitDuration={exitDuration} onEdit={() => setEditing(true)}/>
+                        </div>
                     </div>
-                    <div className="ml-10 flex flex-col gap-3">
+                    <div className="ml-10 mt-1 flex flex-col gap-3">
                         <div className="flex flex-col gap-1">
                             <div className="flex flex-col">
                                 <PostView post={post} isEditing={isEditing} onIsEditingChange={(_isEditing: boolean) => setEditing(_isEditing)} />

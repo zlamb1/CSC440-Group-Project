@@ -2,7 +2,7 @@ import {Badge} from "@ui/badge";
 import {formatGenre, GenreThemes} from "@/utils/genre-util";
 import {Button} from "@ui/button";
 import {Check, Plus, X} from "lucide-react";
-import {ReactNode, useContext, useState} from "react";
+import {Fragment, ReactNode, useContext, useState} from "react";
 import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@ui/command";
 import {Genre} from "@prisma/client";
@@ -90,7 +90,7 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
     }
 
     return (
-        <div className="flex items-center gap-1 overflow-x-scroll">
+        <Fragment>
             {
                 editable && (
                     <GenreCommand genres={genres} loadingGenres={loadingGenres} onUpdateGenre={onUpdateGenre}>
@@ -130,6 +130,6 @@ export default function GenreTags({ genres, editable = true }: { genres: string[
                     ))
                 }
             </AnimatePresence>
-        </div>
+        </Fragment>
     );
 }
