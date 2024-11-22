@@ -4,7 +4,7 @@ import Omit from "@ui/omit";
 import {Button} from "@ui/button";
 import {CaretDownIcon, CaretSortIcon, CaretUpIcon} from "@radix-ui/react-icons";
 import {Checkbox} from "@ui/checkbox";
-import {useTable} from "@components/table/table";
+import {onSelectType, useTable} from "@components/table/table";
 import {cn} from "@/lib/utils";
 import {AnimatePresence, motion, Reorder} from "framer-motion";
 
@@ -38,6 +38,8 @@ export interface DataTableProps {
     pageSize?: number;
     usePagination?: boolean;
     useSelection?: boolean;
+    selected?: any[];
+    onSelect?: onSelectType;
     useReordering?: boolean;
     keyFn?: (row: any) => any;
     filter?: any;
@@ -169,7 +171,7 @@ function ColumnCell(row: any, column: Column) {
 }
 
 export default function DataTable({ columns, data = [], pageSize = 5, usePagination = true, useReordering = true, className,
-                                    styleHeaderOnSelectAll = true, useSelection = true, keyFn = (row => row.id), filterFn,
+                                    styleHeaderOnSelectAll = true, useSelection = true, selected = [], onSelect, keyFn = (row => row.id), filterFn,
                                     filter, prepend, append, empty
                                   }: DataTableProps)
 {
@@ -177,13 +179,15 @@ export default function DataTable({ columns, data = [], pageSize = 5, usePaginat
         filterFn:   filterFn,
         keyFn:      keyFn,
         collection: data,
+        selected,
+        onSelect,
         pageSize,
         filter,
     });
 
     const {
             page, pageCount, prevPage, nextPage, rows, setRows, selectRow, selectAll, selectedAll,
-            sortedBy, setSorted, isSortedDescending, setSortedDescending, selected
+            sortedBy, setSorted, isSortedDescending, setSortedDescending
     } = table;
 
     const isEmpty = !rows || !rows.length || rows.length === 0;

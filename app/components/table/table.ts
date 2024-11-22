@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {Dispatch, SetStateAction, useEffect, useState} from "react";
 
 export function usePagination(props?: { pageSize?: number, pageCount?: number}) {
     const [ page, setPage ] = useState(0);
@@ -14,14 +14,21 @@ export function usePagination(props?: { pageSize?: number, pageCount?: number}) 
     return { page, setPage, prevPage, nextPage };
 }
 
-export function useSelection({ rows, keyFn }: { rows: any[], keyFn: (row: any) => any }) {
-    const [ selected, setSelected ] = useState<any[]>([]);
+export type onSelectType = Dispatch<SetStateAction<any[]>>;
 
+export interface UseSelectionProps {
+    rows: any[];
+    selected?: any[];
+    onSelect?: onSelectType;
+    keyFn: (row: any) => any;
+}
+
+export function useSelection({ rows, selected = [], onSelect, keyFn }: UseSelectionProps) {
     const keys = rows?.map(keyFn);
     const selectedAll = keys?.every(key => selected.includes(key));
 
     function selectRow(row: any) {
-        setSelected(prev => {
+        onSelect?.(prev => {
             const array = [...prev];
             const key = keyFn(row);
             const indexOf = prev.indexOf(key);
@@ -35,23 +42,31 @@ export function useSelection({ rows, keyFn }: { rows: any[], keyFn: (row: any) =
     }
 
     function selectAll() {
-        setSelected(() => {
-            if (selectedAll) {
-                return [];
-            } else {
-                const array: any[] = [];
-                for (const row of rows || []) {
-                    array.push(keyFn(row));
-                }
-                return array;
+        if (selectedAll) {
+            onSelect?.([]);
+        } else {
+            const array: any[] = [];
+            for (const row of rows || []) {
+                array.push(keyFn(row));
             }
-        });
+            onSelect?.(array);
+        }
     }
 
-    return { selected, setSelected, selectRow, selectAll, selectedAll }
+    return { selected, selectRow, selectAll, selectedAll }
 }
 
-export function useTable(props?: { collection?: any[], pageSize?: number, filter?: any, filterFn?: (row: any) => boolean, keyFn?: (row: any) => any }) {
+export interface UseTableProps {
+    collection?: any[];
+    pageSize?: number;
+    selected?: any[];
+    onSelect?: onSelectType;
+    filter?: any;
+    filterFn?: (row: any) => boolean;
+    keyFn?: (row: any) => any;
+}
+
+export function useTable(props?: UseTableProps) {
     const collectionSize = props?.collection?.length ?? 0;
     const pageSize = props?.pageSize ?? 10;
     const pageCount = Math.ceil(collectionSize / pageSize);
@@ -114,10 +129,12 @@ export function useTable(props?: { collection?: any[], pageSize?: number, filter
     }, [page, props?.filter, sortedBy, isSortedDescending]);
 
     const defaultKeyFn = (row: any) => row.id;
-    const { selected, setSelected, selectRow, selectAll, selectedAll } = useSelection({ rows: rows ?? [], keyFn: props?.keyFn ?? defaultKeyFn });
+    const { selected, selectRow, selectAll, selectedAll } = useSelection({
+        rows: rows ?? [], selected: props?.selected ?? [], onSelect: props?.onSelect, keyFn: props?.keyFn ?? defaultKeyFn
+    });
 
     useEffect(() => {
-        setSelected([]);
+        props?.onSelect?.([]);
     }, [page]);
 
     return { page, pageCount, rows, setRows, getRowsByPage, prevPage, nextPage, setPage,

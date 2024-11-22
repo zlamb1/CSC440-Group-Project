@@ -11,11 +11,13 @@ export async function action({ context, request }: ActionFunctionArgs) {
         }
 
         const formData = await request.formData();
-        const ids = JSON.parse(formData.getAll('id'));
+        const ids = formData.getAll('id');
 
         if (!ids || !ids.length) {
             return RequiredFieldResponse('Notification ID');
         }
+
+        console.log(ids);
 
         await context.prisma.notification.deleteMany({
             where: {

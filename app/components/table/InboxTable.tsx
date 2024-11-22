@@ -2,6 +2,7 @@ import {Button} from "@ui/button";
 import DataTable, {Slot, SlotProps} from "@components/table/DataTable";
 import ReplyCell from "@components/table/notification/ReplyCell";
 import {formatFutureDate, formatPastDate} from "@/utils/time";
+import {onSelectType} from "@components/table/table";
 
 function formatType(type: string) {
     return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
@@ -43,13 +44,15 @@ function DefaultAppend(props?: SlotProps) {
 
 export interface InboxTableProps {
     notifications?: any[];
+    selected?: any[];
+    onSelect?: onSelectType;
     filter?: string;
     prepend?: Slot;
     append?: Slot;
     compact?: boolean;
 }
 
-export default function InboxTable({ notifications, filter, prepend, append, compact = false }: InboxTableProps) {
+export default function InboxTable({ notifications, selected, onSelect, filter, prepend, append, compact = false }: InboxTableProps) {
     const columns = [
         {
             name: 'dateIssued',
@@ -92,6 +95,8 @@ export default function InboxTable({ notifications, filter, prepend, append, com
                        filter={filter}
                        filterFn={row => row?.content?.toLowerCase().includes(filter?.toLowerCase())}
                        useSelection={!compact}
+                       selected={selected}
+                       onSelect={onSelect}
                        useReordering={!compact}
                        prepend={prepend}
                        append={typeof append === 'undefined' ? DefaultAppend : append}

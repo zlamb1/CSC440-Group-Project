@@ -24,11 +24,19 @@ export async function loader({ context }: LoaderFunctionArgs) {
 export default function InboxRoute() {
     const data = usePersistedLoaderData();
     const fetcher = useFetcher();
+    const [ notifications, setNotifications ] = useState<any[]>(data?.notifications ?? []);
+    const [ selected, setSelected ] = useState<any[]>([]);
     const [ filter, setFilter ] = useState('');
 
     function onDismiss(evt: FormEvent) {
         evt.preventDefault();
         const formData = new FormData();
+
+        setNotifications(prev => prev?.filter(notification => selected.includes(notification.id)));
+        for (const notification of selected) {
+            formData.append('id', notification);
+        }
+
         fetcher.submit(formData, {
             action: '/notifications/dismiss',
             method: 'POST',
@@ -68,7 +76,7 @@ export default function InboxRoute() {
 
     return (
         <div className="p-8 w-full h-full flex flex-col gap-3">
-            <InboxTable notifications={data?.notifications} filter={filter} prepend={prepend} />
+            <InboxTable selected={selected} onSelect={setSelected} notifications={notifications} filter={filter} prepend={prepend} />
         </div>
     );
 }
