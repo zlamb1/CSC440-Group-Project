@@ -8,6 +8,7 @@ import {FollowWithFollowing} from "@/utils/types";
 import {cn} from "@/lib/utils";
 import {Link} from "@remix-run/react";
 import {UserContext} from "@/utils/context/UserContext";
+import Expand from "@ui/expand";
 
 export default function FollowingPanel({ className, style }: { className?: string, style?: CSSProperties }) {
     const user = useContext(UserContext);
@@ -38,19 +39,21 @@ export default function FollowingPanel({ className, style }: { className?: strin
                 </Button>
             </div>
             <Separator />
-            {
-                showContent && following?.map((follow: FollowWithFollowing) => {
-                    const following = follow.following;
-                    return (
-                        <Button containerClass="w-full" className="w-full flex justify-between rounded-none" key={following.id}  variant="ghost">
-                            <Link to={`/users/${follow.following.userName}`} className="flex items-center gap-2">
-                                <UserAvatar avatar={following.avatarPath} userName={following.userName}/>
-                                @{following.userName}
-                            </Link>
-                        </Button>
-                    );
-                })
-            }
+            <Expand show={showContent}>
+                {
+                    following?.map((follow: FollowWithFollowing) => {
+                        const following = follow.following;
+                        return (
+                            <Button containerClass="w-full" className="w-full flex justify-between rounded-none" key={following.id}  variant="ghost">
+                                <Link to={`/users/${follow.following.userName}`} className="flex items-center gap-2">
+                                    <UserAvatar avatar={following.avatarPath} userName={following.userName}/>
+                                    @{following.userName}
+                                </Link>
+                            </Button>
+                        );
+                    })
+                }
+            </Expand>
         </Card>
     )
 }

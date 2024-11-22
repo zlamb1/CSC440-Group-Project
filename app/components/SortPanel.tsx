@@ -7,6 +7,8 @@ import {cn} from "@/lib/utils";
 import {UserContext} from "@/utils/context/UserContext";
 import {Genre} from "@prisma/client";
 import {formatGenre, GenreThemes} from "@/utils/genre-util";
+import {AnimatePresence, motion} from "framer-motion";
+import Expand from "@ui/expand";
 
 export default function SortPanel({ className, style }: { className?: string, style?: CSSProperties }) {
     const user = useContext(UserContext);
@@ -34,30 +36,28 @@ export default function SortPanel({ className, style }: { className?: string, st
                 </Button>
             </div>
             <Separator />
-            {
-                showContent &&
-                <div className="px-3 py-2 w-full flex flex-col gap-1">
+            <Expand className="w-full flex flex-col gap-1 overflow-hidden" show={showContent}>
+                <div className="p-2">
                     <span className="font-bold select-none opacity-70 text-sm mx-1">Genre</span>
                     <div className="w-full flex flex-wrap">
-                    {
-                        showContent && Object.keys(Genre)?.map?.((genre: string) => {
-                            const color = GenreThemes[genre] || '';
-                            return (
-                                <Button key={genre}
-                                        containerClass="min-w-[100px] flex justify-center"
-                                        className={"w-full rounded-full-center m-1 h-7"}
-                                        style={{ background: color }}
-                                        size="sm"
-                                >
-                                    {formatGenre(genre)}
-                                </Button>
-                            );
-                        })
-                    }
+                        {
+                            showContent && Object.keys(Genre)?.map?.((genre: string) => {
+                                const color = GenreThemes[genre] || '';
+                                return (
+                                    <Button key={genre}
+                                            containerClass="min-w-[100px] flex justify-center"
+                                            className={"w-full rounded-full-center m-1 h-7"}
+                                            style={{background: color}}
+                                            size="sm"
+                                    >
+                                        {formatGenre(genre)}
+                                    </Button>
+                                );
+                            })
+                        }
                     </div>
                 </div>
-            }
-
+            </Expand>
         </Card>
-    )
+    );
 }
