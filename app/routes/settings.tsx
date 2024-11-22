@@ -28,12 +28,22 @@ import UserDeletionDialog from "@components/user/UserDeletionDialog";
 import {ErrorContext} from "@components/error/ErrorContext";
 import {validateUsername} from "@/utils/login-validation";
 import {UserContext} from "@/utils/context/UserContext";
-import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
-import {Calendar} from "@ui/calendar";
 import {formatMDY} from "@/utils/time";
 import DatePicker from "@components/DatePicker";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+function parseBirthDate(birthDate: string) {
+    if (!birthDate) {
+        return undefined;
+    }
+
+    if (birthDate === 'null') {
+        return null;
+    }
+
+    return new Date(birthDate);
+}
 
 export async function action({ context, request }: ActionFunctionArgs) {
     try {
@@ -54,14 +64,13 @@ export async function action({ context, request }: ActionFunctionArgs) {
 
         const isUpdatingAvatar = formData.get("is-updating-avatar") === 'true';
         const file = formData.get("avatar");
+        const cdnAvatarPath = isProduction ? (file?.name ? `${IMAGE_CDN_URL}${file?.name}` : null) :
+            (file?.name ? `${IMAGE_DEV_CDN_URL}${file.name}` : null);
 
         const displayName = formData.get('displayName');
         const bio = formData.get('bio');
+        const birthDate = formData.get('birthDate');
         const visibility = formData.get('visibility');
-
-        const avatar = isProduction ?
-            (file?.name ? `${IMAGE_CDN_URL}${file?.name}` : null) :
-            (file?.name ? `${IMAGE_DEV_CDN_URL}${file.name}` : null);
 
         if (!isProduction) {
             if (!process.env.CDN_API_KEY) {
@@ -97,7 +106,8 @@ export async function action({ context, request }: ActionFunctionArgs) {
         const user = await context.prisma.user.update({
             data: {
                 userName: userName || undefined,
-                avatarPath: isUpdatingAvatar ? avatar : undefined,
+                avatarPath: isUpdatingAvatar ? cdnAvatarPath : undefined,
+                birthDate: parseBirthDate(birthDate),
                 displayName,
                 bio,
                 visibility,
@@ -126,13 +136,14 @@ export default function SettingsRoute() {
     const fetcher = useFetcher();
     const [ userAvatar, setUserAvatar ] = useState<string | null | undefined>(user?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
-    const [ birthDate, setBirthDate ] = useState<Date>();
+    const [ birthDate, setBirthDate ] = useState<Date | null>(user?.birthDate);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (fetcher.state === 'idle') {
             setUserAvatar(user?.avatarPath ?? undefined);
-            setIsAvatarUpdated(false)
+            setIsAvatarUpdated(false);
+            setBirthDate(user?.birthDate);
         }
     }, [fetcher]);
 
@@ -141,7 +152,6 @@ export default function SettingsRoute() {
     }
 
     function onChangeAvatar() {
-        setIsAvatarUpdated(true);
         if (fileInputRef.current) {
             if (fileInputRef.current?.files && fileInputRef.current.files?.length > 0) {
                 const file = fileInputRef.current.files[0];
@@ -149,6 +159,7 @@ export default function SettingsRoute() {
                 reader.onload = () => {
                     // @ts-ignore
                     setUserAvatar(reader.result);
+                    setIsAvatarUpdated(true);
                 }
                 reader.readAsDataURL(file);
             }
@@ -158,12 +169,10 @@ export default function SettingsRoute() {
     function clearAvatar() {
         if (fileInputRef.current) {
             if (userAvatar === user?.avatarPath) {
-                setUserAvatar(undefined);
-                setIsAvatarUpdated(true);
+                setUserAvatar(null);
                 fileInputRef.current.value = '';
             } else {
-                setUserAvatar(user?.avatarPath);
-                setIsAvatarUpdated(false);
+                setUserAvatar(undefined);
             }
         }
     }
@@ -208,6 +217,7 @@ export default function SettingsRoute() {
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Date of Birth
+                    <Input className="hidden" name="birthDate" value={birthDate?.toString?.()} readOnly />
                     <DatePicker value={birthDate}
                                 onChangeValue={setBirthDate}
                                 fromYear={1900} toYear={new Date().getFullYear()}

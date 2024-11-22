@@ -76,6 +76,7 @@ export async function useUserSession(req, prisma, getSession) {
                 visibility: true,
                 displayName: true,
                 bio: true,
+                birthDate: true,
                 following: {
                     include: {
                         following: true,
@@ -86,6 +87,7 @@ export async function useUserSession(req, prisma, getSession) {
                 id
             }
         });
+
         if (user) {
             user.loggedIn = true;
             return { session, user }

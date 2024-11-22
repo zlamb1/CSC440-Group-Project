@@ -7,7 +7,7 @@ import {cn} from "@/lib/utils";
 export interface DatePickerProps {
     children: ReactNode;
     className?: string;
-    value?: Date;
+    value?: string | Date | null;
     onChangeValue?: (value: Date) => void;
     disabled?: (date: Date) => boolean;
     fromYear?: number;
@@ -17,6 +17,22 @@ export interface DatePickerProps {
 const months = [
     'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
 ];
+
+function parseValue(value?: string | Date | null) {
+    if (!value) {
+        return null;
+    }
+
+    switch (typeof value) {
+        case 'number':
+        case 'string':
+            return new Date(value);
+        case 'object':
+            return value;
+        default:
+            return null;
+    }
+}
 
 function getFirstDayOfMonth(date: Date) {
     const newDate = new Date(date.getTime());
@@ -83,7 +99,8 @@ function getYearMode({ fromYear, toYear, onChangeYear }: { fromYear: number; toY
 export default function DatePicker({ children, className, value, onChangeValue, disabled, fromYear, toYear }: DatePickerProps) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [mode, setMode] = useState<number>(0);
-    const [date, setDate] = useState<Date>(value ?? new Date());
+    const _value = parseValue(value);
+    const [date, setDate] = useState<Date>(_value ?? new Date());
     const ref = useRef<HTMLDivElement>(null);
 
     const firstDayOfMonth = getFirstDayOfMonth(date);
@@ -140,7 +157,7 @@ export default function DatePicker({ children, className, value, onChangeValue, 
     }
 
     function cmpDateWithValue(_date: Date) {
-        return _date.getDate() === value?.getDate?.() && _date.getMonth() === value?.getMonth?.() && _date.getFullYear() === value?.getFullYear?.();
+        return _date.getDate() === _value?.getDate?.() && _date.getMonth() === _value?.getMonth?.() && _date.getFullYear() === _value?.getFullYear?.();
     }
 
     function isToday(_date: Date) {
