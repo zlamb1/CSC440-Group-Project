@@ -32,7 +32,9 @@ export default function InboxRoute() {
         evt.preventDefault();
         const formData = new FormData();
 
-        setNotifications(prev => prev?.filter(notification => selected.includes(notification.id)));
+        setNotifications(prev => prev?.filter(n => !selected.includes(n.id)));
+        setSelected([]);
+
         for (const notification of selected) {
             formData.append('id', notification);
         }

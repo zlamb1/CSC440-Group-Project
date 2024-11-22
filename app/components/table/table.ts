@@ -126,7 +126,7 @@ export function useTable(props?: UseTableProps) {
 
     useEffect(() => {
         setRows(getRowsByPage(page));
-    }, [page, props?.filter, sortedBy, isSortedDescending]);
+    }, [page, props?.collection, props?.filter, props?.pageSize, sortedBy, isSortedDescending]);
 
     const defaultKeyFn = (row: any) => row.id;
     const { selected, selectRow, selectAll, selectedAll } = useSelection({
