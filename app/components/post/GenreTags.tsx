@@ -42,7 +42,7 @@ export function GenreCommand({ children, genres, loadingGenres, onUpdateGenre }:
                                                  disabled={loadingGenres[genre]}
                                     >
                                         { formatGenre(genre) }
-                                        { (loadingGenres[genre] && <LoadingSpinner />) || (genres.includes(genre) && <Check />) }
+                                        { (loadingGenres[genre] && <LoadingSpinner />) || (genres?.includes?.(genre) && <Check />) }
                                     </CommandItem>
                                 ))
                             }
