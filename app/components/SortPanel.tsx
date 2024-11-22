@@ -24,17 +24,10 @@ export default function SortPanel({ className, style }: { className?: string, st
 
     return (
         <Card className={cn("h-full flex flex-col overflow-hidden", className)} style={style}>
-            <div className="flex justify-between px-3 py-2 items-center">
-                <span className="font-bold select-none">Sort By</span>
-                <Button className="w-[20px] h-[20px]" size="icon" variant="ghost" onClick={ toggleContent }>
-                    { showContent ? (
-                        <ChevronUp size={16} />
-                    ) : (
-                        <ChevronDown size={16} />
-                    )}
-                  
-                </Button>
-            </div>
+            <Button containerClass="w-full" className="w-full flex justify-between px-3 py-2 items-center" variant="ghost" onClick={toggleContent} noClickAnimation>
+                <span className="font-bold select-none">Following</span>
+                { showContent ? <ChevronUp size={16} /> : <ChevronDown size={16} /> }
+            </Button>
             <Separator />
             <Expand className="w-full flex flex-col gap-1 overflow-hidden" show={showContent}>
                 <div className="p-2">
