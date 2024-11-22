@@ -37,7 +37,7 @@ SELECT
         ) FILTER (WHERE r."id" IS NOT NULL),
         '[]'::jsonb
     ) as replies,
-    COALESCE(JSONB_AGG(g."genre") FILTER (WHERE g."genre" IS NOT NULL), '[]'::jsonb) AS "genres"
+    COALESCE(JSONB_AGG(DISTINCT g."genre") FILTER (WHERE g."genre" IS NOT NULL), '[]'::jsonb) AS "genres"
 FROM "Post" p
 INNER JOIN "User" u ON u."id" = p."userId" AND (u."visibility" = 'PUBLIC' OR u."id" = $1::UUID)
 LEFT JOIN "PostLike" l ON l."postId" = p."id"
@@ -61,7 +61,7 @@ LEFT JOIN LATERAL (
             'displayName',  u."displayName",
             'bio',          u."bio"
         ) AS user,
-        COALESCE(JSONB_AGG(g."genre") FILTER (WHERE g."genre" IS NOT NULL), '[]'::jsonb) AS "genres"
+        COALESCE(JSONB_AGG(DISTINCT g."genre") FILTER (WHERE g."genre" IS NOT NULL), '[]'::jsonb) AS "genres"
     FROM "Post" r
     INNER JOIN "User" AS u ON u."id" = r."userId"
     LEFT JOIN "Post" AS rr ON rr."replyTo" = r."id"
