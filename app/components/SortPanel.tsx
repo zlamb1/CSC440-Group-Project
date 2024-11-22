@@ -25,7 +25,7 @@ export default function SortPanel({ className, style }: { className?: string, st
     return (
         <Card className={cn("h-full flex flex-col overflow-hidden", className)} style={style}>
             <Button containerClass="w-full" className="w-full flex justify-between px-3 py-2 items-center" variant="ghost" onClick={toggleContent} noClickAnimation>
-                <span className="font-bold select-none">Following</span>
+                <span className="font-bold select-none">Sort</span>
                 { showContent ? <ChevronUp size={16} /> : <ChevronDown size={16} /> }
             </Button>
             <Separator />
