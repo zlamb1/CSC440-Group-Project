@@ -8,7 +8,7 @@ export interface DatePickerProps {
     children: ReactNode;
     className?: string;
     value?: string | Date | null;
-    onChangeValue?: (value: Date) => void;
+    onChangeValue?: (value: Date | undefined | null) => void;
     disabled?: (date: Date) => boolean;
     fromYear?: number;
     toYear?: number;
@@ -182,20 +182,21 @@ export default function DatePicker({ children, className, value, onChangeValue, 
                                     [0, 1, 2, 3, 4].map(i => {
                                         const __date = new Date(_date.getTime());
                                         __date.setDate(__date.getDate() + 7 * i);
-                                        const outside = __date.getMonth() !== month;
-                                        const _disabled = disabled?.(__date) ?? false;
+                                        const isSelected = cmpDateWithValue(__date);
+                                        const isOutside = __date.getMonth() !== month;
+                                        const isDisabled = disabled?.(__date) ?? false;
                                         const className = cn('h-8 w-8 p-0 font-normal aria-selected:opacity-100',
                                             isToday(__date) && todayBtnClasses,
-                                            cmpDateWithValue(__date) && selectedBtnClasses,
-                                            outside && outsideBtnClasses,
-                                            _disabled && disabledBtnClasses
+                                            isSelected && selectedBtnClasses,
+                                            isOutside && outsideBtnClasses,
+                                            isDisabled && disabledBtnClasses
                                         );
                                         return (
                                             <Button key={i}
                                                     className={className}
                                                     variant="ghost"
-                                                    onClick={() => onChangeValue?.(__date)}
-                                                    disabled={_disabled}
+                                                    onClick={() => onChangeValue?.(isSelected ? null : __date)}
+                                                    disabled={isDisabled}
                                             >
                                                 {__date.getDate()}
                                             </Button>

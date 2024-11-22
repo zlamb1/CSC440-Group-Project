@@ -136,7 +136,7 @@ export default function SettingsRoute() {
     const fetcher = useFetcher();
     const [ userAvatar, setUserAvatar ] = useState<string | null | undefined>(user?.avatarPath);
     const [ isAvatarUpdated, setIsAvatarUpdated ] = useState<boolean>(false);
-    const [ birthDate, setBirthDate ] = useState<Date | null>(user?.birthDate);
+    const [ birthDate, setBirthDate ] = useState<Date | undefined | null>(user?.birthDate);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -217,7 +217,7 @@ export default function SettingsRoute() {
                 </Label>
                 <Label className="flex flex-col gap-2">
                     Date of Birth
-                    <Input className="hidden" name="birthDate" value={birthDate?.toString?.()} readOnly />
+                    <Input className="hidden" name="birthDate" value={birthDate === null ? 'null' : birthDate?.toString?.()} readOnly />
                     <DatePicker value={birthDate}
                                 onChangeValue={setBirthDate}
                                 fromYear={1900} toYear={new Date().getFullYear()}
