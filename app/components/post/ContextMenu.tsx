@@ -1,15 +1,22 @@
 import {useFetcher} from "@remix-run/react";
 import {useIsPresent} from "framer-motion";
-import React, {useContext, useEffect, useState} from "react";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger} from "@ui/dropdown-menu";
+import React, {Fragment, useContext, useEffect, useState} from "react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@ui/dropdown-menu";
 import {Button} from "@ui/button";
-import {Edit2, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
+import {AlertTriangleIcon, Edit, EllipsisVerticalIcon, Hammer, Trash} from "lucide-react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
-import {Post} from "@prisma/client";
+import {Post, UserRole} from "@prisma/client";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 import {UserContext} from "@/utils/context/UserContext";
+import {cn} from "@/lib/utils";
 
 export default function ContextMenu({ post, exitDuration, onEdit }: { post: Post, exitDuration: number, onEdit?: () => void }) {
     const fetcher = useFetcher();
@@ -19,6 +26,8 @@ export default function ContextMenu({ post, exitDuration, onEdit }: { post: Post
     const { deletePost, deleteReply } = usePostStore(useShallow((state: any) => ({ deletePost: state.delete, deleteReply: state.deleteReply })));
 
     const isTransitioning = fetcher.state !== 'idle' || !isPresent;
+    const isOwnPost = post?.userId === user?.id;
+    const isModerator = user?.role === UserRole.MODERATOR;
 
     useEffect(() => {
         if (fetcher?.data?.success) {
@@ -34,45 +43,46 @@ export default function ContextMenu({ post, exitDuration, onEdit }: { post: Post
         }
     }, [fetcher.data]);
 
-    if (post.userId !== user?.id) {
-        return null;
-    }
-
     function onClickEdit() {
         setOpen(false);
-        if (onEdit) {
-            onEdit();
-        }
+        onEdit?.();
     }
 
     return (
         <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setOpen(isOpen)}  modal={false}>
-            <DropdownMenuTrigger className={post.userId !== user?.id ? 'hidden' : ''} asChild>
+            <DropdownMenuTrigger asChild>
                 <Button className="rounded-full w-[25px] h-[25px]" variant="ghost" size="icon">
                     <EllipsisVerticalIcon className="w-[20px] h-[20px]" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="flex flex-col">
-                <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-primary hover:text-primary" variant="ghost" onClick={ onClickEdit }>
-                    <Edit2 className="" size={20} />
-                    <span className="flex-grow text-left">Edit</span>
-                </Button>
-                <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-yellow-500 hover:text-yellow-500" variant="ghost">
-                    <Hammer size={20} />
-                    <span className="flex-grow text-left">Moderate</span>
-                </Button>
-                <fetcher.Form action={`/posts/delete/${post.id}`} method="POST">
-                    <Button containerClass="w-100 flex" className="flex-grow flex gap-4 text-red-600 hover:text-red-500"
-                            variant="ghost" disabled={isTransitioning}>
-                        {
-                            isTransitioning ? <LoadingSpinner/> :
-                                <>
-                                    <Trash size={20} />
-                                    <span className="flex-grow text-left">Delete</span>
-                                </>
-                        }
-                    </Button>
-                </fetcher.Form>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={onClickEdit} className={cn("gap-2", !isOwnPost && 'hidden')}>
+                        <Edit size={16} />
+                        <span>Edit</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className={cn("text-yellow-600 focus:text-yellow-700 dark:text-yellow-300 dark:focus:text-yellow-400 gap-2", !isModerator && 'hidden')}>
+                        <Hammer size={16} />
+                        Moderate
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator/>
+                    <DropdownMenuItem className={cn("text-red-400 focus:text-red-500 gap-2", isOwnPost && 'hidden')}>
+                        <AlertTriangleIcon size={16} />
+                        Report
+                    </DropdownMenuItem>
+                    <fetcher.Form action={`/posts/delete/${post.id}`} method="POST">
+                        <DropdownMenuItem className={cn("gap-2 text-red-600 focus:text-red-700", !isOwnPost && 'hidden')} disabled={isTransitioning}>
+                            {
+                                isTransitioning ? <LoadingSpinner/> :
+                                    <Fragment>
+                                        <Trash size={16} />
+                                        <span className="flex-grow text-left">Delete</span>
+                                    </Fragment>
+                            }
+                        </DropdownMenuItem>
+                    </fetcher.Form>
+                </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>
     );
