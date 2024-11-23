@@ -10,6 +10,7 @@ export enum PostEvent {
     EDIT   = 'post-edit',
     GENRE  = 'post-genre',
     DELETE = 'post-delete',
+    FILTER = 'post-filter',
 }
 
 function usePostSync() {
@@ -52,6 +53,10 @@ function usePostSync() {
             case PostEvent.DELETE: {
                 const {post} = data.evt;
                 state.delete(post, false);
+                break;
+            }
+            case PostEvent.FILTER: {
+                // not synced
                 break;
             }
         }

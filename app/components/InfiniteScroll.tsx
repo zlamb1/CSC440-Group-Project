@@ -25,9 +25,10 @@ export type InfiniteScrollReturn = [
     () => void,
 ];
 
-export function useInfiniteScroll({ fetcher, logErrors = true, retryAttempts = 3, retryTimeout = 250, onError, onRetryFail }: UseInfiniteScrollProps): InfiniteScrollReturn {
+export function useInfiniteScroll({ fetcher, logErrors = true, retryAttempts = 3, retryTimeout = 100, onError, onRetryFail }: UseInfiniteScrollProps): InfiniteScrollReturn {
     const [ isLoading, setIsLoading ] = useState<boolean>(true);
     const [ hasMoreData, setHasMoreData ] = useState<boolean>(true);
+    const [ lastCursor, setLastCursor ] = useState<any>(null);
     const [ retries, setRetries ] = useState<number>(0);
 
     function shouldRetry() {
@@ -40,10 +41,16 @@ export function useInfiniteScroll({ fetcher, logErrors = true, retryAttempts = 3
         const fetch = () => {
             // @ts-ignore
             fetcher?.({ isLoading, setIsLoading, hasMoreData, setHasMoreData, doUpdate })
-                .then(() => {
+                .then(cursor => {
                     if (doUpdate) {
-                        setIsLoading(false);
-                        setRetries(0);
+                        if (cursor === lastCursor) {
+                            // we didn't fetch any data since the cursor is the same
+                            setRetries(prev => prev + 1)
+                        } else {
+                            setIsLoading(false);
+                            setRetries(0);
+                        }
+                        setLastCursor(cursor);
                     }
                 })
                 .catch((err) => {

@@ -26,7 +26,7 @@ export default function PostScroller({ posts, fetcher, onLoad, empty }: PostScro
         <InfiniteScroll onLoad={_onLoad} isLoading={isLoading} empty={empty} isEmpty={isEmpty}>
             <AnimatePresence initial={!isSSR}>
                 {
-                    posts?.map(post =>
+                    posts?.map?.(post =>
                         <div className="flex flex-col" key={post.id}>
                             <Post className="p-3 px-5" id={post.id} />
                             <hr />

@@ -3,7 +3,8 @@ import {InfiniteFetcherParams} from "@components/InfiniteScroll";
 import useVirtualizedPosts from "@/utils/posts/useVirtualizedPosts";
 
 async function fetcher(set: any, get: any, { setHasMoreData }: InfiniteFetcherParams) {
-    const cursor = get().posts?.[get().posts?.length - 1]?.postedAt ?? new Date();
+    const postedAt = get().posts?.[get().posts?.length - 1]?.postedAt;
+    const cursor = postedAt ?? new Date();
     const limit = get().limit;
 
     const params = new URLSearchParams();
@@ -22,7 +23,8 @@ async function fetcher(set: any, get: any, { setHasMoreData }: InfiniteFetcherPa
         get().add(posts);
     }
 
-    return set((state: any) => state);
+    set((state: any) => state);
+    return postedAt ?? 'now';
 }
 
 export const usePublicPostsStore = useVirtualizedPosts({ fetcher });

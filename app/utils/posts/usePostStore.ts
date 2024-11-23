@@ -247,6 +247,10 @@ export const usePostStore = create((set, get: any) => ({
         });
     },
 
+    filter({ filter }: { filter: string }) {
+        emitter.emit(PostEvent.FILTER, { filter });
+    },
+
     reset() {
         return set({});
     }

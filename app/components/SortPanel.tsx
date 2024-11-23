@@ -2,18 +2,25 @@ import {Card} from "@ui/card";
 import {Button} from "@ui/button";
 import {ChevronUp, ChevronDown, Search, X} from "lucide-react";
 import {Separator} from "@ui/separator";
-import React, {CSSProperties, useContext, useState} from "react";
+import React, {CSSProperties, useContext, useEffect, useState} from "react";
 import {cn} from "@/lib/utils";
 import {UserContext} from "@/utils/context/UserContext";
 import {Genre} from "@prisma/client";
 import {formatGenre, GenreThemes} from "@/utils/genre-util";
 import Expand from "@ui/expand";
 import {Input} from "@ui/input";
+import {usePostStore} from "@/utils/posts/usePostStore";
+import {useShallow} from "zustand/react/shallow";
 
 export default function SortPanel({ className, style }: { className?: string, style?: CSSProperties }) {
     const user = useContext(UserContext);
     const [showContent, setShowContent] = useState<boolean>(true);
     const [filter, setFilter] = useState<string>('');
+    const {_filter} = usePostStore(useShallow((state: any) => ({ _filter: state?.filter })));
+
+    useEffect(() => {
+        _filter({filter});
+    }, [filter]);
 
     const toggleContent = () => {
         setShowContent(!showContent);

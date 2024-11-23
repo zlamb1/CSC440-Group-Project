@@ -3,6 +3,7 @@ import {InfiniteFetcherParams} from "@components/InfiniteScroll";
 import {PostWithRelations, PostWithReplies} from "@/utils/types";
 import {Post} from "@prisma/client";
 import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
+import {usePostStore} from "@/utils/posts/usePostStore";
 
 const DEFAULT_LIMIT = 5;
 
@@ -38,17 +39,96 @@ function binarySearch(element: PostWithDate, array: PostWithDate[]) {
     return -(low + 1);
 }
 
+enum ComparisonOperation {
+    EQ, LT, GT, LTE, GTE
+}
+
+function parseNumericAttribute(attribute: string, value: string) {
+    const numericValue = parseInt(value);
+    for (let i = 0; i < attribute?.length; i++) {
+        const char = attribute.charAt(i), nextChar = attribute.charAt(i + 1);
+        switch (char) {
+            case '=':
+                return { attribute: attribute.substring(0, i), value: numericValue, op: ComparisonOperation.EQ };
+            case '>':
+                return { attribute: attribute.substring(0, i), value: numericValue, op: nextChar === '=' ? ComparisonOperation.LTE : ComparisonOperation.LT };
+            case '<':
+                return { attribute: attribute.substring(0, i), value: numericValue, op: nextChar === '=' ? ComparisonOperation.GTE : ComparisonOperation.GT };
+        }
+    }
+}
+
+function applyNumericComparison(value: number, realValue: number, op: ComparisonOperation) {
+    switch (op) {
+        case ComparisonOperation.EQ:
+            return value === realValue;
+        case ComparisonOperation.LT:
+            return value < realValue;
+        case ComparisonOperation.GT:
+            return value > realValue;
+        case ComparisonOperation.LTE:
+            return value <= realValue;
+        case ComparisonOperation.GTE:
+            return value >= realValue;
+        default:
+            return false;
+    }
+}
+
+function _filterFn(filter: string, posts: PostWithDate[]) {
+    // get post store data
+    const state: any = usePostStore.getState();
+
+    const attributes = filter?.split?.(' ');
+    if (attributes) {
+        for (const attributePair of attributes) {
+            if (attributePair.includes('::')) {
+                const pair = attributePair.split('::');
+                if (pair.length < 2) continue;
+                const attribute = pair[0];
+                const value = pair[1];
+                if (!attribute || !value) continue;
+                switch (attribute.toLowerCase()) {
+                    case 'genre':
+                        posts = posts.filter(post => state[post.id]?.genres?.includes?.(value.toUpperCase()))
+                        break;
+                    case 'liked':
+                        const _value = (value === '1' || value === 'true' || value === 't');
+                        posts = posts.filter(post => state[post.id]?.liked === _value);
+                        break;
+                    default:
+                        const numericAttribute = parseNumericAttribute(attribute, value);
+                        switch (numericAttribute?.attribute) {
+                            case 'likes':
+                                posts = posts.filter(post => applyNumericComparison(numericAttribute.value, state[post.id]?.likeCount, numericAttribute.op));
+                                break;
+                            case 'replies':
+                                posts = posts.filter(post => applyNumericComparison(numericAttribute.value, state[post.id]?.replyCount, numericAttribute.op));
+                                break;
+                        }
+                        break;
+                }
+            } else {
+                posts = posts.filter(post => state[post.id]?.content?.includes?.(attributePair));
+            }
+        }
+    }
+
+    return posts;
+}
+
 export interface VirtualizedPostsProps {
     name?: string;
     fetcher: (set: any, get: any, params: InfiniteFetcherParams) => Promise<void>;
     limit?: number;
     state?: object;
-    filterFn?: (post: Post | PostWithReplies | PostWithRelations) => boolean;
+    filterFn?: (filter: string, posts: PostWithDate[]) => PostWithDate[];
+    includeFn?: (post: Post | PostWithReplies | PostWithRelations) => boolean;
 }
 
-export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT, state, filterFn }: VirtualizedPostsProps) {
+export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT, state, includeFn, filterFn = _filterFn }: VirtualizedPostsProps) {
     const initialState = {
-        posts: [], limit, ...state
+        posts: [], _posts: [], limit, _filter: '', ...state
     };
 
     const store = create((set, get: any) => ({
@@ -59,8 +139,8 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
         },
 
         add(posts: (Post | PostWithRelations | PostWithReplies)[]) {
-            if (filterFn) {
-                posts = posts?.filter?.(filterFn);
+            if (includeFn) {
+                posts = posts?.filter?.(includeFn);
             }
 
             return set((state: any) => {
@@ -68,7 +148,7 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
                     return state;
                 }
 
-                const _posts = [...state.posts];
+                const _posts = [...state._posts];
 
                 for (const post of posts) {
                     if (post.replyTo) continue;
@@ -95,15 +175,24 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
                     }
                 }
 
-                return {...state, posts: _posts};
+                return {...state, posts: filterFn(state._filter, _posts), _posts};
             });
         },
 
         delete(post: string | Post | PostWithReplies | PostWithRelations) {
             const id = typeof post === 'string' ? post : post.id;
             return set((state: any) => ({
-                ...state, posts: state.posts.filter((post: PostWithDate) => post.id !== id)
+                ...state,
+                posts: state.posts.filter((post: PostWithDate) => post.id !== id),
+                _posts: state._posts.filter((post: PostWithDate) => post.id !== id)
             }));
+        },
+
+        filter({ _filter }: { _filter: string }) {
+            if (!_filter) {
+                return set((state: any) => ({ ...state, posts: state._posts }))
+            }
+            return set((state: any) => ({ ...state, _filter, posts: filterFn(_filter, state._posts) }));
         },
 
         reset() {
@@ -123,6 +212,13 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
         const state: any = store.getState();
         if (state?.delete) {
             state.delete(post);
+        }
+    });
+
+    emitter.on(PostEvent.FILTER, ({ filter }: any) => {
+        const state: any = store.getState();
+        if (state?.filter) {
+            state.filter({ _filter: filter });
         }
     });
 
