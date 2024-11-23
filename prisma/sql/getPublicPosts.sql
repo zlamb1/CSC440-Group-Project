@@ -3,7 +3,7 @@
 -- @param {Int} $3:limit
 SELECT
     p."id", p."postedAt", p."content", p."replyTo", p."lastEdited", p."userId",
-    (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
+    (COALESCE(COUNT(DISTINCT l) FILTER (WHERE l."liked"), 0) - COALESCE(COUNT(DISTINCT l) FILTER (WHERE NOT l."liked"), 0))::INTEGER as "likeCount",
     COALESCE(COUNT(DISTINCT r."id"), 0)::INTEGER AS "replyCount",
     CASE
         WHEN COUNT(CASE WHEN l."userId" = $1::UUID THEN 1 END) = 0 THEN NULL
@@ -45,7 +45,7 @@ LEFT JOIN "PostGenre" AS g ON g."postId" = p."id"
 LEFT JOIN LATERAL (
     SELECT
         r."id", r."postedAt", r."content", r."replyTo", r."lastEdited", r."userId",
-        (COALESCE(COUNT(CASE WHEN l."liked" THEN 1 END), 0) - COALESCE(COUNT(CASE WHEN NOT l."liked" THEN 1 END), 0))::INTEGER as "likeCount",
+        (COALESCE(COUNT(DISTINCT l) FILTER (WHERE l."liked"), 0) - COALESCE(COUNT(DISTINCT l) FILTER (WHERE NOT l."liked"), 0))::INTEGER as "likeCount",
         COALESCE(COUNT(DISTINCT rr."id"), 0)::INTEGER AS "replyCount",
         CASE
             WHEN COUNT(CASE WHEN l."userId" = $1::UUID THEN 1 END) = 0 THEN NULL
