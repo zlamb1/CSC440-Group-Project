@@ -56,6 +56,8 @@ function parseNumericAttribute(attribute: string, value: string) {
                 return { attribute: attribute.substring(0, i), value: numericValue, op: nextChar === '=' ? ComparisonOperation.GTE : ComparisonOperation.GT };
         }
     }
+
+    return { attribute, value: numericValue, op: ComparisonOperation.LTE };
 }
 
 function applyNumericComparison(value: number, realValue: number, op: ComparisonOperation) {
@@ -128,7 +130,7 @@ export interface VirtualizedPostsProps {
 
 export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetcher, limit = DEFAULT_LIMIT, state, includeFn, filterFn = _filterFn }: VirtualizedPostsProps) {
     const initialState = {
-        posts: [], _posts: [], limit, _filter: '', ...state
+        posts: [], _posts: [], limit, filter: '', ...state
     };
 
     const store = create((set, get: any) => ({
@@ -175,7 +177,7 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
                     }
                 }
 
-                return {...state, posts: filterFn(state._filter, _posts), _posts};
+                return {...state, posts: filterFn(state.filter, _posts), _posts};
             });
         },
 
@@ -188,11 +190,12 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
             }));
         },
 
-        filter({ _filter }: { _filter: string }) {
-            if (!_filter) {
-                return set((state: any) => ({ ...state, posts: state._posts }))
+        _filter(options?: { filter: string }) {
+            if (!options) {
+                // re-filter results
+                return set((state: any) => ({ ...state, posts: filterFn(state.filter, state._posts) }))
             }
-            return set((state: any) => ({ ...state, _filter, posts: filterFn(_filter, state._posts) }));
+            return set((state: any) => ({ ...state, filter: options?.filter, posts: filterFn(options?.filter, state._posts) }));
         },
 
         reset() {
@@ -203,7 +206,6 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
     emitter.on(PostEvent.CREATE, ({ post }: any) => {
         const state: any = store.getState();
         if (state?.add) {
-            // TODO: introduce conditions for adding post to store
             state.add([post]);
         }
     });
@@ -215,10 +217,24 @@ export default function useVirtualizedPosts({ name = "useVirtualizedPosts", fetc
         }
     });
 
-    emitter.on(PostEvent.FILTER, ({ filter }: any) => {
+    emitter.on(PostEvent.LIKE, () => {
         const state: any = store.getState();
         if (state?.filter) {
-            state.filter({ _filter: filter });
+            state._filter();
+        }
+    });
+
+    emitter.on(PostEvent.EDIT, () => {
+        const state: any = store.getState();
+        if (state?._filter) {
+            state._filter();
+        }
+    });
+
+    emitter.on(PostEvent.FILTER, ({ filter }: any) => {
+        const state: any = store.getState();
+        if (state?._filter) {
+            state._filter({ filter });
         }
     });
 

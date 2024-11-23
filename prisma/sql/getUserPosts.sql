@@ -67,11 +67,11 @@ LEFT JOIN LATERAL (
     INNER JOIN "User" AS u ON u."id" = r."userId"
     LEFT JOIN "Post" AS rr ON rr."replyTo" = r."id"
     LEFT JOIN "PostLike" AS l ON l."postId" = r."id"
-    LEFT JOIN "PostGenre" AS g ON g."postId" = p."id"
+    LEFT JOIN "PostGenre" AS g ON g."postId" = r."id"
     WHERE r."replyTo" = p."id"
     GROUP BY r."id", u."id"
     ORDER BY r."postedAt" DESC
-) r ON TRUE
+) AS r ON TRUE
 WHERE p."replyTo" IS NULL AND p."userId" = $1::UUID AND p."postedAt" < $3::TIMESTAMP
 GROUP BY p."id", u."id"
 ORDER BY p."postedAt" DESC
