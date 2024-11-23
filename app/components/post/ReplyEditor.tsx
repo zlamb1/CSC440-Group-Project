@@ -8,6 +8,7 @@ import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import {Form} from "@remix-run/react";
 import ProgressCircle from "@components/ProgressCircle";
+import Expand from "@ui/expand";
 
 export default function ReplyEditor({ post, isReplying = true }: { post: PostWithUser, isReplying?: boolean }) {
     const [isEditorActive, setEditorActive] = useState(false);
@@ -52,40 +53,31 @@ export default function ReplyEditor({ post, isReplying = true }: { post: PostWit
     }
 
     return (
-        <AnimatePresence mode="wait" initial={false}>
-            {
-                isReplying ?
-                    <Form navigate={false} onSubmit={onReply}>
-                        <motion.div className="overflow-y-hidden" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}>
-                            <PostEditor placeholder="Write a reply..."
-                                        ref={ref}
-                                        isActive={isEditorActive}
-                                        focus={setEditorActive}
-                                        editable={!isPending}
-                                        editorProps={{attributes: {class: 'break-all focus-visible:outline-none'}}}
-                                        onTextUpdate={(progress: number) => setEditorProgress(progress)}
-                                        append={
-                                            <motion.div initial={{opacity: 0, height: 0}}
-                                                        animate={{opacity: 1, height: 'auto'}}
-                                                        exit={{opacity: 0, height: 0}}
-                                                        className="flex gap-2 justify-end overflow-y-hidden">
-                                                <ProgressCircle percentage={editorProgress} />
-                                                <Button variant="ghost" onClick={handleCancel} type="button">
-                                                    Cancel
-                                                </Button>
-                                                <Button type="submit"
-                                                        disabled={isPending}>
-                                                    {
-                                                        isPending ? <LoadingSpinner /> : 'Reply'
-                                                    }
-                                                </Button>
-                                            </motion.div>
+        <Expand className="overflow-y-hidden" show={isReplying} initial={false}>
+            <Form navigate={false} onSubmit={onReply}>
+                <PostEditor placeholder="Write a reply..."
+                            ref={ref}
+                            isActive={isEditorActive}
+                            focus={setEditorActive}
+                            editable={!isPending}
+                            editorProps={{attributes: {class: 'break-all focus-visible:outline-none'}}}
+                            onTextUpdate={(progress: number) => setEditorProgress(progress)}
+                            append={
+                                <Expand className="overflow-y-hidden flex justify-end gap-1" show={isEditorActive}>
+                                    <ProgressCircle percentage={editorProgress} />
+                                    <Button variant="ghost" onClick={handleCancel} type="button">
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit"
+                                            disabled={isPending}>
+                                        {
+                                            isPending ? <LoadingSpinner /> : 'Reply'
                                         }
-                            />
-                        </motion.div>
-                    </Form>
-                    : null
-            }
-        </AnimatePresence>
-    )
+                                    </Button>
+                                </Expand>
+                            }
+                />
+            </Form>
+        </Expand>
+    );
 }

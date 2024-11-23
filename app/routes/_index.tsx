@@ -13,6 +13,7 @@ import {usePublicPostsStore} from "@/utils/posts/usePublicPostsStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/hooks/useMountedEffect";
 import {UserContext} from "@/utils/context/UserContext";
+import Expand from "@ui/expand";
 
 export default function Index() {
     const user = useContext(UserContext);
@@ -69,10 +70,7 @@ export default function Index() {
                                     editorProps={{ attributes: { class: 'break-all py-1 focus-visible:outline-none' } }}
                                     containerProps={{className: 'flex-grow w-full text-md'}}
                                     append={
-                                        <motion.div className="self-end flex items-center overflow-y-hidden gap-3"
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                    exit={{ opacity: 0, height: 0 }}>
+                                        <Expand className="self-end flex items-center overflow-y-hidden gap-1" show={isEditorActive}>
                                             <ProgressCircle percentage={editorProgress}/>
                                             <Button type="button" variant="ghost" onClick={handleCancel}>
                                                 Cancel
@@ -81,7 +79,7 @@ export default function Index() {
                                                     disabled={fetcher.state !== 'idle'}>
                                                 {fetcher.state === 'idle' ? 'Post' : <LoadingSpinner />}
                                             </Button>
-                                        </motion.div>
+                                        </Expand>
                                     }
                         />
                     </div>

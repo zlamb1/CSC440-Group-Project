@@ -98,16 +98,14 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
                 <Separator orientation="horizontal" />
             </div>
         );
-    } else {
-        return (
-            <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text" onClick={() => editor?.commands.focus()}>
-                <EditorContext.Provider value={{editor}}>
-                    <EditorContent {...props?.containerProps} editor={editor}/>
-                </EditorContext.Provider>
-                <AnimatePresence mode="wait">
-                    { props?.isActive ? (props?.append ?? null) : null }
-                </AnimatePresence>
-            </Card>
-        );
     }
+
+    return (
+        <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text" onClick={() => editor?.commands.focus()}>
+            <EditorContext.Provider value={{editor}}>
+                <EditorContent {...props?.containerProps} editor={editor}/>
+            </EditorContext.Provider>
+            { props?.append }
+        </Card>
+    );
 });
