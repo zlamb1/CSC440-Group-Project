@@ -42,7 +42,7 @@ function usePostSync() {
             }
             case PostEvent.LIKE: {
                 const {post, liked} = data.evt;
-                state.like(post, liked, false);
+                state.like({ id: post, liked, emit: false });
                 break;
             }
             case PostEvent.GENRE: {

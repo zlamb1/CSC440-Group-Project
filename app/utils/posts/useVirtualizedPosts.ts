@@ -135,6 +135,7 @@ export interface VirtualizedPostsProps {
   filterFn?: (filter: string, posts: PostWithDate[]) => PostWithDate[];
   includeFn?: (post: Post | PostWithReplies | PostWithRelations) => boolean;
   excludedEvents?: PostEvent[];
+  eventHandlers?: { [key: string]: Function };
 }
 
 export default function useVirtualizedPosts({
@@ -144,7 +145,8 @@ export default function useVirtualizedPosts({
                                               state,
                                               includeFn,
                                               filterFn = _filterFn,
-                                              excludedEvents = []
+                                              excludedEvents = [],
+                                              eventHandlers
                                             }: VirtualizedPostsProps) {
   const initialState = {
     posts: [], _posts: [], limit, filter: '', ...state
@@ -219,6 +221,13 @@ export default function useVirtualizedPosts({
       return set(initialState);
     }
   }));
+
+  emitter.on('*', (type, evt) => {
+    if (eventHandlers?.[type.toString()]) {
+      const state: any = store.getState();
+      eventHandlers[type.toString()]({state, evt});
+    }
+  });
 
   if (!excludedEvents?.includes(PostEvent.CREATE)) {
     emitter.on(PostEvent.CREATE, ({post}: any) => {

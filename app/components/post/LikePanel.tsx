@@ -11,79 +11,79 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {UserContext} from "@/utils/context/UserContext";
 
 function getIsLiked(state: any) {
-    if (state == null || state == 'null') {
-        return null;
-    }
-    return state === true || state === 'true';
+  if (state == null || state == 'null') {
+    return null;
+  }
+  return state === true || state === 'true';
 }
 
 function getLikeCount(likeCount: number, oldState?: any, state?: any) {
-    const oldIsLiked = getIsLiked(oldState);
-    const newIsLiked = getIsLiked(state);
-    if (oldIsLiked !== newIsLiked) {
-        if (oldIsLiked === null) {
-            return likeCount + (newIsLiked ? 1 : -1);
-        } else if (newIsLiked === null) {
-            return likeCount + (oldIsLiked ? -1 : 1);
-        } else {
-            return likeCount + (newIsLiked ? 2 : -2);
-        }
+  const oldIsLiked = getIsLiked(oldState);
+  const newIsLiked = getIsLiked(state);
+  if (oldIsLiked !== newIsLiked) {
+    if (oldIsLiked === null) {
+      return likeCount + (newIsLiked ? 1 : -1);
+    } else if (newIsLiked === null) {
+      return likeCount + (oldIsLiked ? -1 : 1);
+    } else {
+      return likeCount + (newIsLiked ? 2 : -2);
     }
-    return likeCount;
+  }
+  return likeCount;
 }
 
-export default function LikePanel({ className, post }: { className?: string, post: PostWithUser }) {
-    const fetcher = useFetcher();
-    const viewer = useContext(UserContext);
+export default function LikePanel({className, post}: { className?: string, post: PostWithUser }) {
+  const fetcher = useFetcher();
+  const viewer = useContext(UserContext);
 
-    const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.liked;
-    const likeCount = fetcher.formData ? getLikeCount(post?.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : (post?.likeCount ?? 0);
+  const isLiked = fetcher.formData ? getIsLiked(fetcher.formData.get('liked')) : post?.liked;
+  const likeCount = fetcher.formData ? getLikeCount(post?.likeCount ?? 0, post?.liked, fetcher.formData.get('liked')) : (post?.likeCount ?? 0);
 
-    const { like } = usePostStore(useShallow((state: any) => ({ like: state.like })));
+  const {like} = usePostStore(useShallow((state: any) => ({like: state.like})));
 
-    useMountedEffect(() => {
-        if (fetcher?.data?.liked !== undefined) {
-            like(post.id, fetcher.data.liked);
-        }
-    }, [fetcher.data]);
+  useMountedEffect(() => {
+    if (fetcher?.data?.liked !== undefined) {
+      like({id: post.id, liked: fetcher.data.liked});
+    }
+  }, [fetcher.data]);
 
-    return (
-        <div className={cn("flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900", className)}>
-            <fetcher.Form method="POST"
-                          action={`/posts/${post.id}/like`}
-                          className="flex items-center">
-                <Button className="w-[24px] h-[24px] rounded-full"
-                        variant="ghost"
-                        size="icon"
-                        type="submit"
-                        disabled={!viewer?.loggedIn || fetcher.state !== 'idle'}>
-                    <input className="hidden" name="liked"
-                           value={isLiked === true ? 'null' : 'true'}
-                           readOnly
-                    />
-                    <ThumbsUp size={16}
-                              className={"stroke-current " + (isLiked === true ? 'fill-primary' : '')}
-                    />
-                </Button>
-            </fetcher.Form>
-            <span className="select-none text-sm text-center font-medium min-w-[14px]">
-                {fetcher.state === 'idle' ? `${likeCount}` : <LoadingSpinner size={14} />}
+  return (
+    <div className={cn("flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-900", className)}>
+      <fetcher.Form method="POST"
+                    action={`/posts/${post.id}/like`}
+                    className="flex items-center">
+        <Button className="w-[24px] h-[24px] rounded-full"
+                variant="ghost"
+                size="icon"
+                type="submit"
+                disabled={!viewer?.loggedIn || fetcher.state !== 'idle'}>
+          <input className="hidden" name="liked"
+                 value={isLiked === true ? 'null' : 'true'}
+                 readOnly
+          />
+          <ThumbsUp size={16}
+                    className={"stroke-current " + (isLiked === true ? 'fill-primary' : '')}
+          />
+        </Button>
+      </fetcher.Form>
+      <span className="select-none text-sm text-center font-medium min-w-[14px]">
+                {fetcher.state === 'idle' ? `${likeCount}` : <LoadingSpinner size={14}/>}
             </span>
-            <fetcher.Form method="POST" action={`/posts/${post.id}/like`}>
-                <Button className="w-[24px] h-[24px] rounded-full"
-                        variant="ghost"
-                        size="icon"
-                        type="submit"
-                        disabled={!viewer?.loggedIn || fetcher.state !== 'idle'}>
-                    <input className="hidden" name="liked"
-                           value={isLiked === false ? 'null' : 'false'}
-                           readOnly
-                    />
-                    <ThumbsDown size={16}
-                                className={"stroke-current " + (isLiked === false ? 'fill-primary' : '')}
-                    />
-                </Button>
-            </fetcher.Form>
-        </div>
-    );
+      <fetcher.Form method="POST" action={`/posts/${post.id}/like`}>
+        <Button className="w-[24px] h-[24px] rounded-full"
+                variant="ghost"
+                size="icon"
+                type="submit"
+                disabled={!viewer?.loggedIn || fetcher.state !== 'idle'}>
+          <input className="hidden" name="liked"
+                 value={isLiked === false ? 'null' : 'false'}
+                 readOnly
+          />
+          <ThumbsDown size={16}
+                      className={"stroke-current " + (isLiked === false ? 'fill-primary' : '')}
+          />
+        </Button>
+      </fetcher.Form>
+    </div>
+  );
 }

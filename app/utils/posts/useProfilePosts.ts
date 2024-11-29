@@ -30,10 +30,31 @@ async function fetcher(set: any, get: any, {setHasMoreData}: InfiniteFetcherPara
   return set((state: any) => state);
 }
 
-export default function useProfilePosts(userId: string) {
+function handleLike({state, evt}: any, viewerId?: string) {
+  const post = evt.post;
+
+  if (post) {
+    const postState: any = usePostStore.getState();
+    const _post = postState[post];
+    if (_post && state.id === viewerId) {
+      if (evt.liked) {
+        state?.add([_post]);
+      } else {
+        state?.delete(post);
+      }
+    }
+  }
+}
+
+export default function useProfilePosts(userId: string, viewerId?: string) {
   return create((set, get: any) => ({
     id: userId,
     profilePosts: useVirtualizedPosts({state: {id: userId}, fetcher, includeFn: (post) => post.userId === userId}),
-    likedPosts: useVirtualizedPosts({state: {id: userId, liked: true}, fetcher, excludedEvents: [PostEvent.CREATE]}),
+    likedPosts: useVirtualizedPosts({
+      state: {id: userId, liked: true},
+      fetcher,
+      excludedEvents: [PostEvent.CREATE],
+      eventHandlers: {[PostEvent.LIKE]: (args: any) => handleLike(args, viewerId)}
+    }),
   }));
 }

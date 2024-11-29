@@ -50,10 +50,7 @@ export const usePostStore = create((set, get: any) => ({
       lastEdited = lastEdited ?? new Date();
       post.lastEdited = typeof lastEdited === 'string' ? new Date(lastEdited) : lastEdited;
 
-      if (emit) {
-        shouldEmit = true;
-      }
-
+      shouldEmit = emit;
       return {...state, [id]: post};
     });
 
@@ -62,9 +59,8 @@ export const usePostStore = create((set, get: any) => ({
     }
   },
 
-  like(id: string, liked: boolean | null, emit?: boolean) {
-    if (emit == null) emit = true;
-    let shouldEmit = true;
+  like({id, liked, emit = true}: { id: string, liked: boolean | null, emit?: boolean }) {
+    let shouldEmit = false;
 
     set((state: any) => {
       const post = {...state[id]};
@@ -83,9 +79,7 @@ export const usePostStore = create((set, get: any) => ({
 
       post.liked = liked;
 
-      if (emit) {
-        shouldEmit = true;
-      }
+      shouldEmit = emit;
 
       return {...state, [id]: post};
     });
@@ -124,9 +118,7 @@ export const usePostStore = create((set, get: any) => ({
         }
       }
 
-      if (emit) {
-        shouldEmit = true;
-      }
+      shouldEmit = emit;
 
       return {...state, [post]: _post};
     });
@@ -246,9 +238,7 @@ export const usePostStore = create((set, get: any) => ({
         }
       }
 
-      if (emit) {
-        shouldEmit = true;
-      }
+      shouldEmit = emit;
 
       return {...state, ..._state};
     });
