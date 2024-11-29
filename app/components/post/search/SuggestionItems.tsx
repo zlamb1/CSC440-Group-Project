@@ -76,7 +76,7 @@ export const SuggestionItems = forwardRef<HTMLDivElement, SuggestionItemsProps>(
       }
 
       function onSelectValue(_value: string) {
-        //onChange?.(value + _value.substring(lastValue?.length ?? 0))
+        onChange?.(value + _value.substring(lastValue?.length ?? 0))
       }
 
       return (
