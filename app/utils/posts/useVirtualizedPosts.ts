@@ -134,6 +134,7 @@ export interface VirtualizedPostsProps {
   state?: object;
   filterFn?: (filter: string, posts: PostWithDate[]) => PostWithDate[];
   includeFn?: (post: Post | PostWithReplies | PostWithRelations) => boolean;
+  excludedEvents?: PostEvent[];
 }
 
 export default function useVirtualizedPosts({
@@ -142,7 +143,8 @@ export default function useVirtualizedPosts({
                                               limit = DEFAULT_LIMIT,
                                               state,
                                               includeFn,
-                                              filterFn = _filterFn
+                                              filterFn = _filterFn,
+                                              excludedEvents = []
                                             }: VirtualizedPostsProps) {
   const initialState = {
     posts: [], _posts: [], limit, filter: '', ...state
@@ -218,40 +220,50 @@ export default function useVirtualizedPosts({
     }
   }));
 
-  emitter.on(PostEvent.CREATE, ({post}: any) => {
-    const state: any = store.getState();
-    if (state?.add) {
-      state.add([post]);
-    }
-  });
+  if (!excludedEvents?.includes(PostEvent.CREATE)) {
+    emitter.on(PostEvent.CREATE, ({post}: any) => {
+      const state: any = store.getState();
+      if (state?.add) {
+        state.add([post]);
+      }
+    });
+  }
 
-  emitter.on(PostEvent.DELETE, ({post}: any) => {
-    const state: any = store.getState();
-    if (state?.delete) {
-      state.delete(post);
-    }
-  });
+  if (!excludedEvents?.includes(PostEvent.DELETE)) {
+    emitter.on(PostEvent.DELETE, ({post}: any) => {
+      const state: any = store.getState();
+      if (state?.delete) {
+        state.delete(post);
+      }
+    });
+  }
 
-  emitter.on(PostEvent.LIKE, () => {
-    const state: any = store.getState();
-    if (state?.filter) {
-      state._filter();
-    }
-  });
+  if (!excludedEvents?.includes(PostEvent.LIKE)) {
+    emitter.on(PostEvent.LIKE, () => {
+      const state: any = store.getState();
+      if (state?.filter) {
+        state._filter();
+      }
+    });
+  }
 
-  emitter.on(PostEvent.EDIT, () => {
-    const state: any = store.getState();
-    if (state?._filter) {
-      state._filter();
-    }
-  });
+  if (!excludedEvents?.includes(PostEvent.EDIT)) {
+    emitter.on(PostEvent.EDIT, () => {
+      const state: any = store.getState();
+      if (state?._filter) {
+        state._filter();
+      }
+    });
+  }
 
-  emitter.on(PostEvent.FILTER, ({filter}: any) => {
-    const state: any = store.getState();
-    if (state?._filter) {
-      state._filter({filter});
-    }
-  });
+  if (!excludedEvents?.includes(PostEvent.FILTER)) {
+    emitter.on(PostEvent.FILTER, ({filter}: any) => {
+      const state: any = store.getState();
+      if (state?._filter) {
+        state._filter({filter});
+      }
+    });
+  }
 
   return store;
 }
