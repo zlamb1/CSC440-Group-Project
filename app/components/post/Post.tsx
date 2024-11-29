@@ -17,6 +17,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import {UserContext} from "@/utils/context/UserContext";
 import GenreTags from "@components/post/GenreTags";
 import {PostContext} from "@/utils/context/PostContext";
+import Expand from "@ui/expand";
 
 function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}: {
   className?: string,
@@ -111,7 +112,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
                   <Button containerClass="flex"
                           className="h-[25px] flex gap-1 items-center rounded-full"
                           size="icon"
-                          variant="ghost"
+                          variant={showReplies ? undefined : 'ghost'}
                           onClick={() => setShowReplies(prev => !prev)}>
                     <MessageCircle size={16}/>
                     <span className="text-bold">{post.replyCount}</span>
@@ -120,7 +121,9 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
               </div>
             </div>
             {viewer?.loggedIn && <ReplyEditor post={post} isReplying={isReplying}/>}
-            {getReplyTree()}
+            <Expand initial={false} show={showReplies}>
+              {getReplyTree()}
+            </Expand>
           </div>
         </div>
       </motion.div>
