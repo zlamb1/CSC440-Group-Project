@@ -15,7 +15,7 @@ import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName, cookiePreferenceStorageName, defaultColorScheme} from "@/utils/prefers-color-scheme";
 import FollowingPanel from "@components/FollowingPanel";
-import SortPanel from "@components/SortPanel";
+import SearchPanel from "@components/SearchPanel";
 import CookieToast from "@components/toast/CookieToast";
 import * as Toast from "@radix-ui/react-toast";
 import {StoreInvalidator} from "@/StoreInvalidator";
@@ -84,7 +84,7 @@ export function Layout({children}: {children: ReactNode}) {
                         <div className="px-3 w-full lg:w-[70%] xl:w-[60%] border-0 bg-background">
                             {children}
                         </div>
-                        <SortPanel className="hidden lg:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky" style={{top: boundingRect.height}} />
+                        <SearchPanel className="hidden lg:flex lg:w-[15%] xl:w-[20%] flex-shrink-0 sticky" style={{top: boundingRect.height}} />
                     </div>
                 </div>
                 <Scripts/>

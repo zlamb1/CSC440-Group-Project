@@ -9,27 +9,16 @@ import Expand from "@ui/expand";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import PostSearch from "@components/post/PostSearch";
-import {Checkbox} from "@ui/checkbox";
-import {Label} from "@ui/label";
 
-export default function SortPanel({className, style}: { className?: string, style?: CSSProperties }) {
+export default function SearchPanel({className, style}: { className?: string, style?: CSSProperties }) {
   const user = useContext(UserContext);
   const [showContent, setShowContent] = useState<boolean>(true);
   const [filter, setFilter] = useState<string | undefined>('');
-  const [isLiked, setIsLiked] = useState<boolean | null | undefined>();
   const {_filter} = usePostStore(useShallow((state: any) => ({_filter: state?.filter})));
 
-  const lastCharIsSpace = filter?.substring?.(filter?.length - 1) === ' ';
-
   useEffect(() => {
-    let modifiedFilter = filter;
-
-    if (isLiked !== undefined) {
-      modifiedFilter += (lastCharIsSpace ? '' : ' ') + `liked::${isLiked}`;
-    }
-
-    _filter({filter: modifiedFilter});
-  }, [filter, isLiked]);
+    _filter({filter});
+  }, [filter]);
 
   const toggleContent = () => {
     setShowContent(!showContent);
@@ -57,16 +46,6 @@ export default function SortPanel({className, style}: { className?: string, styl
                       onChange={setFilter}
                       placeholder="Search Posts"
           />
-          <Label className="flex justify-between font-bold">
-            Liked
-            <Checkbox checked={isLiked === true}
-                      onCheckedChange={() => setIsLiked(isLiked === true ? undefined : true)}/>
-          </Label>
-          <Label className="flex justify-between font-bold">
-            Disliked
-            <Checkbox checked={isLiked === false}
-                      onCheckedChange={() => setIsLiked(isLiked === false ? undefined : false)}/>
-          </Label>
         </div>
       </Expand>
     </Card>
