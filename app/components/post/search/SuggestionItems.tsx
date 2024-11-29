@@ -22,15 +22,18 @@ export const SuggestionItems = forwardRef<HTMLDivElement, SuggestionItemsProps>(
       values: Object.keys(Genre).map(formatGenre)
     },
     {
+      placeholder: 'genres::<number>',
+    },
+    {
       placeholder: 'liked::<value>',
       values: ['true', 'false', 'null']
     },
     {
-      placeholder: 'likes::<number>'
+      placeholder: 'likes::<number>',
     },
     {
       placeholder: 'replies::<number>',
-    }
+    },
   ];
 
   const attributes = value?.split(' ');

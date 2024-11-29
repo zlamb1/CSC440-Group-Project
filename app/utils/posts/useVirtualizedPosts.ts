@@ -110,6 +110,9 @@ function _filterFn(filter: string, posts: PostWithDate[]) {
           default:
             const numericAttribute = parseNumericAttribute(attribute, value);
             switch (numericAttribute?.attribute) {
+              case 'genres':
+                posts = posts.filter(post => applyNumericComparison(numericAttribute.value, state[post.id]?.genres.length, numericAttribute.op));
+                break;
               case 'likes':
                 posts = posts.filter(post => applyNumericComparison(numericAttribute.value, state[post.id]?.likeCount, numericAttribute.op));
                 break;
