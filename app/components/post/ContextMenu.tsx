@@ -89,20 +89,18 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
             <AlertTriangleIcon size={16}/>
             Report
           </DropdownMenuItem>
-          <fetcher.Form action={`/posts/delete/${post.id}`} method="POST">
-            <DropdownMenuItem
-              className={cn("gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
-              onClick={onClickDelete}
-              disabled={isTransitioning}>
-              {
-                isTransitioning ? <LoadingSpinner/> :
-                  <Fragment>
-                    <Trash size={16}/>
-                    <span className="flex-grow text-left">Delete</span>
-                  </Fragment>
-              }
-            </DropdownMenuItem>
-          </fetcher.Form>
+          <DropdownMenuItem
+            className={cn("gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
+            onClick={onClickDelete}
+            disabled={isTransitioning}>
+            {
+              isTransitioning ? <LoadingSpinner/> :
+                <Fragment>
+                  <Trash size={16}/>
+                  <span className="flex-grow text-left">Delete</span>
+                </Fragment>
+            }
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
