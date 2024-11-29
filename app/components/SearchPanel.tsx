@@ -1,6 +1,6 @@
 import {Card} from "@ui/card";
 import {Button} from "@ui/button";
-import {ChevronDown, ChevronUp, Search, X} from "lucide-react";
+import {ChevronDown, ChevronUp, Info, Search, X} from "lucide-react";
 import {Separator} from "@ui/separator";
 import React, {CSSProperties, useContext, useEffect, useState} from "react";
 import {cn} from "@/lib/utils";
@@ -13,6 +13,7 @@ import PostSearch from "@components/post/PostSearch";
 export default function SearchPanel({className, style}: { className?: string, style?: CSSProperties }) {
   const user = useContext(UserContext);
   const [showContent, setShowContent] = useState<boolean>(true);
+  const [showInfo, setShowInfo] = useState<boolean>(true);
   const [filter, setFilter] = useState<string | undefined>('');
   const {_filter} = usePostStore(useShallow((state: any) => ({_filter: state?.filter})));
 
@@ -46,6 +47,15 @@ export default function SearchPanel({className, style}: { className?: string, st
                       onChange={setFilter}
                       placeholder="Search Posts"
           />
+          <Button className="w-6 h-6" size="icon" variant="ghost" onClick={() => setShowInfo(prev => !prev)}>
+            <Info size={16}/>
+          </Button>
+          <Expand show={showInfo} initial={false}>
+            <p className="text-sm text-muted-foreground">
+              The search box can be used to search the content of a post, or be used to search various attributes such
+              as (liked, genres, replies, likes).
+            </p>
+          </Expand>
         </div>
       </Expand>
     </Card>
