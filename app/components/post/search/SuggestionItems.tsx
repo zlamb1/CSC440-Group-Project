@@ -58,11 +58,13 @@ export const SuggestionItems = forwardRef<HTMLDivElement, SuggestionItemsProps>(
   }, [value]);
 
   function onSuggest(suggestion: string) {
-    const index = value?.lastIndexOf?.(suggestion);
-    if (!value || index == null) {
-      return onChange?.(value + suggestion.replace(/<(.*)>/, ''));
+    const stripped = suggestion.replace(/<(.*)>/, '');
+    if (value?.substring(value?.length - 1) === ' ' || !value) {
+      onChange?.(value + stripped);
+    } else {
+      const index = value?.lastIndexOf?.(stripped);
+      onChange?.(value + suggestion.substring(value.length - index));
     }
-    onChange?.(value + suggestion.substring(value.length - index));
   }
 
   if (_suggestions.length === 1 && isEnteringValue) {

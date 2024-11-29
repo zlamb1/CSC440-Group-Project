@@ -11,6 +11,7 @@ export type PostSearchProps = Omit<ComponentProps<typeof Input>, 'onChange'> & {
 
 export default function PostSearch({className, value, onChange, ...props}: PostSearchProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [selectionIndex, setSelectionIndex] = useState<number>(0);
   const [maxSelection, setMaxSelection] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +57,8 @@ export default function PostSearch({className, value, onChange, ...props}: PostS
                value={value}
                onChange={(e) => onChange?.(e?.target?.value)}
                onKeyDown={onKeyDown}
+               onFocus={() => setIsFocused(true)}
+               onBlur={() => setIsFocused(false)}
                placeholder={'Search Posts'}
                ref={inputRef}
         />
