@@ -8,7 +8,7 @@ import {UserContext} from "@/utils/context/UserContext";
 import Expand from "@ui/expand";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
-import PostSearch from "@components/post/PostSearch";
+import PostSearch from "@components/post/search/PostSearch";
 
 export default function SearchPanel({className, style}: { className?: string, style?: CSSProperties }) {
   const user = useContext(UserContext);
