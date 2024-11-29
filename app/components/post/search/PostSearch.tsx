@@ -1,14 +1,5 @@
 import {Input} from "@ui/input";
-import {
-  ComponentProps,
-  Dispatch,
-  Fragment,
-  KeyboardEvent,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState
-} from "react";
+import {ComponentProps, Dispatch, Fragment, KeyboardEvent, SetStateAction, useEffect, useRef, useState} from "react";
 import {Popover, PopoverContent, PopoverTrigger} from "@ui/popover";
 import {SuggestionItems} from "@components/post/search/SuggestionItems";
 
@@ -28,7 +19,6 @@ export default function PostSearch({className, value, onChange, ...props}: PostS
 
   useEffect(() => {
     setSelectionIndex(0);
-    setMaxSelection(0);
   }, [value, isOpen]);
 
   function prepend() {
