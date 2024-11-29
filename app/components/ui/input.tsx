@@ -45,6 +45,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, type, ...pr
                     props?.inputClasses
                 )}
                 ref={inputRef}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                 {...propsOmitInputClasses}
             />
             {
