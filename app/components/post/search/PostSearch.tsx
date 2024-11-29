@@ -48,7 +48,7 @@ export default function PostSearch({className, value, onChange, ...props}: PostS
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen || isFocused} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Input {...props}
                type="text"

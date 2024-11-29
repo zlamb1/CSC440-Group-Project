@@ -63,7 +63,7 @@ export const SuggestionItems = forwardRef<HTMLDivElement, SuggestionItemsProps>(
       onChange?.(value + stripped);
     } else {
       const index = value?.lastIndexOf?.(stripped);
-      onChange?.(value + suggestion.substring(value.length - index));
+      onChange?.(value + stripped.substring(value.length - index - 1));
     }
   }
 
