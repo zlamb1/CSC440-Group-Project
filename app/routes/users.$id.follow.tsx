@@ -1,11 +1,12 @@
 import NotFound from "@/routes/$";
-import {Prisma} from "@prisma/client";
+import {Prisma, ProfileVisibility} from "@prisma/client";
 import {ActionFunctionArgs} from "@remix-run/node";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import BadRequestResponse, {RequiredFieldResponse} from "@/api/BadRequestResponse";
-import {ExplicitUpdateResponse} from "@/api/UpdateResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {ExplicitDeleteResponse} from "@/api/DeleteResponse";
+import {ExplicitCreateResponse} from "@/api/CreateResponse";
 
 export async function action({context, request, params}: ActionFunctionArgs) {
   try {
@@ -25,12 +26,46 @@ export async function action({context, request, params}: ActionFunctionArgs) {
     }
 
     if (follow) {
+      const user = await context.prisma.user.findUnique({
+        where: {
+          id: params.id,
+        }
+      });
+
+      if (!user) {
+        return ExplicitResourceNotFoundResponse('User');
+      }
+
+      if (user.visibility !== ProfileVisibility.PUBLIC) {
+        const data = {
+          requestorId: context.user.id,
+          requestedId: user.id
+        }
+
+        await context.prisma.$transaction([
+          context.prisma.followRequest.create({
+            data
+          }),
+          context.prisma.notification.create({
+            data: {
+              data: JSON.stringify(data),
+              userId: context.user.id,
+              type: 'follow_request',
+            },
+          })
+        ]);
+
+        return ExplicitCreateResponse('FollowRequest');
+      }
+
       await context.prisma.follow.create({
         data: {
           followerId: context.user.id,
           followingId: params.id,
         },
       });
+
+      return ExplicitCreateResponse('Follow');
     } else {
       const follow = await context.prisma.follow.delete({
         where: {
@@ -44,9 +79,9 @@ export async function action({context, request, params}: ActionFunctionArgs) {
       if (!follow) {
         return ExplicitResourceNotFoundResponse('Follow');
       }
-    }
 
-    return ExplicitUpdateResponse('Follow');
+      return ExplicitDeleteResponse('Follow');
+    }
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === 'P2025') {
