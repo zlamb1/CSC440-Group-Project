@@ -37,6 +37,36 @@ export async function action({context, request, params}: ActionFunctionArgs) {
         return ExplicitResourceNotFoundResponse('User');
       }
 
+      const followRequest = await context.prisma.followRequest.findUnique({
+        where: {
+          requestorId_requestedId: {
+            requestorId: user.id,
+            requestedId: context.user.id,
+          },
+        },
+      });
+
+      if (followRequest) {
+        await context.prisma.$transaction([
+          context.prisma.followRequest.delete({
+            where: {
+              requestorId_requestedId: {
+                requestorId: user.id,
+                requestedId: context.user.id,
+              },
+            },
+          }),
+          context.prisma.follow.create({
+            data: {
+              followerId: context.user.id,
+              followingId: params.id,
+            },
+          })
+        ]);
+
+        return ExplicitCreateResponse('Follow');
+      }
+
       if (user.visibility !== ProfileVisibility.PUBLIC) {
         const followRequest = await context.prisma.followRequest.findUnique({
           where: {
@@ -133,7 +163,7 @@ export async function action({context, request, params}: ActionFunctionArgs) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       switch (err.code) {
         case 'P2002':
-          return EndpointResponse('FollowRequest Already Exists', ResponseType.Conflict);
+          return EndpointResponse('Follow Already Exists', ResponseType.Conflict);
         case 'P2025':
           return ExplicitResourceNotFoundResponse('Follow');
       }

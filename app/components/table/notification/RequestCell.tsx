@@ -9,6 +9,7 @@ import {Button} from "@ui/button";
 export default function RequestCell({row}: { row: any }) {
   const hasFetched = useRef<boolean>(false);
   const fetcher = useFetcher();
+  const followFetcher = useFetcher();
   const [user, setUser] = useState<User | null>(null);
 
   const data = JSON.parse(row?.data);
@@ -48,8 +49,18 @@ export default function RequestCell({row}: { row: any }) {
         has requested to follow you.
       </div>
       <div className="flex gap-1">
-        <Button className="w-16 h-8">Accept</Button>
-        <Button className="w-16 h-8" variant="ghost">Reject</Button>
+        <followFetcher.Form action={`/users/${user.id}/follow`} method="POST">
+          <input className="hidden" value="true" name="follow" readOnly/>
+          <Button className="w-16 h-8" type="submit" disabled={followFetcher.state !== 'idle'}>
+            {followFetcher.state === 'idle' ? "Accept" : <LoadingSpinner/>}
+          </Button>
+        </followFetcher.Form>
+        <followFetcher.Form action={`/users/${user.id}/follow`} method="POST">
+          <input className="hidden" value="false" name="follow" readOnly/>
+          <Button className="w-16 h-8" variant="ghost" disabled={followFetcher.state !== 'idle'}>
+            {followFetcher.state === 'idle' ? "Reject" : <LoadingSpinner/>}
+          </Button>
+        </followFetcher.Form>
       </div>
     </div>
   );
