@@ -4,6 +4,8 @@ import EndpointResponse from "@/api/EndpointResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {getLikedPosts, getUserPosts} from "@prisma/client/sql";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
+import {Follow, ProfileVisibility} from "@prisma/client";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
 
 export async function loader({context, params, request}: LoaderFunctionArgs) {
   try {
@@ -12,6 +14,9 @@ export async function loader({context, params, request}: LoaderFunctionArgs) {
     }
 
     const user = await context.prisma.user.findUnique({
+      include: {
+        followers: true,
+      },
       where: {
         id: params.id
       }
@@ -19,6 +24,14 @@ export async function loader({context, params, request}: LoaderFunctionArgs) {
 
     if (!user) {
       return ExplicitResourceNotFoundResponse('User');
+    }
+
+    if (user.visibility !== ProfileVisibility.PUBLIC) {
+      if (context.user.id !== user.id) {
+        if (!user.followers.find((follower: Follow) => follower.followerId === context.user.id)) {
+          return UnauthorizedResponse();
+        }
+      }
     }
 
     let posts;
