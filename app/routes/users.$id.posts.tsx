@@ -28,7 +28,7 @@ export async function loader({context, params, request}: LoaderFunctionArgs) {
 
     if (user.visibility !== ProfileVisibility.PUBLIC) {
       if (context.user.id !== user.id) {
-        if (!user.followers.find((follower: Follow) => follower.followerId === context.user.id)) {
+        if (!user.followers.find((follower: Follow) => follower.followerId && follower.followerId === context.user.id)) {
           return UnauthorizedResponse();
         }
       }
