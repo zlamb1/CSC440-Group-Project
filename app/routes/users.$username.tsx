@@ -4,7 +4,7 @@ import {Link} from "@remix-run/react";
 import {Separator} from "@ui/separator";
 import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
-import {Follow, Prisma, ProfileVisibility, User} from "@prisma/client";
+import {Follow, Prisma, User} from "@prisma/client";
 import NotFound from "@/routes/$";
 import {useContext, useRef, useState} from "react";
 import FollowButton from "@components/FollowButton";
@@ -195,61 +195,67 @@ export default function UserRoute() {
           ) : <FollowButton user={user} isFollowing={!!isFollowing()}/>
         }
       </div>
-      <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
-        <LayoutGroup id="tabs">
-          <TabsList className="flex justify-center bg-transparent">
-            {
-              tabs.map(_tab => (
-                <TabsTrigger className="flex flex-col" key={_tab.value} value={_tab.value}>
-                  {_tab.name}
-                  {_tab.value === tab ? <motion.div className="border w-full border-current" layoutId="tab"/> : null}
-                </TabsTrigger>
-              ))
-            }
-          </TabsList>
-        </LayoutGroup>
-        <Separator/>
-        <TabsContent className="flex flex-col gap-2" value="posts">
-          <PostScroller posts={profileStore?.posts} fetcher={profileStore?.fetch} empty={
-            <div className="font-bold select-none text-center mt-8">
-              <span className="text-primary">@{user?.userName}</span> has no posts ¯\_(ツ)_/¯
-            </div>
-          }/>
-        </TabsContent>
-        <TabsContent className="flex flex-col gap-2" value="following">
-          {
-            !following || !following.length ?
-              <div className="font-bold select-none text-center mt-8">
-                <span className="text-primary">@{user?.userName}</span> is not following anyone ¯\_(ツ)_/¯
-              </div> : null
-          }
-          {
-            following?.map((follow: Prisma.FollowGetPayload<{ include: { following: true } }>) =>
-              <FollowRow key={follow.followingId} follow={follow} user={follow.following}/>
-            )
-          }
-        </TabsContent>
-        <TabsContent className="flex flex-col gap-2" value="followers">
-          {
-            !followers || !followers.length ?
-              <div className="font-bold select-none text-center mt-8">
-                <span className="text-primary">@{user?.userName}</span> is not followed by anyone ¯\_(ツ)_/¯
-              </div> : null
-          }
-          {
-            followers?.map((follow: FollowWithRelations) =>
-              <FollowRow key={follow.followerId} follow={follow} user={follow.follower}/>
-            )
-          }
-        </TabsContent>
-        <TabsContent className="flex flex-col gap-2" value="liked">
-          <PostScroller posts={likedStore?.posts} fetcher={likedStore?.fetch} empty={
-            <div className="font-bold select-none text-center mt-8">
-              <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
-            </div>
-          }/>
-        </TabsContent>
-      </Tabs>
+      {
+        isPrivate ?
+          <div className="font-bold text-center select-none">Request to follow {user?.userName} to view their
+            profile.</div> :
+          <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
+            <LayoutGroup id="tabs">
+              <TabsList className="flex justify-center bg-transparent">
+                {
+                  tabs.map(_tab => (
+                    <TabsTrigger className="flex flex-col" key={_tab.value} value={_tab.value}>
+                      {_tab.name}
+                      {_tab.value === tab ?
+                        <motion.div className="border w-full border-current" layoutId="tab"/> : null}
+                    </TabsTrigger>
+                  ))
+                }
+              </TabsList>
+            </LayoutGroup>
+            <Separator/>
+            <TabsContent className="flex flex-col gap-2" value="posts">
+              <PostScroller posts={profileStore?.posts} fetcher={profileStore?.fetch} empty={
+                <div className="font-bold select-none text-center mt-8">
+                  <span className="text-primary">@{user?.userName}</span> has no posts ¯\_(ツ)_/¯
+                </div>
+              }/>
+            </TabsContent>
+            <TabsContent className="flex flex-col gap-2" value="following">
+              {
+                !following || !following.length ?
+                  <div className="font-bold select-none text-center mt-8">
+                    <span className="text-primary">@{user?.userName}</span> is not following anyone ¯\_(ツ)_/¯
+                  </div> : null
+              }
+              {
+                following?.map((follow: Prisma.FollowGetPayload<{ include: { following: true } }>) =>
+                  <FollowRow key={follow.followingId} follow={follow} user={follow.following}/>
+                )
+              }
+            </TabsContent>
+            <TabsContent className="flex flex-col gap-2" value="followers">
+              {
+                !followers || !followers.length ?
+                  <div className="font-bold select-none text-center mt-8">
+                    <span className="text-primary">@{user?.userName}</span> is not followed by anyone ¯\_(ツ)_/¯
+                  </div> : null
+              }
+              {
+                followers?.map((follow: FollowWithRelations) =>
+                  <FollowRow key={follow.followerId} follow={follow} user={follow.follower}/>
+                )
+              }
+            </TabsContent>
+            <TabsContent className="flex flex-col gap-2" value="liked">
+              <PostScroller posts={likedStore?.posts} fetcher={likedStore?.fetch} empty={
+                <div className="font-bold select-none text-center mt-8">
+                  <span className="text-primary">@{user?.userName}</span> has no liked posts ¯\_(ツ)_/¯
+                </div>
+              }/>
+            </TabsContent>
+          </Tabs>
+      }
     </div>
   );
 }
