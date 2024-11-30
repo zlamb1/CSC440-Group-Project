@@ -32,7 +32,7 @@ export async function action({context, request, params}: ActionFunctionArgs) {
         },
       });
     } else {
-      await context.prisma.follow.delete({
+      const follow = await context.prisma.follow.delete({
         where: {
           followerId_followingId: {
             followerId: context.user.id,
@@ -40,6 +40,10 @@ export async function action({context, request, params}: ActionFunctionArgs) {
           },
         },
       });
+
+      if (!follow) {
+        return ExplicitResourceNotFoundResponse('Follow');
+      }
     }
 
     return ExplicitUpdateResponse('Follow');
