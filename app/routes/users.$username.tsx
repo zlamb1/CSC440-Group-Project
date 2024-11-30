@@ -22,6 +22,7 @@ import useProfilePosts from "@/utils/posts/useProfilePosts";
 import usePersistedLoaderData from "@/utils/hooks/usePersistedLoaderData";
 import {UserContext} from "@/utils/context/UserContext";
 import {getPublicUser} from "@/routes/users.$username.public";
+import {isUserPrivate} from "@/routes/users.$id.posts";
 
 export async function loader({context, params}: LoaderFunctionArgs) {
   try {
@@ -63,19 +64,15 @@ export async function loader({context, params}: LoaderFunctionArgs) {
       return ExplicitResourceNotFoundResponse('User');
     }
 
-    if (user.visibility !== ProfileVisibility.PUBLIC) {
-      if (context.user.loggedIn && context.user.id === user.id) {
-        return EndpointResponse({user});
-      } else {
-        const user = await getPublicUser({userName: params.username, context});
-        if (!user) {
-          return ExplicitResourceNotFoundResponse('User');
-        }
-        return EndpointResponse({user});
+    if (isUserPrivate(user, context.user)) {
+      const user = await getPublicUser({userName: params.username, context});
+      if (!user) {
+        return ExplicitResourceNotFoundResponse('User');
       }
+      return EndpointResponse({user, isPrivate: true});
     }
 
-    return EndpointResponse({user});
+    return EndpointResponse({user, isPrivate: false});
   } catch (err) {
     return UnknownErrorResponse(err);
   }
@@ -139,6 +136,7 @@ export default function UserRoute() {
   })));
 
   const isOwnPage = self?.id === user?.id;
+  const isPrivate = data?.isPrivate;
 
   if (data?.error && data.error === 'User Not Found') {
     return <NotFound/>;

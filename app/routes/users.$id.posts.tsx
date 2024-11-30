@@ -6,6 +6,17 @@ import {getLikedPosts, getUserPosts} from "@prisma/client/sql";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {Follow, ProfileVisibility} from "@prisma/client";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
+import {UserWithFollowers, UserWithLoggedIn} from "@/utils/types";
+
+export function isUserPrivate(user: UserWithFollowers, viewer: UserWithLoggedIn) {
+  if (user.visibility !== ProfileVisibility.PUBLIC) {
+    if (viewer.id !== user.id) {
+      if (!user.followers.find((follower: Follow) => follower.followerId && follower.followerId === viewer.id)) {
+        return true;
+      }
+    }
+  }
+}
 
 export async function loader({context, params, request}: LoaderFunctionArgs) {
   try {
@@ -26,12 +37,8 @@ export async function loader({context, params, request}: LoaderFunctionArgs) {
       return ExplicitResourceNotFoundResponse('User');
     }
 
-    if (user.visibility !== ProfileVisibility.PUBLIC) {
-      if (context.user.id !== user.id) {
-        if (!user.followers.find((follower: Follow) => follower.followerId && follower.followerId === context.user.id)) {
-          return UnauthorizedResponse();
-        }
-      }
+    if (isUserPrivate(user, context.user)) {
+      return UnauthorizedResponse();
     }
 
     let posts;
