@@ -198,7 +198,7 @@ export default function UserRoute() {
       {
         isPrivate ?
           <div className="font-bold text-center select-none">Request to follow {user?.userName} to view their
-            profile.</div> :
+            posts.</div> :
           <Tabs value={tab} className="flex flex-col" onValueChange={setTab}>
             <LayoutGroup id="tabs">
               <TabsList className="flex justify-center bg-transparent">
