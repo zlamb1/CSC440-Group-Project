@@ -4,7 +4,7 @@ import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import EndpointResponse from "@/api/EndpointResponse";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 
-export async function getPublicUser({userName, context}: { userName: string; context: any }) {
+export async function getPublicUserByID({id, context}: { id: string; context: any }) {
   const stdProps = {
     id: true,
     userName: true,
@@ -20,18 +20,18 @@ export async function getPublicUser({userName, context}: { userName: string; con
       ...stdProps,
     },
     where: {
-      userName,
+      id,
     },
   });
 }
 
 export async function loader({context, params}: LoaderFunctionArgs) {
   try {
-    if (!params.username) {
+    if (!params.id) {
       return RequiredFieldResponse('Username');
     }
 
-    const user = await getPublicUser({userName: params.username, context});
+    const user = await getPublicUserByID({id: params.id, context});
 
     if (!user) {
       return ExplicitResourceNotFoundResponse('User');
