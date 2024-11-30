@@ -38,25 +38,38 @@ export async function action({context, request, params}: ActionFunctionArgs) {
       }
 
       if (user.visibility !== ProfileVisibility.PUBLIC) {
-        const data = {
-          requestorId: context.user.id,
-          requestedId: user.id
+        const followRequest = await context.prisma.followRequest.findUnique({
+          where: {
+            requestorId_requestedId: {
+              requestorId: user.id,
+              requestedId: context.user.id,
+            },
+          },
+        });
+
+        if (!followRequest) {
+          const data = {
+            requestorId: context.user.id,
+            requestedId: user.id
+          }
+
+          await context.prisma.$transaction([
+            context.prisma.followRequest.create({
+              data
+            }),
+            context.prisma.notification.create({
+              data: {
+                data: JSON.stringify(data),
+                userId: user.id,
+                type: 'follow_request',
+              },
+            })
+          ]);
+
+          return ExplicitCreateResponse('FollowRequest');
         }
 
-        await context.prisma.$transaction([
-          context.prisma.followRequest.create({
-            data
-          }),
-          context.prisma.notification.create({
-            data: {
-              data: JSON.stringify(data),
-              userId: user.id,
-              type: 'follow_request',
-            },
-          })
-        ]);
-
-        return ExplicitCreateResponse('FollowRequest');
+        return ExplicitCreateResponse('Follow');
       }
 
       await context.prisma.follow.create({
@@ -68,16 +81,49 @@ export async function action({context, request, params}: ActionFunctionArgs) {
 
       return ExplicitCreateResponse('Follow');
     } else {
-      const follow = await context.prisma.follow.delete({
+      let followRequest = await context.prisma.followRequest.findUnique({
         where: {
-          followerId_followingId: {
-            followerId: context.user.id,
-            followingId: params.id,
+          requestorId_requestedId: {
+            requestorId: params.id,
+            requestedId: context.user.id,
           },
         },
       });
 
+      try {
+        followRequest = await context.prisma.followRequest.delete({
+          where: {
+            requestorId_requestedId: {
+              requestorId: params.id,
+              requestedId: context.user.id,
+            },
+          },
+        });
+      } catch (err) {
+        console.error(err);
+      }
+
+      let follow;
+      try {
+        follow = await context.prisma.follow.delete({
+          where: {
+            followerId_followingId: {
+              followerId: context.user.id,
+              followingId: params.id,
+            },
+          },
+        });
+      } catch (err) {
+        if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== 'P2025') {
+          throw err;
+        }
+      }
+
+
       if (!follow) {
+        if (followRequest) {
+          return ExplicitDeleteResponse('FollowRequest');
+        }
         return ExplicitResourceNotFoundResponse('Follow');
       }
 
