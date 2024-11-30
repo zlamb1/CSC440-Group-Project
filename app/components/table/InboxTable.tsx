@@ -105,7 +105,7 @@ export default function InboxTable({
       <DataTable data={notifications}
                  columns={columns}
                  filter={filter}
-                 filterFn={row => row?.content?.toLowerCase().includes(filter?.toLowerCase())}
+                 filterFn={row => !filter || row?.content?.toLowerCase().includes(filter?.toLowerCase())}
                  useSelection={!compact}
                  selected={selected}
                  onSelect={onSelect}
