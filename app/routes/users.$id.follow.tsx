@@ -87,7 +87,7 @@ export async function action({context, request, params}: ActionFunctionArgs) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       switch (err.code) {
         case 'P2002':
-          return EndpointResponse('FollowRequest', ResponseType.Conflict);
+          return EndpointResponse('FollowRequest Already Exists', ResponseType.Conflict);
         case 'P2025':
           return ExplicitResourceNotFoundResponse('Follow');
       }
