@@ -104,7 +104,7 @@ function _filterFn(filter: string, posts: PostWithDate[]) {
               state[post.id]?.genres?.map?.((genre: string) => genre.replaceAll('_', ''))?.includes?.(value.toUpperCase()))
             break;
           case 'liked':
-            const _value = (value === '1' || value === 'true' || value === 't');
+            const _value = (value === '1' || value === 'true' || value === 't') || (value === 'null' ? null : false);
             posts = posts.filter(post => state[post.id]?.liked === _value);
             break;
           default:
