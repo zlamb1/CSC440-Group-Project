@@ -7,7 +7,7 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {ExplicitDeleteResponse} from "@/api/DeleteResponse";
 import {ExplicitCreateResponse} from "@/api/CreateResponse";
-import EndpointResponse from "@/api/EndpointResponse";
+import EndpointResponse, {ResponseType} from "@/api/EndpointResponse";
 
 export async function action({context, request, params}: ActionFunctionArgs) {
   try {
@@ -86,6 +86,8 @@ export async function action({context, request, params}: ActionFunctionArgs) {
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       switch (err.code) {
+        case 'P2021':
+          return EndpointResponse('FollowRequest', ResponseType.Conflict);
         case 'P2025':
           return ExplicitResourceNotFoundResponse('Follow');
       }
