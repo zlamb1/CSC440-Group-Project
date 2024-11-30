@@ -4,6 +4,7 @@ import {User} from "@prisma/client";
 import UserAvatar from "@components/user/UserAvatar";
 import UserHoverCard from "@components/hover/UserHoverCard";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {Button} from "@ui/button";
 
 export default function RequestCell({row}: { row: any }) {
   const hasFetched = useRef<boolean>(false);
@@ -15,7 +16,7 @@ export default function RequestCell({row}: { row: any }) {
   useEffect(() => {
     if (data) {
       fetcher.submit(null, {
-        action: `/users/${data.requestorId}/public`,
+        action: `/users/id/${data.requestorId}/public`,
         method: 'GET',
       });
     }
@@ -34,13 +35,22 @@ export default function RequestCell({row}: { row: any }) {
     return null;
   }
 
+  const name = user.displayName || user.userName;
+
   return (
-    <div className="flex gap-1">
-      <UserHoverCard user={user}>
-        <Link to={`/users/${user.userName}`} className="flex gap-1 items-center">
-          <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName}/>
-        </Link>
-      </UserHoverCard>
+    <div className="flex justify-between">
+      <div className="flex items-center gap-1">
+        <UserHoverCard user={user}>
+          <Link to={`/users/${user.userName}`} className="flex gap-1 items-center">
+            <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName}/> {name}
+          </Link>
+        </UserHoverCard>
+        has requested to follow you.
+      </div>
+      <div className="flex gap-1">
+        <Button className="w-16 h-8">Accept</Button>
+        <Button className="w-16 h-8" variant="ghost">Reject</Button>
+      </div>
     </div>
   );
 }
