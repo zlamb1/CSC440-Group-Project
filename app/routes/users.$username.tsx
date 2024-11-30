@@ -21,6 +21,7 @@ import PostScroller from "@components/post/PostScroller";
 import useProfilePosts from "@/utils/posts/useProfilePosts";
 import usePersistedLoaderData from "@/utils/hooks/usePersistedLoaderData";
 import {UserContext} from "@/utils/context/UserContext";
+import {getPublicUser} from "@/routes/users.$username.public";
 
 export async function loader({context, params}: LoaderFunctionArgs) {
   try {
@@ -64,9 +65,13 @@ export async function loader({context, params}: LoaderFunctionArgs) {
 
     if (user.visibility !== ProfileVisibility.PUBLIC) {
       if (context.user.loggedIn && context.user.id === user.id) {
-        return EndpointResponse({user, self: context.user});
+        return EndpointResponse({user});
       } else {
-        return ExplicitResourceNotFoundResponse('User');
+        const user = await getPublicUser({userName: params.username, context});
+        if (!user) {
+          return ExplicitResourceNotFoundResponse('User');
+        }
+        return EndpointResponse({user});
       }
     }
 
