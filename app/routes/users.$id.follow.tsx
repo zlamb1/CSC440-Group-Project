@@ -149,7 +149,6 @@ export async function action({context, request, params}: ActionFunctionArgs) {
         }
       }
 
-
       if (!follow) {
         if (followRequest) {
           return ExplicitDeleteResponse('FollowRequest');
