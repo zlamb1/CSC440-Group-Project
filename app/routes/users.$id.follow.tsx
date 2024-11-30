@@ -49,7 +49,7 @@ export async function action({context, request, params}: ActionFunctionArgs) {
           context.prisma.notification.create({
             data: {
               data: JSON.stringify(data),
-              userId: context.user.id,
+              userId: user.id,
               type: 'follow_request',
             },
           })
