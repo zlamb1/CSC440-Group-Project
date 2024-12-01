@@ -21,18 +21,20 @@ export async function loader({context, params}: LoaderFunctionArgs) {
       return RequiredFieldResponse('Post ID');
     }
 
-    const post = await context.prisma.$queryRawTyped(getPostByID(params.id, context.user.id));
+    const posts = await context.prisma.$queryRawTyped(getPostByID(params.id, context.user.id));
 
-    if (!post) {
+    if (posts.length < 1 || !posts[0]) {
       return ExplicitResourceNotFoundResponse('Post');
     }
+
+    const post = posts[0];
 
     const user = await context.prisma.user.findUnique({
       include: {
         followers: true,
       },
       where: {
-        id: params.id,
+        id: post.userId,
       },
     });
 
@@ -56,15 +58,17 @@ export default function PostRoute() {
   const params = useParams();
 
   if (!params.id || !data?.post) {
-    return NotFound;
+    return <NotFound/>;
   }
 
-  const {add, post} = usePostStore(useShallow((state: any) => ({add: state.add, post: state[params.id || '']})));
-
   useEffect(() => {
-    add(data.post);
-    isAdded.current = true;
-  }, []);
+    if (data?.post) {
+      add([data.post]);
+      isAdded.current = true;
+    }
+  }, [data?.post]);
+
+  const {add, post} = usePostStore(useShallow((state: any) => ({add: state.add, post: state[params.id || '']})));
 
   if (!isAdded.current && !post) {
     return (
