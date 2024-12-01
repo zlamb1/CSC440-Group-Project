@@ -32,8 +32,9 @@ export default function FollowingPanel({className, style}: { className?: string,
         <span className="font-bold select-none">Following</span>
         {showContent ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
       </Button>
-      <Separator/>
       <Expand show={showContent}>
+        <Separator/>
+        {!following?.length && <div className='p-1 text-sm text-center font-bold'>You have no followers.</div>}
         {
           following?.map((follow: FollowWithFollowing) => {
             const following = follow.following;

@@ -36,8 +36,8 @@ export default function SearchPanel({className, style}: { className?: string, st
         <span className="font-bold select-none">Search</span>
         {showContent ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
       </Button>
-      <Separator/>
       <Expand className="w-full flex flex-col gap-1 overflow-hidden" show={showContent} initial={false}>
+        <Separator/>
         <div className="flex flex-col gap-2 p-2">
           <PostSearch prepend={<Search className="text-muted-foreground" size={18}/>}
                       append={
