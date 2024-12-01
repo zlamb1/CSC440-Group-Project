@@ -10,20 +10,19 @@ datasource db {
 }
 
 model Notification {
-  dateIssued  DateTime       @default(now()) @db.Timestamptz(6)
-  type        String?        @db.VarChar
-  content     String?        @db.VarChar
-  data        Json?
-  expiresOn   DateTime       @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
-  id          BigInt         @id @default(autoincrement())
-  userId      String         @db.Uuid
-  postId      String?        @db.Uuid
-  requestorId String?        @db.Uuid
-  requestedId String?        @db.Uuid
-  viewed      Boolean        @default(false)
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  post        Post?          @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  request     FollowRequest? @relation(fields: [requestorId, requestedId], references: [requestorId, requestedId], onDelete: Cascade, onUpdate: NoAction)
+  dateIssued      DateTime       @default(now()) @db.Timestamptz(6)
+  type            String?        @db.VarChar
+  content         String?        @db.VarChar
+  data            Json?
+  expiresOn       DateTime       @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
+  id              BigInt         @id @default(autoincrement())
+  userId          String         @db.Uuid
+  postId          String?        @db.Uuid
+  followRequestId BigInt?
+  viewed          Boolean        @default(false)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  post            Post?          @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  followRequest   FollowRequest?
 }
 
 model PostLike {
@@ -94,15 +93,15 @@ model Follow {
 }
 
 model FollowRequest {
-  requestorId String   @db.Uuid
-  requestedId String   @db.Uuid
-  requestedAt DateTime @default(now())
+  id             BigInt   @id @default(autoincrement())
+  requestorId    String   @db.Uuid
+  requestedId    String   @db.Uuid
+  notificationId BigInt?  @unique
+  requestedAt    DateTime @default(now())
 
-  requestor     User           @relation("requestor", fields: [requestorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  requested     User           @relation("requested", fields: [requestedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  notifications Notification[]
-
-  @@id([requestorId, requestedId])
+  requestor    User          @relation("requestor", fields: [requestorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  requested    User          @relation("requested", fields: [requestedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notification Notification? @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 }
 
 model PostGenre {
