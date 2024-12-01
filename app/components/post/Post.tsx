@@ -2,7 +2,7 @@ import UserAvatar from "@components/user/UserAvatar";
 import {Button} from "@ui/button";
 import React, {useContext, useEffect, useState} from "react";
 import {MessageCircle, Pencil,} from "lucide-react";
-import {Link} from "@remix-run/react";
+import {Link, useFetcher} from "@remix-run/react";
 import ContextMenu from "@components/post/ContextMenu";
 import PostView from "@components/post/PostView";
 import UserHoverCard from "@components/hover/UserHoverCard";
@@ -27,12 +27,13 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
   exitDuration?: number,
 }) {
   const viewer = useContext(UserContext);
+  const replyFetcher = useFetcher();
   const [isEditing, setEditing] = useState<boolean>(false);
   const [isReplying, setIsReplying] = useState<boolean>(!!viewer?.loggedIn && autoReply);
   const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
   const [formattedTime, setFormattedTime] = useState<string>('');
 
-  const {post} = usePostStore(useShallow((state: any) => ({post: state[id]})));
+  const {post, add} = usePostStore(useShallow((state: any) => ({post: state[id], add: state.add})));
 
   const hasReplies = post?.replies && post.replies.length;
 
@@ -45,6 +46,22 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
       return () => clearInterval(id);
     }
   });
+
+  useEffect(() => {
+    if (showReplies && post.id && post.replies === null && replyFetcher.state === 'idle') {
+      replyFetcher.submit(null, {
+        action: `/posts/${post.id}/replies`,
+        method: 'GET',
+      });
+    }
+  }, [showReplies]);
+
+  useEffect(() => {
+    const replies = replyFetcher?.data?.replies;
+    if (replies && replies.length) {
+      add(replies);
+    }
+  }, [replyFetcher?.data]);
 
   if (!post) {
     return (

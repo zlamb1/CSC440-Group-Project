@@ -162,7 +162,6 @@ export const usePostStore = create((set, get: any) => ({
 
     set((state: any) => {
       if (posts && posts?.length) {
-        const _state = {...state};
         for (const post of posts) {
           if (typeof post === 'string')
             continue;
@@ -179,17 +178,21 @@ export const usePostStore = create((set, get: any) => ({
               // @ts-ignore
               post.replies = post.replies.map(post => post?.id || post);
             } else {
-              post.replies = null;
+              if (post?.replies) {
+                post.replies = [];
+              } else {
+                post.replies = null;
+              }
             }
 
             // add post to replies of replyTo
             const replyTo = post.replyTo;
-            if (replyTo && _state[replyTo]) {
+            if (replyTo && get()[replyTo]) {
               get().reply(replyTo, post.id);
             }
 
             // add post to state
-            _state[post.id] = post;
+            get()[post.id] = post;
             if (emit) {
               emitPosts.push(post);
             }
@@ -198,7 +201,7 @@ export const usePostStore = create((set, get: any) => ({
           }
         }
 
-        return _state;
+        return get();
       }
 
       return state;
