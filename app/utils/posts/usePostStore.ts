@@ -232,7 +232,7 @@ export const usePostStore = create((set, get: any) => ({
       }
 
       // delete replies
-      if (!isString && 'replies' in post && post.replies.length) {
+      if (!isString && 'replies' in post && post.replies?.length) {
         for (const reply of post.replies) {
           get().delete({post: reply});
         }

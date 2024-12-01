@@ -25,5 +25,5 @@ export type PostWithUser = Prisma.PostGetPayload<{
   },
 }> & { liked: boolean | null, likeCount: number, replyCount: number, genres: string[] };
 
-export type PostWithReplies = PostWithUser & { replies: string[] };
+export type PostWithReplies = PostWithUser & { replies: string[] | null };
 export type PostWithRelations = PostWithUser & { replies: PostWithUser[] };
