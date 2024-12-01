@@ -1,5 +1,4 @@
 import {LoaderFunctionArgs} from "@remix-run/node";
-import {ProfileVisibility} from "@prisma/client";
 import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
 import {RequiredFieldResponse} from "@/api/BadRequestResponse";
@@ -13,52 +12,71 @@ import {useEffect, useRef} from "react";
 import {useParams} from "@remix-run/react";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {getPostByID} from '@prisma/client/sql';
+import {isUserPrivate} from "@/routes/users.$id.posts";
+import UnauthorizedResponse from "@/api/UnauthorizedError";
 
-export async function loader({ context, params }: LoaderFunctionArgs) {
-    try {
-        if (!params.id) {
-            return RequiredFieldResponse('Post ID');
-        }
-
-        const post = await context.prisma.$queryRawTyped(getPostByID(params.id, context.user.id));
-
-        if (!post) {
-            return ExplicitResourceNotFoundResponse('Post');
-        }
-
-        return EndpointResponse({ post });
-    } catch (err) {
-        return UnknownErrorResponse(err);
+export async function loader({context, params}: LoaderFunctionArgs) {
+  try {
+    if (!params.id) {
+      return RequiredFieldResponse('Post ID');
     }
+
+    const post = await context.prisma.$queryRawTyped(getPostByID(params.id, context.user.id));
+
+    if (!post) {
+      return ExplicitResourceNotFoundResponse('Post');
+    }
+
+    const user = await context.prisma.user.findUnique({
+      include: {
+        followers: true,
+      },
+      where: {
+        id: params.id,
+      },
+    });
+
+    if (!user) {
+      return ExplicitResourceNotFoundResponse('Post');
+    }
+
+    if (!post.replyTo && isUserPrivate(user, context.user)) {
+      return UnauthorizedResponse();
+    }
+
+    return EndpointResponse({post});
+  } catch (err) {
+    return UnknownErrorResponse(err);
+  }
 }
 
 export default function PostRoute() {
-    const data = usePersistedLoaderData();
-    const isAdded = useRef<boolean>(false);
-    const params = useParams();
+  const data = usePersistedLoaderData();
+  const isAdded = useRef<boolean>(false);
+  const params = useParams();
 
-    if (!params.id || !data?.post) {
-        return NotFound;
-    }
+  if (!params.id || !data?.post) {
+    return NotFound;
+  }
 
-    const {add, post} = usePostStore(useShallow((state: any) => ({ add: state.add, post: state[params.id || ''] })));
+  const {add, post} = usePostStore(useShallow((state: any) => ({add: state.add, post: state[params.id || '']})));
 
-    useEffect(() => {
-        add(data.post);
-        isAdded.current = true;
-    }, []);
+  useEffect(() => {
+    add(data.post);
+    isAdded.current = true;
+  }, []);
 
-    if (!isAdded.current && !post) {
-        return (
-            <div className="w-full flex justify-center">
-                <LoadingSpinner />
-            </div>
-        )
-    }
-
+  if (!isAdded.current && !post) {
     return (
-        <div className="w-full">
-            <Post id={params.id} />
-        </div>
-    );
+      <div className="w-full flex justify-center">
+        <LoadingSpinner/>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-full">
+      <Post id={params.id}/>
+    </div>
+  );
 }
