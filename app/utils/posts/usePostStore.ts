@@ -13,7 +13,7 @@ export const usePostStore = create((set, get: any) => ({
     post.replies = [];
 
     if (post.replyTo) {
-      get().reply(post.replyTo, post.id);
+      get().reply({parentId: post.replyTo, replyId: post.id});
     }
 
     set((state: any) => ({...state, [post.id]: post}));
@@ -128,7 +128,11 @@ export const usePostStore = create((set, get: any) => ({
     }
   },
 
-  reply(parentId: string, replyId: string) {
+  reply({parentId, replyId, modifyReplyCount = true}: {
+    parentId: string,
+    replyId: string,
+    modifyReplyCount?: boolean
+  }) {
     return set((state: any) => {
       const parent = {...state[parentId]};
       if (parent) {
@@ -140,9 +144,11 @@ export const usePostStore = create((set, get: any) => ({
         // add replyId to parent replies if it isn't already there
         parent.replies = [...new Set([...parent.replies, replyId])];
 
-        const newLen = parent.replies.length;
-        if (newLen > len) {
-          parent.replyCount = parent.replyCount ? Math.max(parent.replyCount + 1, newLen) : newLen;
+        if (modifyReplyCount) {
+          const newLen = parent.replies.length;
+          if (newLen > len) {
+            parent.replyCount = parent.replyCount ? Math.max(parent.replyCount + 1, newLen) : newLen;
+          }
         }
 
         return {...state, [parent.id]: parent};
@@ -188,7 +194,7 @@ export const usePostStore = create((set, get: any) => ({
             // add post to replies of replyTo
             const replyTo = post.replyTo;
             if (replyTo && get()[replyTo]) {
-              get().reply(replyTo, post.id);
+              get().reply({parentId: replyTo, replyId: post.id});
             }
 
             // add post to state
