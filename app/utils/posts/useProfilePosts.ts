@@ -23,7 +23,7 @@ async function fetcher(set: any, get: any, {setHasMoreData}: InfiniteFetcherPara
 
   const postStore: any = usePostStore.getState();
   if (posts?.length) {
-    postStore.add(posts);
+    postStore.add({posts});
     get().add(posts);
   }
 
@@ -38,7 +38,7 @@ function handleLike({state, evt}: any, viewerId?: string) {
     const _post = postState[post];
     if (_post && state.id === viewerId) {
       if (evt.liked) {
-        state?.add([_post]);
+        state?.add({posts: [_post]});
       } else {
         state?.delete(post);
       }

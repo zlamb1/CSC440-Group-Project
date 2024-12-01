@@ -162,7 +162,11 @@ export const usePostStore = create((set, get: any) => ({
     return set((state: any) => ({...state, [post.id]: post}));
   },
 
-  add(posts: (string | PostWithRelations | PostWithReplies)[], emit?: boolean) {
+  add({posts, modifyReplyCount, emit = true}: {
+    posts: (string | PostWithRelations | PostWithReplies)[],
+    modifyReplyCount?: boolean,
+    emit?: boolean
+  }) {
     if (!emit) emit = true;
     const emitPosts: any = [];
 
@@ -180,7 +184,7 @@ export const usePostStore = create((set, get: any) => ({
 
             // add replies to state
             if (post?.replies && post?.replies?.length) {
-              get().add(post.replies);
+              get().add({posts: post.replies});
               // @ts-ignore
               post.replies = post.replies.map(post => post?.id || post);
             } else {
@@ -194,7 +198,7 @@ export const usePostStore = create((set, get: any) => ({
             // add post to replies of replyTo
             const replyTo = post.replyTo;
             if (replyTo && get()[replyTo]) {
-              get().reply({parentId: replyTo, replyId: post.id});
+              get().reply({parentId: replyTo, replyId: post.id, modifyReplyCount});
             }
 
             // add post to state

@@ -49,7 +49,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
   });
 
   useEffect(() => {
-    if (showReplies && post.id && post.replies === null && replyFetcher.state === 'idle') {
+    if (showReplies && post?.id && post?.replies === null && replyFetcher.state === 'idle') {
       replyFetcher.submit(null, {
         action: `/posts/${post.id}/replies`,
         method: 'GET',
@@ -60,7 +60,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
   useEffect(() => {
     const replies = replyFetcher?.data?.replies;
     if (replies && replies.length) {
-      add(replies);
+      add({posts: replies, modifyReplyCount: false});
     }
   }, [replyFetcher?.data]);
 

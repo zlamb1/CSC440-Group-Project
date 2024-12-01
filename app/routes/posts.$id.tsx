@@ -63,7 +63,7 @@ export default function PostRoute() {
 
   useEffect(() => {
     if (data?.post) {
-      add([data.post]);
+      add({posts: [data.post]});
       isAdded.current = true;
     }
   }, [data?.post]);
