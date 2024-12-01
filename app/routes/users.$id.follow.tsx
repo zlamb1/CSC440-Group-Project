@@ -42,7 +42,7 @@ export async function action({context, request, params}: ActionFunctionArgs) {
           data: {
             requestorId: context.user.id,
             requestedId: user.id,
-            notification: {
+            notifications: {
               create: [
                 {
                   type: 'follow_request',
