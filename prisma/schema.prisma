@@ -18,11 +18,11 @@ model Notification {
   id              BigInt         @id @default(autoincrement())
   userId          String         @db.Uuid
   postId          String?        @db.Uuid
-  followRequestId BigInt?
+  followRequestId BigInt?        @unique
   viewed          Boolean        @default(false)
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   post            Post?          @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  followRequest   FollowRequest?
+  followRequest   FollowRequest? @relation(fields: [followRequestId], references: [id], onDelete: Cascade)
 }
 
 model PostLike {
@@ -93,15 +93,14 @@ model Follow {
 }
 
 model FollowRequest {
-  id             BigInt   @id @default(autoincrement())
-  requestorId    String   @db.Uuid
-  requestedId    String   @db.Uuid
-  notificationId BigInt?  @unique
-  requestedAt    DateTime @default(now())
+  id          BigInt   @id @default(autoincrement())
+  requestorId String   @db.Uuid
+  requestedId String   @db.Uuid
+  requestedAt DateTime @default(now())
 
   requestor    User          @relation("requestor", fields: [requestorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   requested    User          @relation("requested", fields: [requestedId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  notification Notification? @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  notification Notification?
 }
 
 model PostGenre {
