@@ -39,15 +39,14 @@ export default function RequestCell({row}: { row: any }) {
   const name = user.displayName || user.userName;
 
   return (
-    <div className="flex justify-between">
-      <div className="flex items-center gap-1">
-        <UserHoverCard user={user}>
-          <Link to={`/users/${user.userName}`} className="flex gap-1 items-center">
-            <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName}/> {name}
-          </Link>
-        </UserHoverCard>
-        has requested to follow you.
-      </div>
+    <div className="flex flex-wrap gap-1 items-center justify-between">
+      <UserHoverCard user={user}>
+        <Link to={`/users/${user.userName}`} className="flex flex-nowrap gap-1 ">
+          <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName}/>
+          {name}
+          <span>has requested to follow you.</span>
+        </Link>
+      </UserHoverCard>
       <div className="flex gap-1">
         <followFetcher.Form action={`/users/${user.id}/follow/request`} method="POST">
           <input className="hidden" value="true" name="accept" readOnly/>
