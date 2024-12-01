@@ -11,7 +11,7 @@ import {UserWithFollowers, UserWithLoggedIn} from "@/utils/types";
 export function isUserPrivate(user: UserWithFollowers, viewer: UserWithLoggedIn) {
   if (user.visibility !== ProfileVisibility.PUBLIC) {
     if (viewer.id !== user.id) {
-      if (!user.followers.find((follower: Follow) => follower.followerId && follower.followerId === viewer.id)) {
+      if (!viewer.id || !user.followers.find((follower: Follow) => follower.followerId === viewer.id)) {
         return true;
       }
     }
