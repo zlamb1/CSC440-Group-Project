@@ -179,7 +179,7 @@ export const usePostStore = create((set, get: any) => ({
               // @ts-ignore
               post.replies = post.replies.map(post => post?.id || post);
             } else {
-              post.replies = [];
+              post.replies = null;
             }
 
             // add post to replies of replyTo
