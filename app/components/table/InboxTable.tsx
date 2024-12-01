@@ -6,7 +6,7 @@ import {onSelectType} from "@components/table/table";
 import RequestCell from "@components/table/notification/RequestCell";
 
 function formatType(type: string) {
-  return type?.substring(0, 1)?.toUpperCase() + type.substring(1).toLowerCase();
+  return type?.split?.('_')?.reduce((accumulator, word) => accumulator + ' ' + word?.charAt?.(0).toUpperCase() + word?.substring?.(1).toLowerCase(), '');
 }
 
 function DefaultAppend(props?: SlotProps) {
