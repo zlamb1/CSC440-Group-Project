@@ -1,7 +1,7 @@
 span[data-state=unchecked] .z__checkbox-icon__z {
-    stroke-dashoffset: 100;
+  stroke-dashoffset: 100;
 }
 
 span[data-state=checked] .z__checkbox-icon__z {
-    stroke-dashoffset: 200;
+  stroke-dashoffset: 200;
 }

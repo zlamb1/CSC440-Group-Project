@@ -8,64 +8,64 @@ import FollowButton from "@components/FollowButton";
 import {UserContext} from "@/utils/context/UserContext";
 
 function getFormattedDate(date: Date) {
-    if (!date) {
-        return null;
-    } else {
-        date = new Date(date);
-    }
+  if (!date) {
+    return null;
+  } else {
+    date = new Date(date);
+  }
 
-    const months = [
-        "January", "February", "March", "April", "May", "June", "July", "August",
-        "September", "October", "November", "December"
-    ]
+  const months = [
+    "January", "February", "March", "April", "May", "June", "July", "August",
+    "September", "October", "November", "December"
+  ]
 
-    return (
-        months[date.getMonth()] + ", " + date.getFullYear()
-    );
+  return (
+    months[date.getMonth()] + ", " + date.getFullYear()
+  );
 }
 
-export default function UserHoverCard({ user, children }: { user: User | null, children: ReactNode }) {
-    if (!user) {
-        return children;
-    }
+export default function UserHoverCard({user, children}: { user: User | null, children: ReactNode }) {
+  if (!user) {
+    return children;
+  }
 
-    const viewer = useContext(UserContext);
-    const isSelf = viewer?.id === user.id;
-    const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id) || false;
+  const viewer = useContext(UserContext);
+  const isSelf = viewer?.id === user.id;
+  const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id) || false;
 
-    return (
-        <HoverCard>
-            <HoverCardTrigger asChild>
-                {children}
-            </HoverCardTrigger>
-            <HoverCardContent className="flex flex-row w-fit gap-2">
-                <div className="flex gap-1 flex-col">
-                    <div className="flex justify-between items-center gap-12">
-                        <Link to={`/users/${user.userName}`} className="flex gap-2">
-                            <UserAvatar avatar={user.avatarPath} userName={user.userName} />
-                            {
-                                user.displayName ?
-                                    <div className="flex items-center gap-1">
-                                        <span className="font-bold">{user.displayName}</span>
-                                        <span className="text-sm text-gray-400">@{user.userName}</span>
-                                    </div> : <span className="font-bold">@{user.userName}</span>
-                            }
-                        </Link>
-                        <Fade show={viewer?.loggedIn && !isSelf}>
-                            <FollowButton user={user} isFollowing={isFollowing} />
-                        </Fade>
-                    </div>
-                    <div className="text-sm dark:text-gray-300" suppressHydrationWarning>
-                        Joined {getFormattedDate(user.joinedAt)}
-                    </div>
-                    {
-                        user.bio ?
-                            <div className="text-sm dark:text-gray-300">
-                                { user.bio }
-                            </div> : null
-                    }
-                </div>
-            </HoverCardContent>
-        </HoverCard>
-    );
+  return (
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        {children}
+      </HoverCardTrigger>
+      <HoverCardContent className="flex flex-row w-fit gap-2">
+        <div className="flex gap-1 flex-col">
+          <div className="flex justify-between items-center gap-12">
+            <Link to={`/users/${user.userName}`} className="flex gap-2">
+              <UserAvatar avatar={user.avatarPath} userName={user.userName}/>
+              {
+                user.displayName ?
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold">{user.displayName}</span>
+                    <span className="text-sm text-gray-400">@{user.userName}</span>
+                  </div> : <span className="font-bold">@{user.userName}</span>
+              }
+            </Link>
+            <Fade show={viewer?.loggedIn && !isSelf}>
+              <FollowButton user={user} isFollowing={isFollowing}/>
+            </Fade>
+          </div>
+          <div className="text-sm dark:text-gray-300" suppressHydrationWarning>
+            Joined {getFormattedDate(user.joinedAt)}
+          </div>
+          {
+            user.bio ?
+              <div className="text-sm dark:text-gray-300">
+                {user.bio}
+              </div> : null
+          }
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
 }

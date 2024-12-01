@@ -1,6 +1,4 @@
-import {
-    EditorContent, EditorContext, useEditor,
-} from "@tiptap/react";
+import {EditorContent, EditorContext, useEditor,} from "@tiptap/react";
 
 import Document from '@tiptap/extension-document'
 import Dropcursor from '@tiptap/extension-dropcursor'
@@ -17,95 +15,95 @@ import {Separator} from "@ui/separator";
 import useIsSSR from "@/utils/hooks/useIsSSR";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Card} from "@ui/card";
-import {AnimatePresence} from "framer-motion";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 300;
 
 const defaultExtensions = [
-    Document,
-    Paragraph,
-    Text,
-    Image,
-    Dropcursor,
-    CodeBlockLowlight.configure({
-        lowlight,
-    }),
-    Youtube.configure({
-        controls: false,
-        nocookie: true
-    }),
+  Document,
+  Paragraph,
+  Text,
+  Image,
+  Dropcursor,
+  CodeBlockLowlight.configure({
+    lowlight,
+  }),
+  Youtube.configure({
+    controls: false,
+    nocookie: true
+  }),
 ];
 
 export interface PostEditorElement {
-    getContent: () => string;
-    clearEditor(): void;
+  getContent: () => string;
+
+  clearEditor(): void;
 }
 
 export const PostEditor = React.forwardRef((props: any, ref) => {
-    const [ isFocused, setFocused ] = useState<boolean>(false);
-    const isSSR = useIsSSR();
+  const [isFocused, setFocused] = useState<boolean>(false);
+  const isSSR = useIsSSR();
 
-    useEffect(() => {
-        setFocused(props?.autofocus);
-    }, []);
+  useEffect(() => {
+    setFocused(props?.autofocus);
+  }, []);
 
-    useEffect(() => {
-        if (typeof props?.focus === 'function' && isFocused) {
-            props.focus(isFocused);
-        }
-    }, [isFocused]);
-
-    const extensions = [
-        ...defaultExtensions,
-        CharacterCount.configure({
-            limit: characterCountLimit,
-            textCounter: (text: string) => {
-                const cb = props?.onTextUpdate;
-                if (typeof cb === 'function') {
-                    cb(Math.ceil(text.length / characterCountLimit * 100));
-                }
-                return text.length;
-            }
-        }),
-        Placeholder.configure({
-            placeholder: props?.placeholder ?? 'Write something...',
-        }),
-    ];
-
-    const editor = useEditor({
-        extensions: extensions,
-        content: props?.content,
-        editable: props?.editable ?? true,
-        editorProps: props?.editorProps,
-        immediatelyRender: false,
-        autofocus: props?.autofocus ?? false,
-        onFocus: () => setFocused(true),
-        onBlur: () => setFocused(false),
-    });
-
-    useImperativeHandle(ref, () => {
-        return {
-            getContent: () => editor?.getHTML(),
-            clearEditor: () => editor?.commands.clearContent(true)
-        }
-    });
-
-    if (isSSR) {
-        return (
-            <div className="w-full flex flex-col items-center gap-2">
-                <LoadingSpinner className="stroke-primary" strokeWidth={3} />
-                <Separator orientation="horizontal" />
-            </div>
-        );
+  useEffect(() => {
+    if (typeof props?.focus === 'function' && isFocused) {
+      props.focus(isFocused);
     }
+  }, [isFocused]);
 
+  const extensions = [
+    ...defaultExtensions,
+    CharacterCount.configure({
+      limit: characterCountLimit,
+      textCounter: (text: string) => {
+        const cb = props?.onTextUpdate;
+        if (typeof cb === 'function') {
+          cb(Math.ceil(text.length / characterCountLimit * 100));
+        }
+        return text.length;
+      }
+    }),
+    Placeholder.configure({
+      placeholder: props?.placeholder ?? 'Write something...',
+    }),
+  ];
+
+  const editor = useEditor({
+    extensions: extensions,
+    content: props?.content,
+    editable: props?.editable ?? true,
+    editorProps: props?.editorProps,
+    immediatelyRender: false,
+    autofocus: props?.autofocus ?? false,
+    onFocus: () => setFocused(true),
+    onBlur: () => setFocused(false),
+  });
+
+  useImperativeHandle(ref, () => {
+    return {
+      getContent: () => editor?.getHTML(),
+      clearEditor: () => editor?.commands.clearContent(true)
+    }
+  });
+
+  if (isSSR) {
     return (
-        <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text" onClick={() => editor?.commands.focus()}>
-            <EditorContext.Provider value={{editor}}>
-                <EditorContent {...props?.containerProps} editor={editor}/>
-            </EditorContext.Provider>
-            { props?.append }
-        </Card>
+      <div className="w-full flex flex-col items-center gap-2">
+        <LoadingSpinner className="stroke-primary" strokeWidth={3}/>
+        <Separator orientation="horizontal"/>
+      </div>
     );
+  }
+
+  return (
+    <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text" onClick={() => editor?.commands.focus()}>
+      <EditorContext.Provider value={{editor}}>
+        <EditorContent {...props?.containerProps} editor={editor}/>
+      </EditorContext.Provider>
+      {props?.append}
+    </Card>
+  );
 });

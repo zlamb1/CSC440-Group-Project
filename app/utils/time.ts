@@ -4,111 +4,111 @@ export const MS_HOUR = MS_MINUTE * 60;
 export const MS_DAY = MS_HOUR * 24;
 
 function isPlural(unit: number) {
-    if (unit !== 1) return 's';
-    return '';
+  if (unit !== 1) return 's';
+  return '';
 }
 
 export function formatPastDate(date: string | Date, suffix?: string) {
-    if (!date) return '';
+  if (!date) return '';
 
-    if (typeof date === 'string') {
-        date = new Date(date);
-    }
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
 
-    if (suffix == null) {
-        suffix = 'ago';
-    }
+  if (suffix == null) {
+    suffix = 'ago';
+  }
 
-    const now = new Date();
-    const epochDiff = now.getTime() - date.getTime();
+  const now = new Date();
+  const epochDiff = now.getTime() - date.getTime();
 
-    if (epochDiff < MS_MINUTE) {
-        const seconds = Math.floor(epochDiff / MS_SECOND);
-        return `${seconds} second${isPlural(seconds)} ${suffix}`;
-    }
+  if (epochDiff < MS_MINUTE) {
+    const seconds = Math.floor(epochDiff / MS_SECOND);
+    return `${seconds} second${isPlural(seconds)} ${suffix}`;
+  }
 
-    if (epochDiff < MS_HOUR) {
-        const minutes = Math.floor(epochDiff / MS_MINUTE);
-        return `${minutes} minute${isPlural(minutes)} ${suffix}`;
-    }
+  if (epochDiff < MS_HOUR) {
+    const minutes = Math.floor(epochDiff / MS_MINUTE);
+    return `${minutes} minute${isPlural(minutes)} ${suffix}`;
+  }
 
-    if (epochDiff < MS_DAY) {
-        const hours = Math.floor(epochDiff / MS_HOUR);
-        return `${hours} hour${isPlural(hours)} ${suffix}`;
-    }
+  if (epochDiff < MS_DAY) {
+    const hours = Math.floor(epochDiff / MS_HOUR);
+    return `${hours} hour${isPlural(hours)} ${suffix}`;
+  }
 
-    const years = now.getFullYear() - date.getFullYear();
-    if (years > 0) {
-        return `${years} year${isPlural(years)} ${suffix}`;
-    }
+  const years = now.getFullYear() - date.getFullYear();
+  if (years > 0) {
+    return `${years} year${isPlural(years)} ${suffix}`;
+  }
 
-    const months = now.getMonth() - date.getMonth();
-    if (months > 0) {
-        return `${months} month${isPlural(months)} ${suffix}`;
-    }
+  const months = now.getMonth() - date.getMonth();
+  if (months > 0) {
+    return `${months} month${isPlural(months)} ${suffix}`;
+  }
 
-    const days = Math.floor(epochDiff / MS_DAY);
-    return `${days} day${isPlural(days)} ${suffix}`;
+  const days = Math.floor(epochDiff / MS_DAY);
+  return `${days} day${isPlural(days)} ${suffix}`;
 }
 
 export function formatFutureDate(date: string | Date, suffix?: string) {
-    if (!date) return '';
+  if (!date) return '';
 
-    if (typeof date === 'string') {
-        date = new Date(date);
-    }
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
 
-    if (!suffix) {
-        suffix = '';
-    }
+  if (!suffix) {
+    suffix = '';
+  }
 
-    const now = new Date();
-    const msDiff = date.getTime() - now.getTime();
+  const now = new Date();
+  const msDiff = date.getTime() - now.getTime();
 
-    if (msDiff < MS_MINUTE) {
-        const seconds = Math.floor(msDiff / MS_SECOND);
-        return `${seconds} second${isPlural(seconds)} ${suffix}`;
-    }
+  if (msDiff < MS_MINUTE) {
+    const seconds = Math.floor(msDiff / MS_SECOND);
+    return `${seconds} second${isPlural(seconds)} ${suffix}`;
+  }
 
-    if (msDiff < MS_HOUR) {
-        const minutes = Math.floor(msDiff / MS_MINUTE);
-        return `${minutes} minute${isPlural(minutes)} ${suffix}`;
-    }
+  if (msDiff < MS_HOUR) {
+    const minutes = Math.floor(msDiff / MS_MINUTE);
+    return `${minutes} minute${isPlural(minutes)} ${suffix}`;
+  }
 
-    if (msDiff < MS_DAY) {
-        const hours = Math.floor(msDiff / MS_HOUR);
-        return `${hours} hour${isPlural(hours)} ${suffix}`;
-    }
+  if (msDiff < MS_DAY) {
+    const hours = Math.floor(msDiff / MS_HOUR);
+    return `${hours} hour${isPlural(hours)} ${suffix}`;
+  }
 
-    const years = date.getFullYear() - now.getFullYear();
-    if (years > 0) {
-        return `${years} year${isPlural(years)} ${suffix}`;
-    }
+  const years = date.getFullYear() - now.getFullYear();
+  if (years > 0) {
+    return `${years} year${isPlural(years)} ${suffix}`;
+  }
 
-    const months = date.getMonth() - now.getMonth();
-    if (months > 0) {
-        return `${months} month${isPlural(months)} ${suffix}`;
-    }
+  const months = date.getMonth() - now.getMonth();
+  if (months > 0) {
+    return `${months} month${isPlural(months)} ${suffix}`;
+  }
 
-    const days = Math.floor(msDiff / MS_DAY);
-    return `${days} day${isPlural(days)} ${suffix}`;
+  const days = Math.floor(msDiff / MS_DAY);
+  return `${days} day${isPlural(days)} ${suffix}`;
 }
 
-const suffix = [ 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th' ]
+const suffix = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th']
 
 export function formatMDY(date: string | Date) {
-    if (!date) return '';
-    if (typeof date === 'string') {
-        date = new Date(date);
-    }
+  if (!date) return '';
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
 
-    const day = date.getDate();
-    const suffixMap = [ 'th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th' ];
-    let suffix = suffixMap[day % 10];
+  const day = date.getDate();
+  const suffixMap = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+  let suffix = suffixMap[day % 10];
 
-    if (day > 10 && day < 14) {
-        suffix = 'th';
-    }
+  if (day > 10 && day < 14) {
+    suffix = 'th';
+  }
 
-    return date.toLocaleString('default', { month: 'long' }) + ` ${day}${suffix}, ${date.getFullYear()}`;
+  return date.toLocaleString('default', {month: 'long'}) + ` ${day}${suffix}, ${date.getFullYear()}`;
 }

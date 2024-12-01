@@ -1,13 +1,15 @@
 import React from "react";
 import {
-    colorSchemes, colorSchemeStorageName, cookiePreferenceStorageName,
-    defaultColorScheme, themes,
-    themeStorageName,
+  colorSchemes,
+  colorSchemeStorageName,
+  defaultColorScheme,
+  themeStorageName,
 } from "@/utils/prefers-color-scheme";
 
 export default function ThemeScript() {
-    return (
-        <script dangerouslySetInnerHTML={{__html: `            
+  return (
+    <script dangerouslySetInnerHTML={{
+      __html: `            
             class Adapter {
                 constructor() {
                     this.items = {}
@@ -209,6 +211,7 @@ export default function ThemeScript() {
             if (typeof document !== 'undefined') {
                 initializeTheme(); 
             }
-        `}} />
-    )
+        `
+    }}/>
+  )
 }
