@@ -207,7 +207,7 @@ export const usePostStore = create((set, get: any) => ({
               emitPosts.push(post);
             }
           } else {
-            console.error('[usePostStore] attempted to store post with null id');
+            console.error('[usePostStore] attempted to store post with null ID');
           }
         }
 
@@ -220,6 +220,15 @@ export const usePostStore = create((set, get: any) => ({
     for (const post of emitPosts) {
       emitter.emit(PostEvent.LOAD, {post});
     }
+  },
+
+  setPost({post}: { post: PostWithRelations | PostWithReplies }) {
+    if (!post.id) {
+      console.error('[usePostStore] attempted to set null post');
+      return;
+    }
+
+    return set((state: any) => ({...state, [post.id]: post}));
   },
 
   delete({post, deleteReply = true, emit = true}: {
