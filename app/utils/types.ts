@@ -8,6 +8,7 @@ export type UserWithFollowers = Prisma.UserGetPayload<{
 
 export type UserWithLoggedIn = Prisma.UserGetPayload<{
   include: {
+    sentRequests: true,
     following: {
       include: {
         following: true,

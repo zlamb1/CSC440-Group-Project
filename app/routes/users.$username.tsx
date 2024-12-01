@@ -142,10 +142,6 @@ export default function UserRoute() {
     return <NotFound/>;
   }
 
-  function isFollowing() {
-    return self?.following?.some((follow: Follow) => follow.followingId === user?.id);
-  }
-
   const tabs = [
     {
       value: 'posts',
@@ -192,7 +188,7 @@ export default function UserRoute() {
                   className="flex flex-row gap-1 w-fit items-center justify-center whitespace-nowrap relative overflow-hidden rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-700 shadow-sm hover:bg-blue-700/90 text-white h-9 px-4 py-2">
               Edit Profile
             </Link>
-          ) : <FollowButton user={user} isFollowing={!!isFollowing()}/>
+          ) : <FollowButton user={user}/>
         }
       </div>
       {

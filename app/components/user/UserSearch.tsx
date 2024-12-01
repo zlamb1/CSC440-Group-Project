@@ -105,7 +105,7 @@ export default function UserSearch() {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                        <FollowButton user={user} isFollowing={following} onClick={evt => evt.preventDefault()}/>
+                        <FollowButton user={user} onClick={evt => evt.preventDefault()}/>
                       </Link>
                     )
                   }

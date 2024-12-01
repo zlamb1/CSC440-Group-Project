@@ -31,7 +31,6 @@ export default function UserHoverCard({user, children}: { user: User | null, chi
 
   const viewer = useContext(UserContext);
   const isSelf = viewer?.id === user.id;
-  const isFollowing = viewer?.following?.some(follow => follow.followingId === user?.id) || false;
 
   return (
     <HoverCard>
@@ -52,7 +51,7 @@ export default function UserHoverCard({user, children}: { user: User | null, chi
               }
             </Link>
             <Fade show={viewer?.loggedIn && !isSelf}>
-              <FollowButton user={user} isFollowing={isFollowing}/>
+              <FollowButton user={user}/>
             </Fade>
           </div>
           <div className="text-sm dark:text-gray-300" suppressHydrationWarning>
