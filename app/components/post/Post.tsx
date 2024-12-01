@@ -34,7 +34,11 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
   const [showReplies, setShowReplies] = useState<boolean>(depth > 0);
   const [formattedTime, setFormattedTime] = useState<string>('');
 
-  const {post, add} = usePostStore(useShallow((state: any) => ({post: state[id], add: state.add})));
+  const {post, add, setPost} = usePostStore(useShallow((state: any) => ({
+    post: state[id],
+    add: state.add,
+    setPost: state.setPost
+  })));
 
   const hasReplies = post?.replies && post.replies.length;
 
@@ -59,8 +63,12 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
 
   useEffect(() => {
     const replies = replyFetcher?.data?.replies;
-    if (replies && replies.length) {
-      add({posts: replies, modifyReplyCount: false});
+    if (replies) {
+      if (replies.length) {
+        add({posts: replies, modifyReplyCount: false});
+      } else {
+        setPost({post: {...post, replyCount: 0, replies: []}});
+      }
     }
   }, [replyFetcher?.data]);
 
