@@ -38,10 +38,11 @@ export const SuggestionItems = forwardRef<HTMLDivElement, SuggestionItemsProps>(
 
   const attributes = value?.split(' ');
   const lastAttribute = attributes?.[attributes?.length - 1];
-  const lastValue = lastAttribute?.split('::')?.[1];
+  const sections = lastAttribute?.split('::');
+  const lastValue = sections?.[1];
   const regex = /(.*)::/;
   const isEnteringValue = regex.test(lastAttribute ?? '');
-  const attribute = lastAttribute?.split('::')?.[0];
+  const attribute = sections?.length && sections.length > 1 ? sections?.[0] + '::' : sections?.[0];
   const _suggestions = suggestions.filter(suggestion => suggestion.placeholder.startsWith(attribute ?? ''));
 
   useEffect(() => {
