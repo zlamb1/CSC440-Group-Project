@@ -43,14 +43,16 @@ export async function action({context, request, params}: ActionFunctionArgs) {
             requestorId: context.user.id,
             requestedId: user.id,
             notification: {
-              create: {
-                type: 'follow_request',
-                userId: user.id,
-                data: JSON.stringify({
-                  requestorId: context.user.id,
-                  requestedId: user.id
-                }),
-              },
+              create: [
+                {
+                  type: 'follow_request',
+                  userId: user.id,
+                  data: JSON.stringify({
+                    requestorId: context.user.id,
+                    requestedId: user.id
+                  }),
+                }
+              ],
             },
           },
         });

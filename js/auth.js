@@ -91,8 +91,6 @@ export async function useUserSession(req, prisma, getSession) {
 
     if (user) {
       user.loggedIn = true;
-      // remap follow requests so that we do not serialize BigInt
-      user.sentRequests = user.sentRequests?.map?.(request => ({...request, id: request.id?.toString?.()}));
       return {session, user}
     } else {
       return {
