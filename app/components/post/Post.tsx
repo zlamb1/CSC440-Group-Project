@@ -18,6 +18,7 @@ import {UserContext} from "@/utils/context/UserContext";
 import GenreTags from "@components/post/GenreTags";
 import {PostContext} from "@/utils/context/PostContext";
 import Expand from "@ui/expand";
+import {LoadingSpinner} from "@components/LoadingSpinner";
 
 function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}: {
   className?: string,
@@ -127,7 +128,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
                           size="icon"
                           variant={showReplies ? undefined : 'ghost'}
                           onClick={() => setShowReplies(prev => !prev)}>
-                    <MessageCircle size={16}/>
+                    {replyFetcher.state === 'idle' ? <MessageCircle size={16}/> : <LoadingSpinner size={16}/>}
                     <span className="text-bold">{post.replyCount}</span>
                   </Button>
                 </div>
