@@ -13,7 +13,7 @@ import {usePostStore} from "@/utils/posts/usePostStore";
 import {Card} from "@ui/card";
 import {useShallow} from "zustand/react/shallow";
 import {cn} from "@/lib/utils";
-import {AnimatePresence, motion} from "framer-motion";
+import {motion} from "framer-motion";
 import {UserContext} from "@/utils/context/UserContext";
 import GenreTags from "@components/post/GenreTags";
 import {PostContext} from "@/utils/context/PostContext";
@@ -34,6 +34,8 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
 
   const {post} = usePostStore(useShallow((state: any) => ({post: state[id]})));
 
+  const hasReplies = post?.replies && post.replies.length;
+
   useEffect(() => {
     const date = new Date(post?.postedAt);
     const diff = new Date().getTime() - date.getTime();
@@ -53,13 +55,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
   }
 
   function getReplyTree() {
-    return (
-      <AnimatePresence>
-        {
-          post?.replies?.map((reply: string) => <Post key={reply} id={reply} depth={depth - 1} autoReply={false}/>)
-        }
-      </AnimatePresence>
-    )
+    return post?.replies?.map((reply: string) => <Post key={reply} id={reply} depth={depth - 1} autoReply={false}/>)
   }
 
   return (
@@ -121,7 +117,7 @@ function Post({className, id, depth = 1, autoReply = true, exitDuration = 0.25}:
               </div>
             </div>
             {viewer?.loggedIn && <ReplyEditor post={post} isReplying={isReplying}/>}
-            <Expand initial={false} show={showReplies}>
+            <Expand initial={false} show={showReplies && hasReplies}>
               {getReplyTree()}
             </Expand>
           </div>
