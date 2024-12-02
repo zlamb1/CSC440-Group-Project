@@ -70,7 +70,7 @@ export default function Index() {
             <PostEditor ref={ref}
                         focus={setEditorActive}
                         isActive={isEditorActive}
-                        placeholder="Write a post..."
+                        placeholder="Write a story..."
                         onTextUpdate={(progress: number) => setEditorProgress(progress)}
                         editable={fetcher.state === 'idle'}
                         editorProps={{attributes: {class: 'break-all py-1 focus-visible:outline-none'}}}
