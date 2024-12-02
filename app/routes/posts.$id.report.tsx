@@ -3,7 +3,7 @@ import UnknownErrorResponse from "@/api/UnknownErrorResponse";
 import BadRequestResponse, {RequiredFieldResponse} from "@/api/BadRequestResponse";
 import UnauthorizedResponse from "@/api/UnauthorizedError";
 import {ExplicitResourceNotFoundResponse} from "@/api/ResourceNotFoundResponse";
-import EndpointResponse from "@/api/EndpointResponse";
+import {ExplicitCreateResponse} from "@/api/CreateResponse";
 
 export async function action({context, params, request}: ActionFunctionArgs) {
   try {
@@ -26,7 +26,7 @@ export async function action({context, params, request}: ActionFunctionArgs) {
       return BadRequestResponse('Report Description Must Be Less Than 200 Characters');
     }
 
-    const post = await context.prisma.findUnique({
+    const post = await context.prisma.post.findUnique({
       where: {
         id: params.id
       },
@@ -48,7 +48,7 @@ export async function action({context, params, request}: ActionFunctionArgs) {
       },
     });
 
-    return EndpointResponse('Report');
+    return ExplicitCreateResponse('Report');
   } catch (err) {
     return UnknownErrorResponse(err);
   }
