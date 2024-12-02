@@ -117,7 +117,7 @@ model PostGenre {
 }
 
 model PostReport {
-  reportId    String   @id @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   reportedAt  DateTime @default(now())
   userId      String   @db.Uuid
   postId      String   @db.Uuid

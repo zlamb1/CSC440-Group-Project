@@ -40,6 +40,14 @@ export async function action({context, params, request}: ActionFunctionArgs) {
       return BadRequestResponse('You Cannot Report Your Own Post!');
     }
 
+    await context.prisma.postReport.create({
+      data: {
+        postId: post.id,
+        userId: context.user.id,
+        description
+      },
+    });
+
     return EndpointResponse('Report');
   } catch (err) {
     return UnknownErrorResponse(err);
