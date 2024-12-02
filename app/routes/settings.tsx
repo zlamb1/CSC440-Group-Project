@@ -153,7 +153,7 @@ export default function SettingsRoute() {
         useSuccessToast('Updated Profile');
       } else if (fetcher.data.error) {
         useErrorToast(fetcher.data.error);
-      } else {
+      } else if (!fetcher.data.username) {
         useUnknownErrorToast();
       }
     }
