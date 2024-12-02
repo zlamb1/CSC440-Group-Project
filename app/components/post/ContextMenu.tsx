@@ -42,7 +42,8 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
   useEffect(() => {
     if (fetcher?.data) {
       if (fetcher.data.success) {
-        useSuccessToast('Deleted Story');
+        const replyTo = !!post?.replyTo;
+        useSuccessToast(`Deleted ${replyTo ? 'Reply' : 'Story'}`);
         // notify post stores to trigger exit animation
         emitter.emit(PostEvent.DELETE, {post: post.id});
         if (post.replyTo) {
