@@ -19,6 +19,7 @@ import {useShallow} from "zustand/react/shallow";
 import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 import {UserContext} from "@/utils/context/UserContext";
 import {cn} from "@/lib/utils";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
 
 export default function ContextMenu({post, exitDuration, onEdit}: {
   post: Post,
@@ -39,18 +40,28 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
   const isModerator = user?.role === UserRole.MODERATOR;
 
   useEffect(() => {
-    if (fetcher?.data?.success) {
-      // notify post stores to trigger exit animation
-      emitter.emit(PostEvent.DELETE, {post: post.id});
-      if (post.replyTo) {
-        deleteReply({id: post.id, replyTo: post.replyTo});
+    if (fetcher?.data) {
+      if (fetcher.data.success) {
+        useSuccessToast('Deleted Story');
+        // notify post stores to trigger exit animation
+        emitter.emit(PostEvent.DELETE, {post: post.id});
+        if (post.replyTo) {
+          deleteReply({id: post.id, replyTo: post.replyTo});
+        }
+        setTimeout(() => {
+          // delete element from usePostStore following exit animation
+          deletePost({post, deleteReply: false, emit: false});
+        }, exitDuration * 1000 + 100);
+      } else if (fetcher.data.error) {
+        useErrorToast(fetcher.data.error);
+      } else {
+        useUnknownErrorToast();
       }
-      setTimeout(() => {
-        // delete element from usePostStore following exit animation
-        deletePost({post, deleteReply: false, emit: false});
-      }, exitDuration * 1000 + 100);
     }
-  }, [fetcher.data]);
+    if (fetcher?.data?.success) {
+
+    }
+  }, [fetcher?.data]);
 
   function onClickEdit() {
     setOpen(false);
