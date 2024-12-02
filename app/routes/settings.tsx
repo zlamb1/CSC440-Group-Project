@@ -29,6 +29,7 @@ import {validateUsername} from "@/utils/login-validation";
 import {UserContext} from "@/utils/context/UserContext";
 import {formatMDY} from "@/utils/time";
 import DatePicker from "@components/DatePicker";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -145,6 +146,18 @@ export default function SettingsRoute() {
       setBirthDate(user?.birthDate);
     }
   }, [fetcher]);
+
+  useEffect(() => {
+    if (fetcher?.data) {
+      if (fetcher.data.success) {
+        useSuccessToast('Updated Profile');
+      } else if (fetcher.data.error) {
+        useErrorToast(fetcher.data.error);
+      } else {
+        useUnknownErrorToast();
+      }
+    }
+  }, [fetcher?.data]);
 
   function onClick() {
     fileInputRef.current?.click();
