@@ -87,7 +87,7 @@ export function Layout({children}: { children: ReactNode }) {
           </div>
         </div>
         <Scripts/>
-        <Toaster />
+        <Toaster/>
         <Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-[10px] m-1"
                         style={{zIndex: 2147483647}}/>
         </body>

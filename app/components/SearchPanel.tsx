@@ -60,11 +60,11 @@ export default function SearchPanel({className, style}: { className?: string, st
                       }
                       value={filter}
                       onChange={setFilter}
-                      placeholder="Search Posts"
+                      placeholder="Search Stories"
           />
           <Expand show={showInfo} initial={false}>
             <p className="text-sm text-muted-foreground">
-              The search box can be used to search the content of a post, or be used to search various attributes such
+              The search box can be used to search the content of a story, or be used to search various attributes such
               as (liked, genres, replies, likes).
             </p>
           </Expand>

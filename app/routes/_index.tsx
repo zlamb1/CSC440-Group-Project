@@ -13,6 +13,7 @@ import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/hooks/useMountedEffect";
 import {UserContext} from "@/utils/context/UserContext";
 import Expand from "@ui/expand";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
 
 export default function Index() {
   const user = useContext(UserContext);
@@ -27,14 +28,20 @@ export default function Index() {
   const ref = createRef<PostEditorElement>();
 
   useMountedEffect(() => {
-    if (fetcher?.data?.post) {
-      create(fetcher.data.post);
-      if (ref.current) {
-        ref.current.clearEditor();
+    if (fetcher?.data) {
+      if (fetcher.data.post) {
+        useSuccessToast('Created Story', {duration: 1500});
+        create(fetcher.data.post);
+        if (ref.current) {
+          ref.current.clearEditor();
+        }
+      } else if (fetcher.data.error) {
+        useErrorToast(fetcher.data.error);
+      } else {
+        useUnknownErrorToast();
       }
-
     }
-  }, [fetcher.data]);
+  }, [fetcher?.data]);
 
   function onSubmit(evt: FormEvent<HTMLFormElement>) {
     evt.preventDefault();
@@ -63,7 +70,7 @@ export default function Index() {
             <PostEditor ref={ref}
                         focus={setEditorActive}
                         isActive={isEditorActive}
-                        placeholder="Write a post..."
+                        placeholder="Write a story..."
                         onTextUpdate={(progress: number) => setEditorProgress(progress)}
                         editable={fetcher.state === 'idle'}
                         editorProps={{attributes: {class: 'break-all py-1 focus-visible:outline-none'}}}

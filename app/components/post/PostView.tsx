@@ -8,6 +8,7 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {usePostStore} from "@/utils/posts/usePostStore";
 import {useShallow} from "zustand/react/shallow";
 import useMountedEffect from "@/utils/hooks/useMountedEffect";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
 
 export default function PostView({
                                    post, isEditing = false, onIsEditingChange = () => {
@@ -23,11 +24,19 @@ export default function PostView({
   const {edit} = usePostStore(useShallow((state: any) => ({edit: state.edit})));
 
   useMountedEffect(() => {
-    onIsEditingChange(false);
-    if (fetcher?.data?.success) {
-      edit(post.id, fetcher?.data?.content, fetcher?.data?.lastEdited);
+    if (fetcher?.data) {
+      if (fetcher.data.success) {
+        const isReply = !!post?.replyTo;
+        useSuccessToast(`Edited ${isReply ? 'Reply' : 'Story'}`, {duration: 1500});
+        onIsEditingChange(false);
+        edit(post.id, fetcher?.data?.content, fetcher?.data?.lastEdited);
+      } else if (fetcher.data.error) {
+        useErrorToast(fetcher.data.error);
+      } else {
+        useUnknownErrorToast();
+      }
     }
-  }, [fetcher.data]);
+  }, [fetcher?.data]);
 
   function onEdit(evt: FormEvent<HTMLFormElement>) {
     evt.preventDefault();

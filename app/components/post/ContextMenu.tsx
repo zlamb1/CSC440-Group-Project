@@ -19,6 +19,8 @@ import {useShallow} from "zustand/react/shallow";
 import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 import {UserContext} from "@/utils/context/UserContext";
 import {cn} from "@/lib/utils";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
+import ReportDialog from "@components/post/ReportDialog";
 
 export default function ContextMenu({post, exitDuration, onEdit}: {
   post: Post,
@@ -39,25 +41,37 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
   const isModerator = user?.role === UserRole.MODERATOR;
 
   useEffect(() => {
-    if (fetcher?.data?.success) {
-      // notify post stores to trigger exit animation
-      emitter.emit(PostEvent.DELETE, {post: post.id});
-      if (post.replyTo) {
-        deleteReply({id: post.id, replyTo: post.replyTo});
+    if (fetcher?.data) {
+      if (fetcher.data.success) {
+        const replyTo = !!post?.replyTo;
+        useSuccessToast(`Deleted ${replyTo ? 'Reply' : 'Story'}`);
+        // notify post stores to trigger exit animation
+        emitter.emit(PostEvent.DELETE, {post: post.id});
+        if (post.replyTo) {
+          deleteReply({id: post.id, replyTo: post.replyTo});
+        }
+        setTimeout(() => {
+          // delete element from usePostStore following exit animation
+          deletePost({post, deleteReply: false, emit: false});
+        }, exitDuration * 1000 + 100);
+      } else if (fetcher.data.error) {
+        useErrorToast(fetcher.data.error);
+      } else {
+        useUnknownErrorToast();
       }
-      setTimeout(() => {
-        // delete element from usePostStore following exit animation
-        deletePost({post, deleteReply: false, emit: false});
-      }, exitDuration * 1000 + 100);
     }
-  }, [fetcher.data]);
+    if (fetcher?.data?.success) {
+
+    }
+  }, [fetcher?.data]);
 
   function onClickEdit() {
     setOpen(false);
     onEdit?.();
   }
 
-  function onClickDelete() {
+  function onClickDelete(evt: React.MouseEvent) {
+    evt.preventDefault();
     fetcher.submit(null, {
       action: `/posts/delete/${post.id}`,
       method: 'POST',
@@ -84,13 +98,17 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
             Moderate
           </DropdownMenuItem>
           <DropdownMenuSeparator/>
+          <ReportDialog>
+            <DropdownMenuItem
+              className={cn("text-red-400 focus:text-red-500 gap-2 cursor-pointer", isOwnPost && 'hidden')}
+              onSelect={(e) => e.preventDefault()}
+            >
+              <AlertTriangleIcon size={16}/>
+              Report
+            </DropdownMenuItem>
+          </ReportDialog>
           <DropdownMenuItem
-            className={cn("text-red-400 focus:text-red-500 gap-2 cursor-pointer", isOwnPost && 'hidden')}>
-            <AlertTriangleIcon size={16}/>
-            Report
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className={cn("gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
+            className={cn("justify-center gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
             onClick={onClickDelete}
             disabled={isTransitioning}>
             {

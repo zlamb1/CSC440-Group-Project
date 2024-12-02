@@ -51,6 +51,7 @@ model Post {
   post          Post?          @relation("postsToposts", fields: [replyTo], references: [id], onDelete: Cascade, onUpdate: NoAction)
   replies       Post[]         @relation("postsToposts")
   notifications Notification[]
+  reports       PostReport[]
 }
 
 model Session {
@@ -80,6 +81,7 @@ model User {
   followers     Follow[]          @relation("following")
   requests      FollowRequest[]   @relation("requested")
   sentRequests  FollowRequest[]   @relation("requestor")
+  reports       PostReport[]
 }
 
 model Follow {
@@ -112,6 +114,17 @@ model PostGenre {
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([postId, genre])
+}
+
+model PostReport {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reportedAt  DateTime @default(now())
+  userId      String   @db.Uuid
+  postId      String   @db.Uuid
+  description String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 enum Genre {

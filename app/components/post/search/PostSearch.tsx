@@ -59,7 +59,7 @@ export default function PostSearch({className, value, onChange, ...props}: PostS
                onKeyDown={onKeyDown}
                onFocus={() => setIsFocused(true)}
                onBlur={() => setIsFocused(false)}
-               placeholder={'Search Posts'}
+               placeholder={'Search Stories'}
                ref={inputRef}
         />
       </PopoverTrigger>

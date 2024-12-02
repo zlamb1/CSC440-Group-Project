@@ -29,7 +29,20 @@ import {validateUsername} from "@/utils/login-validation";
 import {UserContext} from "@/utils/context/UserContext";
 import {formatMDY} from "@/utils/time";
 import DatePicker from "@components/DatePicker";
-import {toast} from "sonner";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
+
+<
+<
+<
+<
+<
+<< HEAD
+  import {toast} from "sonner";
+======
+=
+
+>>>>>>>
+experimental
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -150,21 +163,11 @@ export default function SettingsRoute() {
   useEffect(() => {
     if (fetcher?.data) {
       if (fetcher.data.success) {
-        toast.success("Updated Profile Settings", {
-          position: "top-center",
-          className: 'bg-green-400 justify-center'
-        });
+        useSuccessToast('Updated Profile');
       } else if (fetcher.data.error) {
-        toast.error("Error", {
-          position: "top-center",
-          className: "bg-red-400",
-          description: fetcher?.data?.error,
-        });
+        useErrorToast(fetcher.data.error);
       } else if (!fetcher.data.username) {
-        toast.error("Unknown Error", {
-          position: "top-center",
-          className: "bg-red-400",
-        });
+        useUnknownErrorToast();
       }
     }
   }, [fetcher?.data]);

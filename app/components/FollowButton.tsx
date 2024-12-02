@@ -16,18 +16,22 @@ export default function FollowButton({user, onClick}: {
   const isRequested = !!viewer?.sentRequests?.find(request => request.requestedId === user.id);
 
   function onFollow(evt: MouseEvent<HTMLButtonElement>) {
+    const formData = new FormData();
+    formData.set('follow', !isFollowing + '');
+
+    fetcher.submit(formData, {
+      action: `/users/${user.id}/follow`,
+      method: 'POST',
+    });
     onClick?.(evt);
   }
 
   return (
-    <fetcher.Form method="POST" action={`/users/${user.id}/follow`}>
-      <input className="hidden" value={!isFollowing + ''} name="follow" readOnly/>
-      <Button className="min-w-[90px] font-bold" onClick={onFollow} disabled={isRequested}>
-        {
-          isRequested ? 'Requested' :
-            (fetcher.state === 'idle' ? (isFollowing ? 'Unfollow' : 'Follow') : <LoadingSpinner/>)
-        }
-      </Button>
-    </fetcher.Form>
+    <Button className="min-w-[90px] font-bold" onClick={onFollow} disabled={isRequested}>
+      {
+        isRequested ? 'Requested' :
+          (fetcher.state === 'idle' ? (isFollowing ? 'Unfollow' : 'Follow') : <LoadingSpinner/>)
+      }
+    </Button>
   );
 }
