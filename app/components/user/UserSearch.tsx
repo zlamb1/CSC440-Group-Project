@@ -15,7 +15,9 @@ import {UserContext} from "@/utils/context/UserContext";
 export default function UserSearch() {
   const user = useContext(UserContext);
 
-  const [term, setTerm] = useState('');
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [term, setTerm] = useState<string>('');
   const [users, setUsers] = useState([]);
   const fetcher = useFetcher();
 
@@ -54,13 +56,8 @@ export default function UserSearch() {
     return !!user?.following?.some(follow => follow.followingId === id);
   }
 
-  function onFollow(evt: React.MouseEvent<HTMLButtonElement>) {
-    evt.stopPropagation();
-    evt.preventDefault();
-  }
-
   return (
-    <Popover>
+    <Popover open={isOpen || isFocused} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Input prepend={<Search size={18} className="flex-shrink-0 text-gray-500"/>}
                append={append()}
@@ -70,6 +67,8 @@ export default function UserSearch() {
                value={term}
                type="text"
                onChange={(e) => setTerm(e.target.value)}
+               onBlur={() => setIsFocused(false)}
+               onFocus={() => setIsFocused(true)}
         />
       </PopoverTrigger>
       <PopoverContent
