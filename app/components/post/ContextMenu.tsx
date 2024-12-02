@@ -57,7 +57,8 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
     onEdit?.();
   }
 
-  function onClickDelete() {
+  function onClickDelete(evt: React.MouseEvent) {
+    evt.preventDefault();
     fetcher.submit(null, {
       action: `/posts/delete/${post.id}`,
       method: 'POST',
@@ -90,7 +91,7 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
             Report
           </DropdownMenuItem>
           <DropdownMenuItem
-            className={cn("gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
+            className={cn("justify-center gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
             onClick={onClickDelete}
             disabled={isTransitioning}>
             {
