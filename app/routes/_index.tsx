@@ -30,7 +30,7 @@ export default function Index() {
   useMountedEffect(() => {
     if (fetcher?.data) {
       if (fetcher.data.post) {
-        useSuccessToast('Created Post', {duration: 1500});
+        useSuccessToast('Created Story', {duration: 1500});
         create(fetcher.data.post);
         if (ref.current) {
           ref.current.clearEditor();
