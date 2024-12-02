@@ -20,6 +20,7 @@ import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 import {UserContext} from "@/utils/context/UserContext";
 import {cn} from "@/lib/utils";
 import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
+import ReportDialog from "@components/post/ReportDialog";
 
 export default function ContextMenu({post, exitDuration, onEdit}: {
   post: Post,
@@ -97,11 +98,15 @@ export default function ContextMenu({post, exitDuration, onEdit}: {
             Moderate
           </DropdownMenuItem>
           <DropdownMenuSeparator/>
-          <DropdownMenuItem
-            className={cn("text-red-400 focus:text-red-500 gap-2 cursor-pointer", isOwnPost && 'hidden')}>
-            <AlertTriangleIcon size={16}/>
-            Report
-          </DropdownMenuItem>
+          <ReportDialog>
+            <DropdownMenuItem
+              className={cn("text-red-400 focus:text-red-500 gap-2 cursor-pointer", isOwnPost && 'hidden')}
+              onSelect={(e) => e.preventDefault()}
+            >
+              <AlertTriangleIcon size={16}/>
+              Report
+            </DropdownMenuItem>
+          </ReportDialog>
           <DropdownMenuItem
             className={cn("justify-center gap-2 text-red-600 focus:text-red-700 cursor-pointer", !isOwnPost && 'hidden')}
             onClick={onClickDelete}
