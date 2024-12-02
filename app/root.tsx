@@ -17,6 +17,7 @@ import * as Toast from "@radix-ui/react-toast";
 import {StoreInvalidator} from "@/StoreInvalidator";
 import useResizeObserver from "@/utils/hooks/useResizeObserver";
 import {UserContext} from "./utils/context/UserContext";
+import {Toaster} from "sonner";
 
 export const links: LinksFunction = () => [
   {rel: "stylesheet", href: twStylesheet},
@@ -86,6 +87,7 @@ export function Layout({children}: { children: ReactNode }) {
           </div>
         </div>
         <Scripts/>
+        <Toaster/>
         <Toast.Viewport className="fixed bottom-0 right-0 flex flex-col gap-[10px] m-1"
                         style={{zIndex: 2147483647}}/>
         </body>
