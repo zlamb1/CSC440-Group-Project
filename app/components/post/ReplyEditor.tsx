@@ -8,6 +8,7 @@ import {useShallow} from "zustand/react/shallow";
 import {Form} from "@remix-run/react";
 import ProgressCircle from "@components/ProgressCircle";
 import Expand from "@ui/expand";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
 
 export default function ReplyEditor({post, isReplying = true}: { post: PostWithUser, isReplying?: boolean }) {
   const [isEditorActive, setEditorActive] = useState(false);
@@ -35,7 +36,12 @@ export default function ReplyEditor({post, isReplying = true}: { post: PostWithU
 
         const data = await res.json();
         if (data?.post) {
+          useSuccessToast('Created Reply');
           create(data.post);
+        } else if (data?.error) {
+          useErrorToast(data.error);
+        } else {
+          useUnknownErrorToast();
         }
       }).finally(() => {
         setIsPending(false);

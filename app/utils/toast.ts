@@ -22,6 +22,7 @@ export function useUnknownErrorToast(data?: ExternalToast) {
   toast.error('Unknown Error', {
     position: 'top-center',
     className: 'bg-red-400 justify-center',
+    description: 'We don\'t know what happened. If this error persists submit a report.',
     ...data,
   });
 }
