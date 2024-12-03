@@ -93,7 +93,8 @@ export default function Index() {
         <hr/>
       </Fade>
       <PostScroller posts={posts} fetcher={fetch} empty={
-        <span className="text-muted-foreground text-center font-medium select-none mt-24">There are no stories yet! Write some to expand our catalogue.</span>
+        <div className="text-muted-foreground text-center font-bold select-none mt-16">We couldn't find any stories
+          :(</div>
       }/>
     </div>
   )
