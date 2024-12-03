@@ -13,7 +13,6 @@ export interface NavBarProps {
   ssrColorScheme?: string;
   className?: string;
   user?: any;
-  notificationCount: number;
 }
 
 function InboxButton() {
@@ -46,7 +45,7 @@ function InboxButton() {
   );
 }
 
-const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ssrColorScheme, className, notificationCount}, ref) => {
+const NavBar = forwardRef<HTMLDivElement, NavBarProps>(({ssrColorScheme, className}, ref) => {
   const user = useContext(UserContext);
 
   return (

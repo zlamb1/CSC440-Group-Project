@@ -28,7 +28,7 @@ export default function UserNavDropdown() {
           </Button>
         </Link>
 
-        <Link to="/settings">
+        <Link to="/settings/profile">
           <Button containerClass="flex w-full" className="flex-grow flex gap-4" variant="ghost">
             <Settings size={20}/>
             <span className="flex-grow text-left">Settings</span>

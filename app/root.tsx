@@ -6,7 +6,7 @@ import {json, LinksFunction, LoaderFunctionArgs} from "@remix-run/node";
 import twStylesheet from "@css/tailwind.css?url";
 import tiptapStylesheet from "@css/tiptap.css?url";
 import animationStylesheet from "@css/animation.css?url";
-import React, {ReactNode, useRef} from "react";
+import React, {ReactNode, useEffect, useRef} from "react";
 import ThemeScript from "@/utils/theme-script";
 import {AnimatePresence, motion} from "framer-motion";
 import {colorSchemeStorageName, cookiePreferenceStorageName, defaultColorScheme} from "@/utils/prefers-color-scheme";
@@ -110,8 +110,29 @@ export function ErrorBoundary() {
 }
 
 export default function App() {
+  const prevPathname = useRef('');
   const outlet = useOutlet();
   const {pathname} = useLocation();
+
+  useEffect(() => {
+    prevPathname.current = pathname;
+  }, [pathname]);
+
+  // if we are navigating between settings routes do not use the transition
+  if (prevPathname.current?.startsWith?.('/settings/') && pathname?.startsWith?.('/settings/')) {
+    return (
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.main key="/settings/"
+                     className="w-full"
+                     initial={{opacity: 0}}
+                     animate={{opacity: 1}}
+                     exit={{opacity: 0}}
+                     transition={{duration: 0.1}}>
+          {outlet}
+        </motion.main>
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait" initial={false}>
