@@ -63,25 +63,26 @@ model Session {
 }
 
 model User {
-  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userName      String            @unique @db.VarChar(25)
-  joinedAt      DateTime          @default(now()) @db.Timestamptz(6)
-  passwordHash  String            @db.Char(60)
-  avatarPath    String?           @db.VarChar
-  role          UserRole          @default(NONE)
-  visibility    ProfileVisibility @default(PUBLIC)
-  displayName   String?           @db.VarChar(20)
-  bio           String?           @db.VarChar(300)
-  birthDate     DateTime?
-  notifications Notification[]
-  postLikes     PostLike[]
-  posts         Post[]
-  sessions      Session[]
-  following     Follow[]          @relation("follower")
-  followers     Follow[]          @relation("following")
-  requests      FollowRequest[]   @relation("requested")
-  sentRequests  FollowRequest[]   @relation("requestor")
-  reports       PostReport[]
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userName             String               @unique @db.VarChar(25)
+  joinedAt             DateTime             @default(now()) @db.Timestamptz(6)
+  passwordHash         String               @db.Char(60)
+  avatarPath           String?              @db.VarChar
+  role                 UserRole             @default(NONE)
+  visibility           ProfileVisibility    @default(PUBLIC)
+  displayName          String?              @db.VarChar(20)
+  bio                  String?              @db.VarChar(300)
+  birthDate            DateTime?
+  notifications        Notification[]
+  postLikes            PostLike[]
+  posts                Post[]
+  sessions             Session[]
+  following            Follow[]             @relation("follower")
+  followers            Follow[]             @relation("following")
+  requests             FollowRequest[]      @relation("requested")
+  sentRequests         FollowRequest[]      @relation("requestor")
+  reports              PostReport[]
+  notificationSettings NotificationSettings?
 }
 
 model Follow {
@@ -125,6 +126,15 @@ model PostReport {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model NotificationSettings {
+  userId          String  @id @db.Uuid
+  muteReplies     Boolean
+  muteRequests    Boolean
+  dismissReplies  Boolean
+  dismissRequests Boolean
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Genre {
