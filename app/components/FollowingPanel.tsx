@@ -34,7 +34,7 @@ export default function FollowingPanel({className, style}: { className?: string,
       </Button>
       <Expand show={showContent}>
         <Separator/>
-        {!following?.length && <div className='p-1 text-sm text-center font-bold'>You have no followers.</div>}
+        {!following?.length && <div className='p-3 text-sm text-center text-muted-foreground'>You are not yet following anyone.</div>}
         {
           following?.map((follow: FollowWithFollowing) => {
             const following = follow.following;
