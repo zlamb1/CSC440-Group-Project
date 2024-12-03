@@ -113,7 +113,9 @@ export const usePostStore = create((set, get: any) => ({
           _post.genres.splice(indexOf, 1);
         }
       } else {
-        if (indexOf < 0) {
+        if (indexOf == null) {
+          _post.genres = [genre];
+        } else if (indexOf < 0) {
           _post.genres.push(genre);
         }
       }
