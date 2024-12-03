@@ -7,13 +7,13 @@ import {cn} from "@/lib/utils";
 const settingsRoutes = ['profile', 'notifications'];
 
 export async function loader({request}: LoaderFunctionArgs) {
-  /* redirect the user back to home page if they try to route to an invalid settings route */
+  /* redirect the user back to the default settings route if they try to route to an invalid settings route */
   const url = new URL(request.url);
   const pathname = url.pathname;
   const segments = pathname.split("/");
   const lastSegment = segments[segments.length - 1];
   if (!settingsRoutes.includes(lastSegment)) {
-    return redirect('/');
+    return redirect(`/settings/${settingsRoutes[0]}`);
   }
   return null;
 }
