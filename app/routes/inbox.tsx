@@ -3,7 +3,7 @@ import {useFetcher} from "@remix-run/react";
 import {Input} from "@ui/input";
 import {FormEvent, useEffect, useState} from "react";
 import {Button} from "@ui/button";
-import {Bell, Search, X} from "lucide-react";
+import {Bell, MailCheck, Search, X} from "lucide-react";
 import Fade from "@ui/fade";
 import InboxTable from "@components/table/InboxTable";
 import {SlotProps} from "@components/table/DataTable";
@@ -25,6 +25,7 @@ export async function loader({context}: LoaderFunctionArgs) {
 export default function InboxRoute() {
   const data = usePersistedLoaderData();
   const fetcher = useFetcher();
+  const markFetcher = useFetcher();
   const [notifications, setNotifications] = useState<any[]>(data?.notifications ?? []);
   const [selected, setSelected] = useState<any[]>([]);
   const [filter, setFilter] = useState('');
@@ -32,6 +33,18 @@ export default function InboxRoute() {
   useEffect(() => {
     setNotifications(data?.notifications ?? []);
   }, [data?.notifications]);
+
+  useEffect(() => {
+    if (markFetcher?.data) {
+      if (markFetcher.data.success) {
+        useSuccessToast('Marked Notifications Read');
+      } else if (markFetcher.data.error) {
+        useErrorToast(markFetcher.data.error)
+      } else {
+        useUnknownErrorToast();
+      }
+    }
+  }, [markFetcher?.data]);
 
   useEffect(() => {
     if (fetcher?.data) {
@@ -44,6 +57,20 @@ export default function InboxRoute() {
       }
     }
   }, [fetcher?.data]);
+
+  function onMarkRead(evt: FormEvent) {
+    evt.preventDefault();
+    const formData = new FormData();
+
+    for (const notification of selected) {
+      formData.append('id', notification);
+    }
+
+    markFetcher.submit(formData, {
+      action: '/notifications/mark/read',
+      method: 'POST',
+    });
+  }
 
   function onDismiss(evt: FormEvent) {
     evt.preventDefault();
@@ -83,16 +110,22 @@ export default function InboxRoute() {
                append={clear}
         />
         <div className="flex-grow flex justify-end">
-          <Fade show={selected && selected.length > 0}>
+          <Fade className="flex gap-2" show={selected && selected.length > 0}>
+            <markFetcher.Form onSubmit={onMarkRead}>
+              <Button className="flex flex-row items-center gap-2 min-w-[125px]" variant="outline">
+                {markFetcher.state !== 'idle' ? <LoadingSpinner/> : <>Mark Read <MailCheck size={14}/></>}
+              </Button>
+            </markFetcher.Form>
             <fetcher.Form onSubmit={onDismiss}>
-              <Button className="flex flex-row items-center gap-2 min-w-[100px]" variant="outline">
+              <Button className="flex flex-row items-center gap-2 min-w-[125px]" variant="outline">
                 {fetcher.state !== 'idle' ? <LoadingSpinner/> : <>Dismiss <Bell size={14}/></>}
               </Button>
             </fetcher.Form>
           </Fade>
         </div>
       </div>
-    );
+    )
+      ;
   }
 
   return (
