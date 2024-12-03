@@ -33,7 +33,9 @@ export default function SettingsRoute() {
             settingsRoutes.map(route => {
               const isCurrent = route === lastSegment;
               return <Link key={route} to={`/settings/${route}`}
-                           className={cn("font-bold text-muted-foreground hover:text-current", isCurrent && 'text-current')}>
+                           className={cn("font-medium text-muted-foreground hover:text-current", isCurrent && 'text-current')}
+                           style={{transition: 'color 0.25s ease-in-out'}}
+              >
                 {capitalizeWord(route)}
               </Link>
             })

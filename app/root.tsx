@@ -120,18 +120,7 @@ export default function App() {
 
   // if we are navigating between settings routes do not use the transition
   if (prevPathname.current?.startsWith?.('/settings/') && pathname?.startsWith?.('/settings/')) {
-    return (
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.main key="/settings/"
-                     className="w-full"
-                     initial={{opacity: 0}}
-                     animate={{opacity: 1}}
-                     exit={{opacity: 0}}
-                     transition={{duration: 0.1}}>
-          {outlet}
-        </motion.main>
-      </AnimatePresence>
-    );
+    return outlet;
   }
 
   return (
