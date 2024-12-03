@@ -78,6 +78,7 @@ export async function useUserSession(req, prisma, getSession) {
         bio: true,
         birthDate: true,
         sentRequests: true,
+        notificationSettings: true,
         following: {
           include: {
             following: true,
