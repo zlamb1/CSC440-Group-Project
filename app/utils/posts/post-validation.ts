@@ -15,8 +15,8 @@ export function sanitizeContent(content: string) {
 }
 
 export function ensureContentLength(content: string) {
-  const maxContentLength = 1200;
-  const maxTextLength = 300;
+  const maxContentLength = 65536;
+  const maxTextLength = 32768;
   if (content.length === 0) {
     return 'Post content is required';
   } else if (content.length > maxContentLength) {

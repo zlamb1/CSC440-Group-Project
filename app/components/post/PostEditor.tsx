@@ -17,7 +17,7 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Card} from "@ui/card";
 
 const lowlight = createLowlight(all);
-const characterCountLimit = 300;
+const characterCountLimit = 32768;
 
 const defaultExtensions = [
   Document,
