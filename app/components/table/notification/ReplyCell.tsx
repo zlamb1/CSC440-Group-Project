@@ -30,23 +30,23 @@ export default function ReplyCell({row}: { row: any }) {
     return <LoadingSpinner size={16}/>;
   }
 
-  if (user) {
-    const name = user.displayName || user.userName;
-    row.content = `${name} replied to your post!`;
-    return (
-      <div className="flex gap-1">
-        <UserHoverCard user={user}>
-          <Link to={`/users/${user.userName}`} className="flex gap-1 items-center">
-            <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName}/> {name}
-          </Link>
-        </UserHoverCard>
-        <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyId}`}>replied</Link>
-        <span>to your</span>
-        <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyTo}`}>post!</Link>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
-  row.content = 'Somebody responded to your post!';
-  return <span>Somebody responded to your post!</span>
+  const name = user.displayName || user.userName;
+  row.content = `${name} replied to your post!`;
+
+  return (
+    <div className="flex gap-1">
+      <UserHoverCard user={user}>
+        <Link to={`/users/${user.userName}`} className="flex gap-1 items-center">
+          <UserAvatar size={20} avatar={user.avatarPath} userName={user.userName}/> {name}
+        </Link>
+      </UserHoverCard>
+      <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyId}`}>replied</Link>
+      <span>to your</span>
+      <Link className="underline text-primary hover:text-primary/75" to={`/posts/${data.replyTo}`}>post!</Link>
+    </div>
+  );
 }
