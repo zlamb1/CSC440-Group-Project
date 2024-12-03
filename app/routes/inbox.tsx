@@ -10,6 +10,7 @@ import {SlotProps} from "@components/table/DataTable";
 import {fetchNotifications} from "@/routes/notifications";
 import usePersistedLoaderData from "@/utils/hooks/usePersistedLoaderData";
 import {LoadingSpinner} from "@components/LoadingSpinner";
+import {useErrorToast, useSuccessToast, useUnknownErrorToast} from "@/utils/toast";
 
 export async function loader({context}: LoaderFunctionArgs) {
   if (!context.user.loggedIn) {
@@ -31,6 +32,18 @@ export default function InboxRoute() {
   useEffect(() => {
     setNotifications(data?.notifications ?? []);
   }, [data?.notifications]);
+
+  useEffect(() => {
+    if (fetcher?.data) {
+      if (fetcher.data.success) {
+        useSuccessToast('Dismissed Notifications');
+      } else if (fetcher.data.error) {
+        useErrorToast(fetcher.data.error)
+      } else {
+        useUnknownErrorToast();
+      }
+    }
+  }, [fetcher?.data]);
 
   function onDismiss(evt: FormEvent) {
     evt.preventDefault();
