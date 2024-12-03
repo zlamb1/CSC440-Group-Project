@@ -6,6 +6,8 @@ import {cn} from "@/lib/utils";
 
 const settingsRoutes = ['profile', 'notifications'];
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export async function loader({request}: LoaderFunctionArgs) {
   /* redirect the user back to home page if they try to route to an invalid settings route */
   const url = new URL(request.url);
