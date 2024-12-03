@@ -92,7 +92,11 @@ export default function Index() {
         </Form>
         <hr/>
       </Fade>
-      <PostScroller posts={posts} fetcher={fetch}/>
+      {
+        posts.length > 0 ? <PostScroller posts={posts} fetcher={fetch}/>
+          :
+          <span className="text-muted-foreground text-center font-medium select-none mt-24">There are no stories yet! Write some to expand our catalogue.</span>
+      }
     </div>
   )
 }
