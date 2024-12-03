@@ -4,6 +4,9 @@ import {Post} from "@prisma/client";
 import {emitter, PostEvent} from "@/utils/posts/usePostEvents";
 
 export const usePostStore = create((set, get: any) => ({
+  // filter keywords
+  keywords: [],
+
   create(post: PostWithRelations, emit?: boolean) {
     if (emit == null) emit = true;
 
@@ -295,6 +298,14 @@ export const usePostStore = create((set, get: any) => ({
   },
 
   filter({filter}: { filter: string }) {
+    if (filter === '') {
+      set((state: any) => ({...state, keywords: []}));
+    } else {
+      const attributes = filter?.split(' ');
+      const keywords = attributes?.filter(attribute => !attribute.includes('::') && attribute.trim());
+      set((state: any) => ({...state, keywords}));
+    }
+
     emitter.emit(PostEvent.FILTER, {filter});
   },
 

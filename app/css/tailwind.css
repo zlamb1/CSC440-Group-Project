@@ -69,3 +69,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.filter_highlight {
+  background: theme('colors.primary.DEFAULT');
+  color: white;
+}

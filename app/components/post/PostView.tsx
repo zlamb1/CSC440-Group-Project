@@ -21,7 +21,10 @@ export default function PostView({
   const fetcher = useFetcher();
   const ref = useRef<PostEditorElement>();
 
-  const {edit} = usePostStore(useShallow((state: any) => ({edit: state.edit})));
+  const {edit, keywords} = usePostStore(useShallow((state: any) => ({
+    edit: state.edit,
+    keywords: state.keywords,
+  })));
 
   useMountedEffect(() => {
     if (fetcher?.data) {
@@ -50,16 +53,25 @@ export default function PostView({
     }
   }
 
+  function getPostContent() {
+    if (keywords && keywords.length) {
+      const regex = new RegExp('(' + keywords.join('|') + ')', 'gi');
+      return post.content.replace(regex, '<span class="filter_highlight">$1</span>');
+    }
+
+    return post.content;
+  }
+
   return (
     <div className="flex flex-col gap-3">
       {
         isEditing ?
           <PostEditor editorProps={{attributes: {class: 'focus-visible:outline-none'}}}
                       editable={fetcher.state === 'idle'}
-                      content={post.content}
+                      content={getPostContent()}
                       autofocus="end"
                       ref={ref}
-          /> : <RawPost content={post.content}/>
+          /> : <RawPost content={getPostContent()}/>
       }
       <fetcher.Form onSubmit={onEdit}>
         <AnimatePresence mode="wait">
