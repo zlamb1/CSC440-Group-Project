@@ -23,6 +23,7 @@ export interface TransitionProps {
   initial?: boolean;
   fallback?: ReactNode;
   container?: ReactElement;
+  layout?: boolean;
 }
 
 export default function Transition({
@@ -34,7 +35,8 @@ export default function Transition({
                                      duration = 0.2,
                                      initial = true,
                                      fallback = null,
-                                     container
+                                     container,
+                                     layout = false,
                                    }: TransitionProps) {
   function getProps() {
     if ('property' in transition) {
@@ -70,7 +72,7 @@ export default function Transition({
           show ? cloneElement(container, {
             ...container.props,
             children:
-              <motion.div key={id} className={className} transition={{duration}} {...getProps()}>
+              <motion.div key={id} className={className} transition={{duration}} layout={layout} {...getProps()}>
                 {children}
               </motion.div>
           }) : getFallbackWithContainer()

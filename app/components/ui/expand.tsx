@@ -12,6 +12,8 @@ export interface ExpandProps {
   initial?: boolean;
   fallback?: ReactNode;
   container?: ReactElement;
+  horizontal?: boolean;
+  layout?: boolean;
 }
 
 export default function Expand({
@@ -24,18 +26,21 @@ export default function Expand({
                                  duration = 0.2,
                                  initial = true,
                                  fallback,
-                                 container
+                                 container,
+                                 horizontal = false,
+                                 layout = false,
                                }: ExpandProps) {
   return (
     <Transition children={children}
                 id={id}
-                transition={{property: 'height', transitionFrom, transitionTo}}
+                transition={{property: horizontal ? 'width' : 'height', transitionFrom, transitionTo}}
                 show={show}
                 className={className}
                 duration={duration}
                 initial={initial}
                 fallback={fallback}
                 container={container}
+                layout={layout}
     />
   );
 }

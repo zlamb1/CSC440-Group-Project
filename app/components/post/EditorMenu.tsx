@@ -1,9 +1,12 @@
 import {Editor} from "@tiptap/react";
 import {Button} from "@ui/button";
 import {
+  CaretSortIcon,
+  CheckIcon,
   FontBoldIcon,
   FontFamilyIcon,
   FontItalicIcon,
+  FontSizeIcon,
   StrikethroughIcon,
   TextAlignCenterIcon,
   TextAlignJustifyIcon,
@@ -15,7 +18,9 @@ import React, {ReactNode} from "react";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import {Card} from "@ui/card";
 import {cn} from "@/lib/utils";
-import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger} from "@ui/select";
+import {DropdownMenu} from "@radix-ui/react-dropdown-menu";
+import {DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger} from "@ui/dropdown-menu";
+import Expand from "@ui/expand";
 
 function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: string, bind?: string }) {
   return (
@@ -38,6 +43,23 @@ export default function EditorMenu({editor, className}: { editor: Editor | null,
 
   const attributes = editor?.getAttributes('textStyle');
   const fontFamily = attributes?.fontFamily;
+  const fontSize = attributes?.fontSize;
+
+  function setFontSize(_fontSize: string) {
+    if (fontSize === _fontSize) {
+      editor?.chain().focus().unsetFontSize().run();
+    } else {
+      editor?.chain().focus().setFontSize(_fontSize).run();
+    }
+  }
+
+  function setFontFamily(_fontFamily: string) {
+    if (fontFamily === _fontFamily) {
+      editor?.chain().focus().unsetFontFamily().run();
+    } else {
+      editor?.chain().focus().setFontFamily(_fontFamily).run();
+    }
+  }
 
   return (
     <Card className={cn('flex gap-1 items-center', className)}>
@@ -105,26 +127,56 @@ export default function EditorMenu({editor, className}: { editor: Editor | null,
           <TextAlignJustifyIcon/>
         </Button>
       </MarkSuggestion>
-      <Select value={fontFamily} onValueChange={(font) => editor?.chain().focus().setFontFamily(font).run()}>
-        <SelectTrigger className="w-fit h-7 flex gap-3">
-          <FontFamilyIcon/>
-          {fontFamily ? fontFamily : null}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="bg-transparent w-fit h-7 flex gap-3 px-2" size="icon" type="button">
+            <FontSizeIcon/>
+            <Expand className="overflow-x-hidden" horizontal show={!!fontSize}>
+              {fontSize}
+            </Expand>
+            <CaretSortIcon className="h-4 w-4 opacity-50"/>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
             {
-              fonts.map(font =>
-                <SelectItem key={font}
-                            className="cursor-pointer"
-                            value={font}
-                >
-                  {font}
-                </SelectItem>
+              Array.from(Array(24).keys()).map(i => (i + 1) * 2).map(_fontSize =>
+                <DropdownMenuItem className="flex justify-between cursor-pointer" key={_fontSize}
+                                  onClick={() => setFontSize(_fontSize + 'px')}>
+                  {_fontSize}px
+                  {fontSize === _fontSize + 'px' && <CheckIcon className="h-4 w-4"/>}
+                </DropdownMenuItem>
               )
             }
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="bg-transparent w-fit h-7 flex gap-3 px-2" size="icon" type="button">
+            <FontFamilyIcon/>
+            <Expand className="overflow-x-hidden" horizontal show={!!fontFamily}>
+              {fontFamily}
+            </Expand>
+            <CaretSortIcon className="h-4 w-4 opacity-50"/>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
+            {
+              fonts.map(_fontFamily =>
+                <DropdownMenuItem key={_fontFamily}
+                                  className="flex justify-between cursor-pointer"
+                                  onClick={() => setFontFamily(_fontFamily)}
+                >
+                  {_fontFamily}
+                  {fontFamily === _fontFamily && <CheckIcon className="h-4 w-4"/>}
+                </DropdownMenuItem>
+              )
+            }
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </Card>
   )
 }
