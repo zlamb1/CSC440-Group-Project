@@ -28,6 +28,7 @@ import Expand from "@ui/expand";
 import {FontFamily} from "@tiptap/extension-font-family";
 import {TextStyle} from "@tiptap/extension-text-style";
 import {TextAlign} from "@tiptap/extension-text-align";
+import {Heading} from "@tiptap/extension-heading";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -35,6 +36,7 @@ const characterCountLimit = 32768;
 const defaultExtensions = [
   Document,
   Paragraph,
+  Heading,
   Text,
 
   // marks
@@ -52,7 +54,9 @@ const defaultExtensions = [
 
   TextStyle,
   FontFamily,
-  TextAlign,
+  TextAlign.configure({
+    types: ['heading', 'paragraph'],
+  }),
 
   CodeBlockLowlight.configure({
     lowlight,

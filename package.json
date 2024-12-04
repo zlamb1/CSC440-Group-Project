@@ -53,6 +53,7 @@
     "@tiptap/extension-character-count": "^2.8.0",
     "@tiptap/extension-code-block-lowlight": "^2.8.0",
     "@tiptap/extension-font-family": "^2.10.3",
+    "@tiptap/extension-heading": "^2.10.3",
     "@tiptap/extension-highlight": "^2.10.3",
     "@tiptap/extension-horizontal-rule": "^2.10.3",
     "@tiptap/extension-image": "^2.8.0",
