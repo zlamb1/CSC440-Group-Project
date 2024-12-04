@@ -14,13 +14,14 @@ import {
   TextAlignRightIcon,
   UnderlineIcon
 } from "@radix-ui/react-icons";
-import React, {ReactNode} from "react";
+import React, {ReactNode, useRef} from "react";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import {Card} from "@ui/card";
 import {cn} from "@/lib/utils";
 import {DropdownMenu} from "@radix-ui/react-dropdown-menu";
 import {DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import Expand from "@ui/expand";
+import {Palette} from "lucide-react";
 
 function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: string, bind?: string }) {
   return (
@@ -37,6 +38,8 @@ function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: str
 }
 
 export default function EditorMenu({editor, className}: { editor: Editor | null, className?: string }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const fonts = [
     'Arial', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Helvetica', 'Times New Roman', 'Georgia', 'Inter', 'Comic Sans', 'Serif', 'Cursive', 'Monospace',
   ];
@@ -44,6 +47,7 @@ export default function EditorMenu({editor, className}: { editor: Editor | null,
   const attributes = editor?.getAttributes('textStyle');
   const fontFamily = attributes?.fontFamily;
   const fontSize = attributes?.fontSize;
+  const textColor = attributes?.color;
 
   function setFontSize(_fontSize: string) {
     if (fontSize === _fontSize) {
@@ -126,6 +130,18 @@ export default function EditorMenu({editor, className}: { editor: Editor | null,
                 type="button">
           <TextAlignJustifyIcon/>
         </Button>
+      </MarkSuggestion>
+      <MarkSuggestion mark="Text Color">
+        <div className="flex items-cente  r gap-1">
+          <Button className="bg-transparent flex gap-2 w-fit h-7 p-1" variant="outline" size="icon" type="button"
+                  onClick={() => inputRef.current?.click()}>
+            <Palette className="w-4 h-4"/>
+            {textColor && <div className="w-3 h-3 rounded-full" style={{background: textColor}}/>}
+          </Button>
+          <input onInput={(evt) => editor?.chain().focus().setColor(evt.target.value).run()} value={textColor ?? ''}
+                 className="hidden" ref={inputRef}
+                 type="color"/>
+        </div>
       </MarkSuggestion>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

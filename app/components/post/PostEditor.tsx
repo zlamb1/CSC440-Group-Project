@@ -31,6 +31,7 @@ import {TextAlign} from "@tiptap/extension-text-align";
 import {Heading} from "@tiptap/extension-heading";
 import {Typography} from "@tiptap/extension-typography";
 import {FontSize} from "@components/post/editor/font-size";
+import {Color} from "@tiptap/extension-color";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -58,6 +59,7 @@ const defaultExtensions = [
   TextStyle,
   FontFamily,
   FontSize,
+  Color,
   TextAlign.configure({
     types: ['heading', 'paragraph'],
   }),

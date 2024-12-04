@@ -52,6 +52,7 @@
     "@tiptap/extension-bullet-list": "^2.10.3",
     "@tiptap/extension-character-count": "^2.8.0",
     "@tiptap/extension-code-block-lowlight": "^2.8.0",
+    "@tiptap/extension-color": "^2.10.3",
     "@tiptap/extension-font-family": "^2.10.3",
     "@tiptap/extension-heading": "^2.10.3",
     "@tiptap/extension-highlight": "^2.10.3",
