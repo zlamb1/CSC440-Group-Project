@@ -1,4 +1,4 @@
-import {BubbleMenu, EditorContent, EditorContext, useEditor,} from "@tiptap/react";
+import {EditorContent, EditorContext, useEditor,} from "@tiptap/react";
 
 import Document from '@tiptap/extension-document'
 import Dropcursor from '@tiptap/extension-dropcursor'
@@ -19,11 +19,11 @@ import {BulletList} from "@tiptap/extension-bullet-list";
 import {ListItem} from "@tiptap/extension-list-item";
 import {HorizontalRule} from "@tiptap/extension-horizontal-rule";
 import {Blockquote} from "@tiptap/extension-blockquote";
-import {Button} from "@ui/button";
 import {Bold} from "@tiptap/extension-bold";
 import {Italic} from "@tiptap/extension-italic";
 import {Strike} from "@tiptap/extension-strike";
 import {Underline} from "@tiptap/extension-underline";
+import EditorBubbleMenu from "@components/post/EditorBubbleMenu";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -122,22 +122,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
     <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text"
           onClick={() => editor?.commands.focus()}>
       <EditorContext.Provider value={{editor}}>
-        <BubbleMenu editor={editor} tippyOptions={{duration: 100, appendTo: document.body}}>
-          <Card className="flex gap-1">
-            <Button variant="ghost" onClick={() => editor?.chain().focus().toggleBold().run()} type="button">
-              Bold
-            </Button>
-            <Button variant="ghost" onClick={() => editor?.chain().focus().toggleItalic().run()} type="button">
-              Italic
-            </Button>
-            <Button variant="ghost" onClick={() => editor?.chain().focus().toggleUnderline().run()} type="button">
-              Underline
-            </Button>
-            <Button variant="ghost" onClick={() => editor?.chain().focus().toggleStrike().run()} type="button">
-              Strikethrough
-            </Button>
-          </Card>
-        </BubbleMenu>
+        <EditorBubbleMenu editor={editor}/>
         <EditorContent {...props?.containerProps} editor={editor}/>
       </EditorContext.Provider>
       {props?.append}
