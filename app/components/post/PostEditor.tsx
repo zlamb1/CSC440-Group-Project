@@ -122,7 +122,7 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
     <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text"
           onClick={() => editor?.commands.focus()}>
       <EditorContext.Provider value={{editor}}>
-        <BubbleMenu editor={editor} tippyOptions={{duration: 100}}>
+        <BubbleMenu editor={editor} tippyOptions={{duration: 100, appendTo: document.body}}>
           <Card className="flex gap-1">
             <Button variant="ghost" onClick={() => editor?.chain().focus().toggleBold().run()} type="button">
               Bold
