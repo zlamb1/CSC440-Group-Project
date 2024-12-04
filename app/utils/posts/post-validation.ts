@@ -4,7 +4,7 @@ export function sanitizeContent(content: string) {
   return sanitizeHtml(content, {
     allowedAttributes: {
       code: ['class'],
-      span: ['class'],
+      span: ['class', 'style'],
       ul: ['class'],
       blockquote: ['class'],
     },
@@ -13,6 +13,11 @@ export function sanitizeContent(content: string) {
       'span': ['hljs-*'],
       'ul': ['tiptap-bullet-list'],
       'blockquote': ['tiptap-blockquote'],
+    },
+    allowedStyles: {
+      '*': {
+        'font-family': [/.*/],
+      },
     },
     allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr', 'blockquote', 'strong', 'em', 's', 'u'],
   });

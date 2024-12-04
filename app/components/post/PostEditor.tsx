@@ -25,6 +25,8 @@ import {Strike} from "@tiptap/extension-strike";
 import {Underline} from "@tiptap/extension-underline";
 import EditorMenu from "@components/post/EditorMenu";
 import Expand from "@ui/expand";
+import {FontFamily} from "@tiptap/extension-font-family";
+import {TextStyle} from "@tiptap/extension-text-style";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -46,9 +48,14 @@ const defaultExtensions = [
   ListItem,
   HorizontalRule,
   Blockquote.configure({HTMLAttributes: {class: 'tiptap-blockquote'}}),
+
+  TextStyle,
+  FontFamily,
+
   CodeBlockLowlight.configure({
     lowlight,
   }),
+
   Youtube.configure({
     controls: false,
     nocookie: true

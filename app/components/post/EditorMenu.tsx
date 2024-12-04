@@ -1,11 +1,11 @@
 import {Editor} from "@tiptap/react";
 import {Button} from "@ui/button";
 import {FontBoldIcon, FontFamilyIcon, FontItalicIcon, StrikethroughIcon, UnderlineIcon} from "@radix-ui/react-icons";
-import React, {ReactNode} from "react";
+import React, {ReactNode, useEffect, useState} from "react";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import {Card} from "@ui/card";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@ui/dropdown-menu";
 import {cn} from "@/lib/utils";
+import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger} from "@ui/select";
 
 function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: string, bind?: string }) {
   return (
@@ -22,9 +22,14 @@ function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: str
 }
 
 export default function EditorMenu({editor, className}: { editor: Editor | null, className?: string }) {
+  const [font, setFont] = useState<string>('');
   const fonts = [
     'Arial', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Helvetica', 'Times New Roman', 'Georgia'
   ];
+
+  useEffect(() => {
+    editor?.chain().focus().setFontFamily(font).run();
+  }, [font]);
 
   return (
     <Card className={cn('flex items-center', className)}>
@@ -60,22 +65,26 @@ export default function EditorMenu({editor, className}: { editor: Editor | null,
           <StrikethroughIcon/>
         </Button>
       </MarkSuggestion>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className="cursor-pointer w-7 h-7 overflow-auto p-0" variant="ghost" type="button">
-            <FontFamilyIcon/>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {
-            fonts.map(font =>
-              <DropdownMenuItem key={font} className="cursor-pointer">
-                {font}
-              </DropdownMenuItem>
-            )
-          }
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Select onValueChange={setFont}>
+        <SelectTrigger className="w-fit h-7 flex gap-3">
+          <FontFamilyIcon/>
+          {font && font}
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {
+              fonts.map(font =>
+                <SelectItem key={font}
+                            className="cursor-pointer"
+                            value={font}
+                >
+                  {font}
+                </SelectItem>
+              )
+            }
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </Card>
   )
 }
