@@ -23,7 +23,8 @@ import {Bold} from "@tiptap/extension-bold";
 import {Italic} from "@tiptap/extension-italic";
 import {Strike} from "@tiptap/extension-strike";
 import {Underline} from "@tiptap/extension-underline";
-import EditorBubbleMenu from "@components/post/EditorBubbleMenu";
+import EditorMenu from "@components/post/EditorMenu";
+import Expand from "@ui/expand";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -119,13 +120,19 @@ export const PostEditor = React.forwardRef((props: any, ref) => {
   }
 
   return (
-    <Card className="flex flex-col gap-1 w-full px-3 py-1 cursor-text"
+    <Card className="flex flex-col gap-1 w-full"
           onClick={() => editor?.commands.focus()}>
       <EditorContext.Provider value={{editor}}>
-        <EditorBubbleMenu editor={editor}/>
-        <EditorContent {...props?.containerProps} editor={editor}/>
+        <Expand className="w-full flex flex-col overflow-y-hidden" show={props?.isActive}
+                initial={false}>
+          <EditorMenu className="p-1 bg-transparent border-0 shadow-0" editor={editor}/>
+          <Separator/>
+        </Expand>
+        <div className="flex flex-col gap-1 w-full px-3 py-1 cursor-text">
+          <EditorContent {...props?.containerProps} editor={editor}/>
+          {props?.append}
+        </div>
       </EditorContext.Provider>
-      {props?.append}
     </Card>
   );
 });
