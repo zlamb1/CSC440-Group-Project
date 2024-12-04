@@ -203,7 +203,7 @@ export default function SettingsProfileRoute() {
                 <Edit2 className="text-white" size={20}/>
                 <Input type="text" className="hidden" name="is-updating-avatar" value={'' + isAvatarUpdated}
                        readOnly/>
-                <Input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar}
+                <input type="file" accept="image/*" className="hidden" name="avatar" onChange={onChangeAvatar}
                        ref={fileInputRef}/>
               </motion.div>
             </Button>
