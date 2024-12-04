@@ -33,7 +33,7 @@ function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: str
 
 export default function EditorMenu({editor, className}: { editor: Editor | null, className?: string }) {
   const fonts = [
-    'Arial', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Helvetica', 'Times New Roman', 'Georgia'
+    'Arial', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Helvetica', 'Times New Roman', 'Georgia', 'Inter', 'Comic Sans', 'Serif', 'Cursive', 'Monospace',
   ];
 
   const attributes = editor?.getAttributes('textStyle');
