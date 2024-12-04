@@ -15,6 +15,8 @@ import {Separator} from "@ui/separator";
 import useIsSSR from "@/utils/hooks/useIsSSR";
 import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Card} from "@ui/card";
+import {BulletList} from "@tiptap/extension-bullet-list";
+import {ListItem} from "@tiptap/extension-list-item";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -25,6 +27,8 @@ const defaultExtensions = [
   Text,
   Image,
   Dropcursor,
+  BulletList.configure({HTMLAttributes: {class: 'tiptap-bplist'}}),
+  ListItem,
   CodeBlockLowlight.configure({
     lowlight,
   }),

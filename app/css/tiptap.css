@@ -6,6 +6,12 @@
   pointer-events: none;
 }
 
+.tiptap .tiptap-bplist {
+  list-style-type: disc;
+  list-style-position: outside;
+  padding-left: 1em;
+}
+
 pre {
   code {
     background: none;
