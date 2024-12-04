@@ -29,6 +29,7 @@ import {FontFamily} from "@tiptap/extension-font-family";
 import {TextStyle} from "@tiptap/extension-text-style";
 import {TextAlign} from "@tiptap/extension-text-align";
 import {Heading} from "@tiptap/extension-heading";
+import {Typography} from "@tiptap/extension-typography";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -52,6 +53,7 @@ const defaultExtensions = [
   HorizontalRule,
   Blockquote.configure({HTMLAttributes: {class: 'tiptap-blockquote'}}),
 
+  Typography,
   TextStyle,
   FontFamily,
   TextAlign.configure({
