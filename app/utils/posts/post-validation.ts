@@ -5,12 +5,14 @@ export function sanitizeContent(content: string) {
     allowedAttributes: {
       code: ['class'],
       span: ['class'],
+      ul: ['class'],
     },
     allowedClasses: {
       'code': ['language-*', 'lang-*'],
       'span': ['hljs-*'],
+      'ul': ['tiptap-bplist'],
     },
-    allowedTags: ['pre', 'code', 'p', 'span'],
+    allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr'],
   });
 }
 

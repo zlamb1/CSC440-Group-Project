@@ -9,7 +9,7 @@ export default function RawPost({content}: { content: string }) {
   });
   return (
     <>
-      <div className={`break-all max-h-[200px] ${isExpanded ? 'overflow-y-scroll' : 'overflow-y-hidden'}`}
+      <div className={`tiptap break-all max-h-[200px] ${isExpanded ? 'overflow-y-scroll' : 'overflow-y-hidden'}`}
            dangerouslySetInnerHTML={{__html: content}} ref={ref}/>
       {
         isOverflowing || isExpanded ? (
