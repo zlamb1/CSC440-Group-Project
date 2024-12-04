@@ -27,6 +27,7 @@ import EditorMenu from "@components/post/EditorMenu";
 import Expand from "@ui/expand";
 import {FontFamily} from "@tiptap/extension-font-family";
 import {TextStyle} from "@tiptap/extension-text-style";
+import {TextAlign} from "@tiptap/extension-text-align";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -51,6 +52,7 @@ const defaultExtensions = [
 
   TextStyle,
   FontFamily,
+  TextAlign,
 
   CodeBlockLowlight.configure({
     lowlight,

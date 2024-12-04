@@ -1,7 +1,17 @@
 import {Editor} from "@tiptap/react";
 import {Button} from "@ui/button";
-import {FontBoldIcon, FontFamilyIcon, FontItalicIcon, StrikethroughIcon, UnderlineIcon} from "@radix-ui/react-icons";
-import React, {ReactNode, useEffect, useState} from "react";
+import {
+  FontBoldIcon,
+  FontFamilyIcon,
+  FontItalicIcon,
+  StrikethroughIcon,
+  TextAlignCenterIcon,
+  TextAlignJustifyIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
+  UnderlineIcon
+} from "@radix-ui/react-icons";
+import React, {ReactNode} from "react";
 import {HoverCard, HoverCardContent, HoverCardTrigger} from "@ui/hover-card";
 import {Card} from "@ui/card";
 import {cn} from "@/lib/utils";
@@ -22,17 +32,15 @@ function MarkSuggestion({children, mark, bind}: { children: ReactNode, mark: str
 }
 
 export default function EditorMenu({editor, className}: { editor: Editor | null, className?: string }) {
-  const [font, setFont] = useState<string>('');
   const fonts = [
     'Arial', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Helvetica', 'Times New Roman', 'Georgia'
   ];
 
-  useEffect(() => {
-    editor?.chain().focus().setFontFamily(font).run();
-  }, [font]);
+  const attributes = editor?.getAttributes('textStyle');
+  const fontFamily = attributes?.fontFamily;
 
   return (
-    <Card className={cn('flex items-center', className)}>
+    <Card className={cn('flex gap-1 items-center', className)}>
       <MarkSuggestion mark="Bold" bind="(CTRL + B)">
         <Button variant={editor?.isActive('bold') ? 'default' : 'ghost'} size="icon"
                 onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -65,10 +73,42 @@ export default function EditorMenu({editor, className}: { editor: Editor | null,
           <StrikethroughIcon/>
         </Button>
       </MarkSuggestion>
-      <Select onValueChange={setFont}>
+      <MarkSuggestion mark="Text Align Left" bind="(CTRL + SHIFT + L)">
+        <Button variant={editor?.isActive({textAlign: 'left'}) ? 'default' : 'ghost'} size="icon"
+                onClick={() => editor?.chain().focus().setTextAlign('left').run()}
+                className="w-7 h-7"
+                type="button">
+          <TextAlignLeftIcon/>
+        </Button>
+      </MarkSuggestion>
+      <MarkSuggestion mark="Text Align Center" bind="(CTRL + SHIFT + E)">
+        <Button variant={editor?.isActive({textAlign: 'center'}) ? 'default' : 'ghost'} size="icon"
+                onClick={() => editor?.chain().focus().setTextAlign('center').run()}
+                className="w-7 h-7"
+                type="button">
+          <TextAlignCenterIcon/>
+        </Button>
+      </MarkSuggestion>
+      <MarkSuggestion mark="Text Align Right" bind="(CTRL + SHIFT + R)">
+        <Button variant={editor?.isActive({textAlign: 'right'}) ? 'default' : 'ghost'} size="icon"
+                onClick={() => editor?.chain().focus().setTextAlign('right').run()}
+                className="w-7 h-7"
+                type="button">
+          <TextAlignRightIcon/>
+        </Button>
+      </MarkSuggestion>
+      <MarkSuggestion mark="Text Align Justify" bind="(CTRL + SHIFT + R)">
+        <Button variant={editor?.isActive({textAlign: 'justify'}) ? 'default' : 'ghost'} size="icon"
+                onClick={() => editor?.chain().focus().setTextAlign('justify').run()}
+                className="w-7 h-7"
+                type="button">
+          <TextAlignJustifyIcon/>
+        </Button>
+      </MarkSuggestion>
+      <Select value={fontFamily} onValueChange={(font) => editor?.chain().focus().setFontFamily(font).run()}>
         <SelectTrigger className="w-fit h-7 flex gap-3">
           <FontFamilyIcon/>
-          {font && font}
+          {fontFamily ? fontFamily : null}
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>

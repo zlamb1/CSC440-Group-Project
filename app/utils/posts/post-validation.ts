@@ -3,6 +3,7 @@ import sanitizeHtml from "sanitize-html";
 export function sanitizeContent(content: string) {
   return sanitizeHtml(content, {
     allowedAttributes: {
+      p: ['style'],
       code: ['class'],
       span: ['class', 'style'],
       ul: ['class'],
@@ -16,7 +17,12 @@ export function sanitizeContent(content: string) {
     },
     allowedStyles: {
       '*': {
+        // Match HEX and RGB
+        'color': [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
         'font-family': [/.*/],
+        'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
+        // Match any number with px, em, or %
+        'font-size': [/^\d+(?:px|em|%)$/],
       },
     },
     allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr', 'blockquote', 'strong', 'em', 's', 'u'],
