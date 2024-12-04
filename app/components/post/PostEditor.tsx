@@ -18,6 +18,7 @@ import {Card} from "@ui/card";
 import {BulletList} from "@tiptap/extension-bullet-list";
 import {ListItem} from "@tiptap/extension-list-item";
 import {HorizontalRule} from "@tiptap/extension-horizontal-rule";
+import {Blockquote} from "@tiptap/extension-blockquote";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -28,9 +29,10 @@ const defaultExtensions = [
   Text,
   Image,
   Dropcursor,
-  BulletList.configure({HTMLAttributes: {class: 'tiptap-bplist'}}),
+  BulletList.configure({HTMLAttributes: {class: 'tiptap-bullet-list'}}),
   ListItem,
   HorizontalRule,
+  Blockquote.configure({HTMLAttributes: {class: 'tiptap-blockquote'}}),
   CodeBlockLowlight.configure({
     lowlight,
   }),

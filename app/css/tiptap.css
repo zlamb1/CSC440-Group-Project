@@ -7,10 +7,22 @@
     pointer-events: none;
   }
 
-  .tiptap-bplist {
+  .tiptap-bullet-list {
     list-style-type: disc;
     list-style-position: outside;
     padding-left: 1em;
+  }
+
+  .tiptap-blockquote {
+    --border-size: 3px;
+    --border-style: solid;
+    border-left: var(--border-size) var(--border-style) #d6d6d6;
+    margin: 1rem 0;
+    padding-left: 1rem;
+  }
+
+  .dark .tiptap-blockquote {
+    border-left: var(--border-size) var(--border-style) #fff;
   }
 
   pre {

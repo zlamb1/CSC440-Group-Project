@@ -6,13 +6,15 @@ export function sanitizeContent(content: string) {
       code: ['class'],
       span: ['class'],
       ul: ['class'],
+      blockquote: ['class'],
     },
     allowedClasses: {
       'code': ['language-*', 'lang-*'],
       'span': ['hljs-*'],
-      'ul': ['tiptap-bplist'],
+      'ul': ['tiptap-bullet-list'],
+      'blockquote': ['tiptap-blockquote'],
     },
-    allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr'],
+    allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr', 'blockquote'],
   });
 }
 
