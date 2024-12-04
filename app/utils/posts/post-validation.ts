@@ -14,7 +14,7 @@ export function sanitizeContent(content: string) {
       'ul': ['tiptap-bullet-list'],
       'blockquote': ['tiptap-blockquote'],
     },
-    allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr', 'blockquote'],
+    allowedTags: ['pre', 'code', 'p', 'span', 'ul', 'li', 'hr', 'blockquote', 'strong', 'em', 's', 'u'],
   });
 }
 
