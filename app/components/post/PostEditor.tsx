@@ -17,6 +17,7 @@ import {LoadingSpinner} from "@components/LoadingSpinner";
 import {Card} from "@ui/card";
 import {BulletList} from "@tiptap/extension-bullet-list";
 import {ListItem} from "@tiptap/extension-list-item";
+import {HorizontalRule} from "@tiptap/extension-horizontal-rule";
 
 const lowlight = createLowlight(all);
 const characterCountLimit = 32768;
@@ -29,6 +30,7 @@ const defaultExtensions = [
   Dropcursor,
   BulletList.configure({HTMLAttributes: {class: 'tiptap-bplist'}}),
   ListItem,
+  HorizontalRule,
   CodeBlockLowlight.configure({
     lowlight,
   }),
